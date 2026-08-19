@@ -3,21 +3,23 @@
 Programación **Monster Builders** como web estática.
 
 - Entrada: `index.html` → `programacion_index.html`
-- Autodeploy: push a `master` / `main` → GitHub Actions sincroniza ficheros al servidor (`rsync`, sin `git pull` en el VPS)
+- Autodeploy: push a `master` / `main` → GitHub Actions hace `git pull` en el VPS (~segundos)
 
 ## Qué tienes que configurar tú (una vez)
 
 ### 1. Secretos del repo GitHub (`yearplan`)
 
-En **Settings → Secrets and variables → Actions**, añade los mismos (o equivalentes) que usa `sermestre`:
+En **Settings → Secrets and variables → Actions**:
 
 | Nombre | Valor |
 | --- | --- |
 | `DEPLOY_HOST` | IP o hostname del VPS |
-| `DEPLOY_USER` | usuario SSH (**`root`** si el sitio está en `/opt/…` clonado como root) |
-| `DEPLOY_SSH_KEY` | clave privada SSH (como en sermestre) |
+| `DEPLOY_USER` | Usuario SSH que **posee** `/opt/yearplan.sermestre.es` (p. ej. `deploy`) |
+| `DEPLOY_SSH_KEY` | clave privada de ese usuario |
 | `DEPLOY_PORT` | opcional, por defecto `22` |
 | `DEPLOY_PATH` | opcional, por defecto `/opt/yearplan.sermestre.es` |
+
+`DEPLOY_USER` y el dueño del directorio en el VPS tienen que coincidir. Si clonaste como root pero el Action usa `deploy`, en el VPS (como root): `chown -R deploy:deploy /opt/yearplan.sermestre.es`.
 
 ### 2. DNS
 
@@ -25,12 +27,18 @@ En el DNS de `sermestre.es`, crea un registro **A** (o CNAME) de `yearplan` apun
 
 ### 3. Primera clonación en el servidor
 
-El Action sincroniza por `rsync`; el directorio en el servidor debe existir y ser escribible por `DEPLOY_USER` (típicamente `root`). Setup inicial:
+El Action hace `git pull` en el servidor. Clona con el **mismo usuario** que usarás en `DEPLOY_USER`:
 
 ```bash
 sudo mkdir -p /opt/yearplan.sermestre.es
-sudo chown "$USER":"$USER" /opt/yearplan.sermestre.es
-git clone git@github.com:javiernunez/yearplan.git /opt/yearplan.sermestre.es
+sudo chown deploy:deploy /opt/yearplan.sermestre.es   # o tu DEPLOY_USER
+sudo -u deploy git clone git@github.com:javiernunez/yearplan.git /opt/yearplan.sermestre.es
+```
+
+Si el repo **ya está clonado como root**, no hace falta reclonar — solo:
+
+```bash
+chown -R deploy:deploy /opt/yearplan.sermestre.es
 ```
 
 El servidor necesita acceso de lectura al repo (deploy key de solo lectura o la misma clave que ya usa para `sermestre`).

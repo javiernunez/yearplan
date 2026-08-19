@@ -31,22 +31,37 @@ Workflow: `.github/workflows/deploy.yml` — job **Deploy static site to yearpla
 
 | Trigger | Qué pasa |
 | --- | --- |
-| Push a `master` o `main` | `rsync` desde el runner de GitHub al VPS (no hace `git pull` en el servidor) |
+| Push a `master` o `main` | SSH al VPS → `git pull` (`scripts/remote-deploy.sh`) |
 | **Actions → Deploy → Run workflow** | Mismo deploy manual |
 
 **Secretos** (Settings → Secrets and variables → Actions): `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`; opcionales `DEPLOY_PORT` (default 22), `DEPLOY_PATH` (default `/opt/yearplan.sermestre.es`).
 
-**Cómo despliega:** checkout en GitHub → `rsync --size-only` por SSH a `DEPLOY_PATH`. Solo sube ficheros cuyo **tamaño** cambió (deploy típico = segundos; el runner compara ~1800 paths pero casi no transfiere datos). **Sin `--delete`**: PDFs grandes solo en el VPS no se borran.
+**Usuario SSH (`DEPLOY_USER`):** debe ser **dueño** de `DEPLOY_PATH` (incluido `.git`). Lo habitual:
 
-**`DEPLOY_USER` debe poder escribir** en `DEPLOY_PATH`. Si el clone inicial fue como **root**, pon `DEPLOY_USER=root` en los secretos (misma clave que `~/.ssh/yearplan_deploy`). Si el usuario del Action no es dueño de los ficheros → `Permission denied` al sincronizar.
+| Setup | `DEPLOY_USER` | Una vez en el VPS |
+| --- | --- | --- |
+| **Recomendado** | `deploy` (u otro user sin root) | `chown -R deploy:deploy /opt/yearplan.sermestre.es` |
+| Atajo | `root` | nada, si el clone ya es de root |
 
-**Deploy manual en el VPS** (solo si entras por SSH): `scripts/remote-deploy.sh` hace `git pull` allí; requiere permisos de escritura en `.git`. El CI **no** usa ese script.
+Si el clone es de root y el Action entra como `deploy` → `Permission denied` en `.git/FETCH_HEAD`. No es un bug del workflow: hay que alinear dueño del directorio y usuario SSH.
 
-**Fallos viejos (git pull en servidor):** `dubious ownership` o `cannot open .git/FETCH_HEAD: Permission denied` — evitados con rsync desde Actions; no hace falta arreglar `.git` en el VPS para publicar.
+**Arreglo one-shot (como root en el VPS):**
+
+```bash
+# Si no existe el usuario deploy:
+# adduser --disabled-password --gecos "" deploy
+
+chown -R deploy:deploy /opt/yearplan.sermestre.es
+# Clave pública del par DEPLOY_SSH_KEY en /home/deploy/.ssh/authorized_keys
+```
+
+En GitHub: `DEPLOY_USER=deploy` y `DEPLOY_SSH_KEY` = clave privada de ese usuario. Caddy/nginx solo **leen** los ficheros (644/755); no hace falta que el servicio web sea `deploy`.
+
+**Por qué no rsync desde Actions:** el repo pesa ~2 GB. `actions/checkout` baja todo el commit en cada push (varios minutos). `git pull` en el VPS solo trae el delta (segundos).
+
+**En el servidor:** `git fetch` + `reset --hard` + `clean -fd`; comprueba `index.html` y `programacion_index.html`. `safe.directory` configurado para Git ≥ 2.35.
 
 **Concurrencia:** `concurrency: deploy-yearplan` — un deploy en curso cancela el anterior.
-
-**No tocar en el workflow:** no commitear secretos; la clave va solo en `DEPLOY_SSH_KEY`.
 
 ### Servidor
 

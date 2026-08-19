@@ -301,12 +301,12 @@ body.in-ls-view footer{
 .main-content{
   flex:1;
   min-width:0;
-  margin-left:160px;
+  margin-left:180px;
 }
 .roulette-panel{
   position:fixed;
   inset:0 auto 0 0;
-  width:160px;
+  width:180px;
   height:100vh;
   height:100dvh;
   height:100svh;
@@ -340,13 +340,12 @@ body.in-ls-view footer{
   display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:flex-start;
-  gap:10px;
+  justify-content:space-evenly;
+  gap:2px;
   width:100%;
   flex:1 1 auto;
   min-height:100%;
-  min-height:max(100%, calc(5 * 230px + 4 * 10px + 52px));
-  padding:12px 8px 36px;
+  padding:6px;
   box-sizing:border-box;
 }
 .roulette-panel iframe{
@@ -354,6 +353,8 @@ body.in-ls-view footer{
   border-radius:10px;
   display:block;
   flex-shrink:0;
+  width:168px;
+  height:212px;
 }
 .roulette-panel iframe.ruleta-expanded{
   position:fixed !important;
@@ -371,9 +372,10 @@ body.in-ls-view footer{
   background:#fff !important;
 }
 @media(max-width:1100px){
-  .roulette-panel{width:140px;}
-  .roulette-panel-inner{padding:10px 6px 36px;}
-  .main-content{margin-left:140px;}
+  .roulette-panel{width:160px;}
+  .roulette-panel-inner{padding:5px;}
+  .roulette-panel iframe{width:148px;height:200px;}
+  .main-content{margin-left:160px;}
 }
 @media(max-width:800px){
   .roulette-panel{
@@ -1924,11 +1926,11 @@ a.mgmt-link--eval:active{
 
   <div class="roulette-panel">
     <div class="roulette-panel-inner">
-      <iframe src="monster_roulette_widget.html?cat=0" data-roulette-cat="0" width="145" height="230" scrolling="no" allowtransparency="true" loading="lazy" title="Brain Breaks"></iframe>
-      <iframe src="monster_roulette_widget.html?cat=1" data-roulette-cat="1" width="145" height="230" scrolling="no" allowtransparency="true" loading="lazy" title="Games with Flashcards"></iframe>
-      <iframe src="monster_roulette_widget.html?cat=2" data-roulette-cat="2" width="145" height="230" scrolling="no" allowtransparency="true" loading="lazy" title="Games with Mini Whiteboards"></iframe>
-      <iframe src="monster_roulette_widget.html?cat=3" data-roulette-cat="3" width="145" height="230" scrolling="no" allowtransparency="true" loading="lazy" title="Speaking Games"></iframe>
-      <iframe src="monster_roulette_widget.html?cat=4" data-roulette-cat="4" width="145" height="230" scrolling="no" allowtransparency="true" loading="lazy" title="Drama & Games"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=0" data-roulette-cat="0" width="168" height="212" scrolling="no" allowtransparency="true" loading="lazy" title="Brain Breaks"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=1" data-roulette-cat="1" width="168" height="212" scrolling="no" allowtransparency="true" loading="lazy" title="Games with Flashcards"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=2" data-roulette-cat="2" width="168" height="212" scrolling="no" allowtransparency="true" loading="lazy" title="Games with Mini Whiteboards"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=3" data-roulette-cat="3" width="168" height="212" scrolling="no" allowtransparency="true" loading="lazy" title="Speaking Games"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=4" data-roulette-cat="4" width="168" height="212" scrolling="no" allowtransparency="true" loading="lazy" title="Drama & Games"></iframe>
     </div>
   </div>
 
@@ -5242,8 +5244,8 @@ renderSlide();
     if(typeof activeIframe._origInlineStyle === 'string'){
       activeIframe.setAttribute('style', activeIframe._origInlineStyle);
     }
-    activeIframe.width  = activeIframe._origWidth  || 145;
-    activeIframe.height = activeIframe._origHeight || 230;
+    activeIframe.width  = activeIframe._origWidth  || 168;
+    activeIframe.height = activeIframe._origHeight || 212;
     isRuletaFull = false;
     fsBtn.textContent = '⛶';
     fsBtn.style.display = 'none';
