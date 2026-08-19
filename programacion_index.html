@@ -1971,7 +1971,7 @@ a.mgmt-link--eval:active{
 
   <div class="stage-wrap">
     <div class="stage" id="stage">
-      <img id="slideImg" alt="" src="">
+      <img id="slideImg" alt="" src="" decoding="async">
       <div class="zone left" id="zL" aria-label="Diapositiva anterior (mitad izquierda)"></div>
       <div class="zone right" id="zR" aria-label="Diapositiva siguiente (mitad derecha)"></div>
       <button type="button" class="stage-arrow stage-arrow--prev" id="arrowPrev" aria-label="Anterior">‹</button>
@@ -3360,6 +3360,73 @@ function padletForLs() {
   return ALL_PADLETS[lsIndex];
 }
 
+const _slidePreload = new Map();
+let _slidePreloadLs = -1;
+let _slideRenderToken = 0;
+let _lastInfoBarLs = -1;
+
+function preloadSlideUrl(url) {
+  if (!url) return Promise.resolve(null);
+  if (_slidePreload.has(url)) return _slidePreload.get(url);
+  const p = new Promise(function (resolve) {
+    const im = new Image();
+    im.decoding = "async";
+    function done() {
+      resolve(im);
+    }
+    im.onload = function () {
+      if (im.decode) im.decode().then(done).catch(done);
+      else done();
+    };
+    im.onerror = done;
+    im.src = url;
+  });
+  _slidePreload.set(url, p);
+  return p;
+}
+
+function preloadSlidesForLs(lsIdx, priorityG) {
+  const paths = ALL_SLIDES[lsIdx] || [];
+  if (!paths.length) return;
+  if (priorityG != null) {
+    for (let d = -2; d <= 6; d++) {
+      const i = priorityG + d;
+      if (i >= 0 && i < paths.length) preloadSlideUrl(paths[i]);
+    }
+  }
+  if (_slidePreloadLs === lsIdx) return;
+  _slidePreloadLs = lsIdx;
+  let batch = 0;
+  function loadBatch() {
+    const start = batch * 6;
+    if (start >= paths.length) return;
+    for (let j = start; j < Math.min(start + 6, paths.length); j++) {
+      preloadSlideUrl(paths[j]);
+    }
+    batch++;
+    if (start + 6 < paths.length) {
+      const schedule =
+        window.requestIdleCallback ||
+        function (fn) {
+          setTimeout(fn, 40);
+        };
+      schedule(loadBatch);
+    }
+  }
+  loadBatch();
+}
+
+function setSlideImage(src) {
+  const img = document.getElementById("slideImg");
+  if (!img || !src) return;
+  const token = ++_slideRenderToken;
+  preloadSlideUrl(src).then(function () {
+    if (token !== _slideRenderToken) return;
+    img.src = src;
+  });
+  img.src = src;
+}
+
 function tabStart(t) {
   const c = tabCounts();
   let s = 0;
@@ -3474,7 +3541,7 @@ function goNext() {
   const n = totalSlidesInCurrentLs();
   if (g + 1 < n) {
     fromGlobal(g + 1);
-    buildLessonRow();
+    refreshLessonRowActive();
     scrollLessonTabIntoViewIfNeeded();
     renderSlide();
     return;
@@ -3485,13 +3552,15 @@ function goPrev() {
   const g = globalIndex();
   if (g > 0) {
     fromGlobal(g - 1);
-    buildLessonRow();
+    refreshLessonRowActive();
     scrollLessonTabIntoViewIfNeeded();
     renderSlide();
     return;
   }
   if (lsIndex > 0) {
     lsIndex--;
+    _lastInfoBarLs = -1;
+    _slidePreloadLs = -1;
     buildLsRow();
     const plen = slidesFlat().length;
     fromGlobal(plen - 1);
@@ -3523,8 +3592,13 @@ function syncTheme() {
 function renderInfoBar() {
   const bar = document.getElementById("lsInfoBar");
   if (!bar) return;
+  if (_lastInfoBarLs === lsIndex) return;
+  _lastInfoBarLs = lsIndex;
   const info = LS_INFO[lsIndex];
-  if (!info) { bar.innerHTML = ""; return; }
+  if (!info) {
+    bar.innerHTML = "";
+    return;
+  }
   bar.innerHTML =
     '<span class="ls-info-chip"><span class="chip-icon">📅</span>' + info.dates + '</span>' +
     '<span class="ls-info-chip"><span class="chip-icon">🔤</span>' + info.grammar + '</span>' +
@@ -3539,8 +3613,9 @@ function renderSlide() {
   const paths = slidesFlat();
   const g = globalIndex();
   const src = paths[g] || "";
+  preloadSlidesForLs(lsIndex, g);
+  setSlideImage(src);
   const img = document.getElementById("slideImg");
-  img.src = src;
   img.alt = LESSON_LABELS[lessonTab] + " · " + (localSlide + 1);
 
   document.title =
@@ -3627,6 +3702,8 @@ function buildLsRow() {
       lessonHighlightTab = 0;
       localSlide = 0;
       _lastScrollKey = "";
+      _lastInfoBarLs = -1;
+      _slidePreloadLs = -1;
       buildLsRow();
       buildLessonRow();
       scrollLessonTabIntoViewIfNeeded();
@@ -3718,6 +3795,20 @@ function buildLessonRow() {
     row.appendChild(b);
   });
   fitLessonTabsOneRow();
+}
+
+function refreshLessonRowActive() {
+  const row = document.getElementById("lessonRow");
+  if (!row || row.children.length !== LESSON_TABS.length) {
+    buildLessonRow();
+    return;
+  }
+  LESSON_TABS.forEach((tab, t) => {
+    const b = row.children[t];
+    if (!b) return;
+    b.className =
+      "lesson " + lessonGroupClass(t) + (t === lessonHighlightTab ? " active" : "");
+  });
 }
 
 document.getElementById("zL").addEventListener("click", (e) => {
@@ -5014,6 +5105,8 @@ renderSlide();
     if(typeof lsIndex !== 'undefined'){
       lsIndex=idx; lessonTab=0; lessonHighlightTab=0; localSlide=0;
       if(typeof _lastScrollKey!=='undefined') _lastScrollKey='';
+      if(typeof _lastInfoBarLs!=='undefined') _lastInfoBarLs=-1;
+      if(typeof _slidePreloadLs!=='undefined') _slidePreloadLs=-1;
       if(typeof buildLsRow==='function')    buildLsRow();
       if(typeof buildLessonRow==='function') buildLessonRow();
       if(typeof scrollLessonTabIntoViewIfNeeded==='function') scrollLessonTabIntoViewIfNeeded();
