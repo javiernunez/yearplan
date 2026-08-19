@@ -134,6 +134,7 @@ Al publicar, no “arregles” el gitignore para meter esos PDF: GitHub los rech
 ## Convenciones al editar
 
 - Sitio estático: cambia HTML/CSS/JS/assets y haz push; no hay npm/build.
+- **Commit + push tras cada cambio:** cuando la IA (o quien edite) modifique ficheros del repo, debe hacer `git commit` y `git push origin master` al terminar, sin esperar a que lo pidan. Mensaje breve en imperativo; un commit por tanda lógica de cambios. Dispara el deploy de GitHub Actions.
 - No commits de secretos, `.env`, ni claves SSH.
 - No force-push a `master`.
 - No reescribas `programacion_index.html` entero si solo hay que tocar un enlace o un nombre de fichero.

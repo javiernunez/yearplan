@@ -301,12 +301,12 @@ body.in-ls-view footer{
 .main-content{
   flex:1;
   min-width:0;
-  margin-left:180px;
+  margin-left:200px;
 }
 .roulette-panel{
   position:fixed;
   inset:0 auto 0 0;
-  width:180px;
+  width:200px;
   height:100vh;
   height:100dvh;
   height:100svh;
@@ -353,8 +353,8 @@ body.in-ls-view footer{
   border-radius:10px;
   display:block;
   flex-shrink:0;
-  width:168px;
-  height:212px;
+  width:188px;
+  height:218px;
 }
 .roulette-panel iframe.ruleta-expanded{
   position:fixed !important;
@@ -372,10 +372,10 @@ body.in-ls-view footer{
   background:#fff !important;
 }
 @media(max-width:1100px){
-  .roulette-panel{width:160px;}
+  .roulette-panel{width:175px;}
   .roulette-panel-inner{padding:5px;}
-  .roulette-panel iframe{width:148px;height:200px;}
-  .main-content{margin-left:160px;}
+  .roulette-panel iframe{width:164px;height:208px;}
+  .main-content{margin-left:175px;}
 }
 @media(max-width:800px){
   .roulette-panel{
@@ -707,6 +707,7 @@ button.ls-chip.active{
   width:100%;
   max-width:100%;
   overflow-x:hidden;
+  overflow-y:visible;
   padding:0 0 12px;
   box-sizing:border-box;
   font-size:var(--text-ui);
@@ -729,13 +730,14 @@ button.lesson{
   display:flex;
   align-items:center;
   justify-content:center;
-  white-space:nowrap;
-  overflow:hidden;
+  white-space:normal;
+  overflow:visible;
   border-radius:999px;
-  padding:8px clamp(6px,0.55vw,10px);
-  min-height:2.1em;
+  padding:8px clamp(4px,0.45vw,8px);
+  min-height:2.6em;
+  height:auto;
   font-size:1em;
-  line-height:1.1;
+  line-height:1.15;
   border:1.5px solid;
   letter-spacing:var(--carla-letter-spacing);
   word-spacing:calc(var(--carla-word-spacing) * 0.28);
@@ -750,9 +752,15 @@ button.lesson .lesson-name{
   word-spacing:calc(var(--carla-word-spacing) * 0.28);
   -webkit-text-stroke:0.4px currentColor;
   paint-order:stroke fill;
+  display:block;
+  width:100%;
   max-width:100%;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  white-space:normal;
+  overflow:visible;
+  text-overflow:unset;
+  text-align:center;
+  line-height:1.15;
+  hyphens:none;
 }
 /* Reposo: fondo blanco; borde + texto del color del grupo */
 button.lesson.intro:not(.active){
@@ -1926,11 +1934,11 @@ a.mgmt-link--eval:active{
 
   <div class="roulette-panel">
     <div class="roulette-panel-inner">
-      <iframe src="monster_roulette_widget.html?cat=0" data-roulette-cat="0" width="168" height="212" scrolling="no" allowtransparency="true" loading="lazy" title="Brain Breaks"></iframe>
-      <iframe src="monster_roulette_widget.html?cat=1" data-roulette-cat="1" width="168" height="212" scrolling="no" allowtransparency="true" loading="lazy" title="Games with Flashcards"></iframe>
-      <iframe src="monster_roulette_widget.html?cat=2" data-roulette-cat="2" width="168" height="212" scrolling="no" allowtransparency="true" loading="lazy" title="Games with Mini Whiteboards"></iframe>
-      <iframe src="monster_roulette_widget.html?cat=3" data-roulette-cat="3" width="168" height="212" scrolling="no" allowtransparency="true" loading="lazy" title="Speaking Games"></iframe>
-      <iframe src="monster_roulette_widget.html?cat=4" data-roulette-cat="4" width="168" height="212" scrolling="no" allowtransparency="true" loading="lazy" title="Drama & Games"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=0" data-roulette-cat="0" width="188" height="218" scrolling="no" allowtransparency="true" loading="lazy" title="Brain Breaks"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=1" data-roulette-cat="1" width="188" height="218" scrolling="no" allowtransparency="true" loading="lazy" title="Games with Flashcards"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=2" data-roulette-cat="2" width="188" height="218" scrolling="no" allowtransparency="true" loading="lazy" title="Games with Mini Whiteboards"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=3" data-roulette-cat="3" width="188" height="218" scrolling="no" allowtransparency="true" loading="lazy" title="Speaking Games"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=4" data-roulette-cat="4" width="188" height="218" scrolling="no" allowtransparency="true" loading="lazy" title="Drama & Games"></iframe>
     </div>
   </div>
 
@@ -3649,20 +3657,30 @@ function lessonGroupClass(t) {
   return "g9";
 }
 
-/** Rejilla a ancho completo; solo escala si aún hubiera desbordamiento raro */
+/** Rejilla a ancho completo; escala tipografía si no caben en una fila */
 function fitLessonTabsOneRow() {
   const row = document.getElementById("lessonRow");
   const wrap = row ? row.parentElement : null;
+  const scroll = wrap ? wrap.closest(".lesson-scroll") : null;
   if (!row || !wrap || !row.children.length) return;
   row.style.transform = "";
   wrap.style.minHeight = "";
+  if (scroll) scroll.style.fontSize = "";
   row.style.gridTemplateColumns =
     "repeat(" + LESSON_LABELS.length + ", minmax(0, 1fr))";
   void row.offsetWidth;
   const avail = wrap.clientWidth;
-  const sw = row.scrollWidth;
+  let sw = row.scrollWidth;
   if (sw <= avail + 2) return;
-  const s = Math.max(0.52, (avail - 12) / sw);
+  if (scroll) {
+    const base = parseFloat(getComputedStyle(scroll).fontSize) || 16;
+    const ratio = Math.max(0.72, (avail - 8) / sw);
+    scroll.style.fontSize = base * ratio + "px";
+    void row.offsetWidth;
+    sw = row.scrollWidth;
+  }
+  if (sw <= avail + 2) return;
+  const s = Math.max(0.72, (avail - 8) / sw);
   row.style.transform = "scale(" + s + ")";
   requestAnimationFrame(() => {
     const br = row.getBoundingClientRect();
@@ -5244,8 +5262,8 @@ renderSlide();
     if(typeof activeIframe._origInlineStyle === 'string'){
       activeIframe.setAttribute('style', activeIframe._origInlineStyle);
     }
-    activeIframe.width  = activeIframe._origWidth  || 168;
-    activeIframe.height = activeIframe._origHeight || 212;
+    activeIframe.width  = activeIframe._origWidth  || 188;
+    activeIframe.height = activeIframe._origHeight || 218;
     isRuletaFull = false;
     fsBtn.textContent = '⛶';
     fsBtn.style.display = 'none';
