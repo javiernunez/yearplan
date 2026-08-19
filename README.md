@@ -3,7 +3,7 @@
 Programación **Monster Builders** como web estática.
 
 - Entrada: `index.html` → `programacion_index.html`
-- Autodeploy: push a `master` / `main` → GitHub Actions hace `git pull` en el servidor
+- Autodeploy: push a `master` / `main` → GitHub Actions sincroniza ficheros al servidor (`rsync`, sin `git pull` en el VPS)
 
 ## Qué tienes que configurar tú (una vez)
 
@@ -14,7 +14,7 @@ En **Settings → Secrets and variables → Actions**, añade los mismos (o equi
 | Nombre | Valor |
 | --- | --- |
 | `DEPLOY_HOST` | IP o hostname del VPS |
-| `DEPLOY_USER` | usuario SSH |
+| `DEPLOY_USER` | usuario SSH (**`root`** si el sitio está en `/opt/…` clonado como root) |
 | `DEPLOY_SSH_KEY` | clave privada SSH (como en sermestre) |
 | `DEPLOY_PORT` | opcional, por defecto `22` |
 | `DEPLOY_PATH` | opcional, por defecto `/opt/yearplan.sermestre.es` |
@@ -25,7 +25,7 @@ En el DNS de `sermestre.es`, crea un registro **A** (o CNAME) de `yearplan` apun
 
 ### 3. Primera clonación en el servidor
 
-El Action solo hace `git pull`; el clone inicial es manual:
+El Action sincroniza por `rsync`; el directorio en el servidor debe existir y ser escribible por `DEPLOY_USER` (típicamente `root`). Setup inicial:
 
 ```bash
 sudo mkdir -p /opt/yearplan.sermestre.es

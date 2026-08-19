@@ -31,25 +31,18 @@ Workflow: `.github/workflows/deploy.yml` — job **Deploy static site to yearpla
 
 | Trigger | Qué pasa |
 | --- | --- |
-| Push a `master` o `main` | SSH al VPS y ejecuta `scripts/remote-deploy.sh` |
+| Push a `master` o `main` | `rsync` desde el runner de GitHub al VPS (no hace `git pull` en el servidor) |
 | **Actions → Deploy → Run workflow** | Mismo deploy manual |
 
 **Secretos** (Settings → Secrets and variables → Actions): `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`; opcionales `DEPLOY_PORT` (default 22), `DEPLOY_PATH` (default `/opt/yearplan.sermestre.es`).
 
-**En el servidor**, el script hace:
+**Cómo despliega:** checkout en GitHub → `rsync` por SSH a `DEPLOY_PATH`. **Sin `--delete`**: los PDF grandes de `CUENTOS/` que solo existen en el VPS no se borran. Excluye `.git`, `.github` y carpetas de trabajo del `.gitignore`.
 
-```bash
-git fetch origin
-git checkout -B "$DEPLOY_BRANCH" "origin/$DEPLOY_BRANCH"
-git reset --hard "origin/$DEPLOY_BRANCH"
-git clean -fd
-```
+**`DEPLOY_USER` debe poder escribir** en `DEPLOY_PATH`. Si el clone inicial fue como **root**, pon `DEPLOY_USER=root` en los secretos (misma clave que `~/.ssh/yearplan_deploy`). Si el usuario del Action no es dueño de los ficheros → `Permission denied` al sincronizar.
 
-Comprueba que existan `index.html` y `programacion_index.html`. Si el repo en el VPS aún no tiene `scripts/remote-deploy.sh`, el workflow usa un bootstrap inline equivalente (misma lógica).
+**Deploy manual en el VPS** (solo si entras por SSH): `scripts/remote-deploy.sh` hace `git pull` allí; requiere permisos de escritura en `.git`. El CI **no** usa ese script.
 
-**Fallo habitual — `dubious ownership`:** el clone en `/opt/yearplan.sermestre.es` pertenece a otro usuario (p. ej. root) y el SSH del Action entra con `DEPLOY_USER`. Git ≥ 2.35 lo bloquea. Fix en repo: `git -c safe.directory=…` en `scripts/remote-deploy.sh` y el workflow hace `git config --global --add safe.directory …` antes de ejecutar el script (desbloquea aunque el VPS aún no tenga el script nuevo). Si sigue fallando: entrar al VPS como `DEPLOY_USER` y `git config --global --add safe.directory /opt/yearplan.sermestre.es`.
-
-**Alternativa de setup:** clonar con el mismo usuario que `DEPLOY_USER` (`sudo chown` del directorio antes del clone; ver README).
+**Fallos viejos (git pull en servidor):** `dubious ownership` o `cannot open .git/FETCH_HEAD: Permission denied` — evitados con rsync desde Actions; no hace falta arreglar `.git` en el VPS para publicar.
 
 **Concurrencia:** `concurrency: deploy-yearplan` — un deploy en curso cancela el anterior.
 
