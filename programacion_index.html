@@ -23,6 +23,7 @@
   /* Base ~18–20px; --text-ui compensa el zoom 0.75 de in-ls-view (~18–20px en pantalla) */
   --text-base:clamp(18px,0.35vw + 16.5px,20px);
   --text-ui:clamp(1.34rem,1.2rem + 0.35vw,1.48rem);
+  --text-lesson-tab:clamp(0.92rem,0.84rem + 0.18vw,1.02rem);
   --text-label:clamp(0.78rem,0.72rem + 0.2vw,0.88rem);
 }
 html{font-size:var(--text-base);}
@@ -704,7 +705,7 @@ button.ls-chip.active{
 .lesson-nav{
   flex:0 0 auto;
   width:100%;
-  padding:4px 0 4px;
+  padding:8px 0 6px;
   text-align:center;
   background:transparent;
 }
@@ -713,15 +714,15 @@ button.ls-chip.active{
   max-width:100%;
   overflow-x:hidden;
   overflow-y:visible;
-  padding:0 0 12px;
+  padding:0 0 14px;
   box-sizing:border-box;
-  font-size:var(--text-ui);
+  font-size:var(--text-lesson-tab);
 }
 /* Misma anchura útil que el carrusel: rejilla; columnas las fija JS según LESSON_LABELS */
 .lesson-row{
   display:grid;
   width:100%;
-  gap:clamp(3px,0.55vw,8px);
+  gap:8px;
   align-items:stretch;
   transform-origin:center top;
 }
@@ -737,15 +738,15 @@ button.lesson{
   justify-content:center;
   white-space:normal;
   overflow:visible;
-  border-radius:999px;
-  padding:8px clamp(4px,0.45vw,8px);
-  min-height:2.6em;
+  border-radius:14px;
+  padding:10px 8px;
+  min-height:3.25em;
   height:auto;
   font-size:1em;
-  line-height:1.15;
+  line-height:1.12;
   border:1.5px solid;
   letter-spacing:var(--carla-letter-spacing);
-  word-spacing:calc(var(--carla-word-spacing) * 0.28);
+  word-spacing:calc(var(--carla-word-spacing) * 0.22);
   text-transform:capitalize;
   backdrop-filter:blur(6px);
   -webkit-backdrop-filter:blur(6px);
@@ -754,18 +755,36 @@ button.lesson{
 button.lesson .lesson-name{
   font-family:var(--font-carla);
   letter-spacing:var(--carla-letter-spacing);
-  word-spacing:calc(var(--carla-word-spacing) * 0.28);
-  -webkit-text-stroke:0.4px currentColor;
+  word-spacing:calc(var(--carla-word-spacing) * 0.22);
+  -webkit-text-stroke:0.35px currentColor;
   paint-order:stroke fill;
-  display:block;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
   width:100%;
   max-width:100%;
   white-space:normal;
   overflow:visible;
-  text-overflow:unset;
   text-align:center;
+  line-height:1.12;
+}
+button.lesson .lesson-code{
+  font-size:0.76em;
+  font-weight:700;
+  line-height:1;
+  letter-spacing:0.05em;
+  opacity:0.88;
+}
+button.lesson .lesson-label{
+  font-size:1em;
+  line-height:1.12;
+  display:block;
+}
+button.lesson .lesson-label--solo{
+  font-size:1.06em;
   line-height:1.15;
-  hyphens:none;
 }
 /* Reposo: fondo blanco; borde + texto del color del grupo */
 button.lesson.intro:not(.active){
@@ -3710,7 +3729,21 @@ function buildLessonRow() {
     b.setAttribute("aria-label", LESSON_LABELS[t]);
     const name = document.createElement("span");
     name.className = "lesson-name";
-    name.textContent = tab.name;
+    if (tab.code) {
+      const codeEl = document.createElement("span");
+      codeEl.className = "lesson-code";
+      codeEl.textContent = tab.code;
+      const labelEl = document.createElement("span");
+      labelEl.className = "lesson-label";
+      labelEl.textContent = tab.name;
+      name.appendChild(codeEl);
+      name.appendChild(labelEl);
+    } else {
+      const labelEl = document.createElement("span");
+      labelEl.className = "lesson-label lesson-label--solo";
+      labelEl.textContent = tab.name;
+      name.appendChild(labelEl);
+    }
     b.appendChild(name);
     b.addEventListener("click", () => {
       const c = tabCounts();
