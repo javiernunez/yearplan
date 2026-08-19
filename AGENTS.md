@@ -36,7 +36,7 @@ Workflow: `.github/workflows/deploy.yml` — job **Deploy static site to yearpla
 
 **Secretos** (Settings → Secrets and variables → Actions): `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`; opcionales `DEPLOY_PORT` (default 22), `DEPLOY_PATH` (default `/opt/yearplan.sermestre.es`).
 
-**Cómo despliega:** checkout en GitHub → `rsync` por SSH a `DEPLOY_PATH`. **Sin `--delete`**: los PDF grandes de `CUENTOS/` que solo existen en el VPS no se borran. Excluye `.git`, `.github` y carpetas de trabajo del `.gitignore`.
+**Cómo despliega:** checkout en GitHub → `rsync --size-only` por SSH a `DEPLOY_PATH`. Solo sube ficheros cuyo **tamaño** cambió (deploy típico = segundos; el runner compara ~1800 paths pero casi no transfiere datos). **Sin `--delete`**: PDFs grandes solo en el VPS no se borran.
 
 **`DEPLOY_USER` debe poder escribir** en `DEPLOY_PATH`. Si el clone inicial fue como **root**, pon `DEPLOY_USER=root` en los secretos (misma clave que `~/.ssh/yearplan_deploy`). Si el usuario del Action no es dueño de los ficheros → `Permission denied` al sincronizar.
 

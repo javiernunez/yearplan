@@ -42,8 +42,9 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p "${DEPLOY_PORT}" "${DEPLOY_HOST}" >> ~/.ssh/known_hosts 2>/dev/null || true
 
-          # No --delete: PDFs u otros ficheros solo en el VPS (p. ej. CUENTOS/*.pdf ≥100 MiB) se conservan.
-          rsync -rlvz --omit-dir-times \
+          # --size-only: no re-subir ~2 GB solo porque el checkout de Actions tiene mtime distinto al VPS.
+          # Sin --delete: PDFs solo en el VPS (CUENTOS ≥100 MiB) se conservan.
+          rsync -rlvz --omit-dir-times --size-only \
             -e "ssh -i ~/.ssh/deploy_key -p ${DEPLOY_PORT} -o StrictHostKeyChecking=accept-new" \
             --exclude '.git/' \
             --exclude '.github/' \
