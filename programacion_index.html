@@ -767,13 +767,6 @@ button.lesson .lesson-name{
   text-align:center;
   line-height:1.12;
 }
-button.lesson .lesson-code{
-  font-size:0.76em;
-  font-weight:700;
-  line-height:1;
-  letter-spacing:0.05em;
-  opacity:0.88;
-}
 button.lesson .lesson-label{
   font-size:1em;
   line-height:1.12;
@@ -885,53 +878,51 @@ button.ls-chip:disabled,button.lesson:disabled{opacity:.45;cursor:not-allowed;}
 /* Class Management & UDL (bajo el carrusel) */
 .mgmt-outer{
   flex:0 0 auto;
-  padding:12px 12px 20px;
+  padding:8px 12px 14px;
   display:flex;
   justify-content:center;
 }
 .mgmt-strip{
   width:min(calc(100vw - var(--sidebar-w) - 24px), var(--content-max));
-  padding:20px 24px 22px;
+  padding:10px 16px 12px;
   text-align:center;
-  background:rgba(255,255,255,.82);
-  border:1px solid rgba(255,255,255,.95);
-  border-radius:16px;
-  box-shadow:0 6px 24px rgba(26,53,88,.08);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
+  background:rgba(255,255,255,.78);
+  border:1px solid rgba(255,255,255,.92);
+  border-radius:12px;
+  box-shadow:0 4px 16px rgba(26,53,88,.06);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
 }
 .mgmt-title{
-  margin:0 0 20px;
-  font-size:var(--text-label);
-  font-weight:900;
-  letter-spacing:.07em;
+  margin:0 0 8px;
+  font-size:clamp(0.68rem,0.64rem + 0.15vw,0.76rem);
+  font-weight:800;
+  letter-spacing:.08em;
   text-transform:uppercase;
-  color:rgba(26,53,88,.5);
+  color:rgba(26,53,88,.45);
 }
 .mgmt-links{
   display:flex;
   flex-wrap:wrap;
-  gap:14px 18px;
+  gap:8px 10px;
   justify-content:center;
   align-items:center;
-  font-size:1em;
 }
-/* Enlaces como botones: borde + texto del mismo grupo de color (reposo); más relleno al hover / al pulsar */
 a.mgmt-link{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  padding:11px 20px;
+  padding:6px 12px;
   border-radius:999px;
   font-family:var(--font-carla);
   font-weight:400;
-  font-size:var(--text-ui);
+  font-size:clamp(0.88rem,0.82rem + 0.2vw,0.96rem);
   letter-spacing:var(--carla-letter-spacing);
   word-spacing:var(--carla-word-spacing);
-  -webkit-text-stroke:0.55px currentColor;
+  -webkit-text-stroke:0.4px currentColor;
   paint-order:stroke fill;
   text-decoration:none;
-  border:2px solid;
+  border:1.5px solid;
   background:#fff;
   transition:background .15s,color .15s,border-color .15s,transform .1s,box-shadow .15s;
 }
@@ -3702,21 +3693,10 @@ function buildLessonRow() {
     b.setAttribute("aria-label", LESSON_LABELS[t]);
     const name = document.createElement("span");
     name.className = "lesson-name";
-    if (tab.code) {
-      const codeEl = document.createElement("span");
-      codeEl.className = "lesson-code";
-      codeEl.textContent = tab.code;
-      const labelEl = document.createElement("span");
-      labelEl.className = "lesson-label";
-      labelEl.textContent = tab.name;
-      name.appendChild(codeEl);
-      name.appendChild(labelEl);
-    } else {
-      const labelEl = document.createElement("span");
-      labelEl.className = "lesson-label lesson-label--solo";
-      labelEl.textContent = tab.name;
-      name.appendChild(labelEl);
-    }
+    const labelEl = document.createElement("span");
+    labelEl.className = tab.code ? "lesson-label" : "lesson-label lesson-label--solo";
+    labelEl.textContent = tab.name;
+    name.appendChild(labelEl);
     b.appendChild(name);
     b.addEventListener("click", () => {
       const c = tabCounts();
