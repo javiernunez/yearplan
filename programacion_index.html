@@ -59,7 +59,11 @@ body{
   background:linear-gradient(180deg,#e8f6fc 0%,#cfecf8 18%,#b9e3f4 42%,#a8daf1 72%,#9bd4ef 100%);
   overflow-x:hidden;
 }
-/* Tras elegir LS: vista ~75% (ruletas sin zoom para scroll y franja completa) */
+/* Evita flash de .app al cerrar entry-gate antes de que intro-screen sea opaco */
+body:has(#entry-gate:not([hidden])) .app,
+body:has(#intro-screen.is-open) .app{
+  visibility:hidden;
+}
 body.in-ls-view .hdr,
 body.in-ls-view .main-content,
 body.in-ls-view footer{
@@ -4753,12 +4757,16 @@ renderSlide();
     updateIntroHint();
   }
 
-  function showIntroScreen(){
+  function showIntroScreen(instant){
     document.body.classList.remove('in-ls-view');
     introScreen.classList.add('is-open');
     introScreen.style.display = 'flex';
-    introScreen.style.opacity = '0';
-    setTimeout(function(){ introScreen.style.opacity = '1'; }, 10);
+    if(instant){
+      introScreen.style.opacity = '1';
+    } else {
+      introScreen.style.opacity = '0';
+      setTimeout(function(){ introScreen.style.opacity = '1'; }, 10);
+    }
     scheduleFitLegoLabels();
   }
 
@@ -4772,13 +4780,13 @@ renderSlide();
 
   window.__mbStartYearPlan = function(){
     setIntroMode('year');
-    showIntroScreen();
     introScreen.dispatchEvent(new CustomEvent('introreset'));
+    showIntroScreen(true);
   };
 
   window.__mbStartLearningSituations = function(){
-    showIntroScreen();
     jumpToLsPicker();
+    showIntroScreen(true);
   };
 
   function hideText(cb, instant){
@@ -5103,13 +5111,13 @@ renderSlide();
   };
 
   yearBtn.addEventListener('click', function(){
-    hideGate();
     if(typeof window.__mbStartYearPlan === 'function') window.__mbStartYearPlan();
+    hideGate();
   });
 
   lsBtn.addEventListener('click', function(){
-    hideGate();
     if(typeof window.__mbStartLearningSituations === 'function') window.__mbStartLearningSituations();
+    hideGate();
   });
 })();
 
