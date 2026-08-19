@@ -44,6 +44,8 @@ jobs:
             set -euxo pipefail
             export DEPLOY_PATH="${{ env.DEPLOY_PATH }}"
             export DEPLOY_BRANCH="${{ env.DEPLOY_BRANCH }}"
+            # Repo puede ser de otro uid (clone root / deploy otro user); necesario antes del script viejo en VPS.
+            git config --global --add safe.directory "${DEPLOY_PATH}" 2>/dev/null || true
             if [ -x "${DEPLOY_PATH}/scripts/remote-deploy.sh" ]; then
               exec bash "${DEPLOY_PATH}/scripts/remote-deploy.sh"
             fi
@@ -53,10 +55,10 @@ jobs:
               exit 1
             )
             cd "${DEPLOY_PATH}"
-            git fetch origin
-            git checkout -B "${DEPLOY_BRANCH}" "origin/${DEPLOY_BRANCH}"
-            git reset --hard "origin/${DEPLOY_BRANCH}"
-            git clean -fd
+            git -c "safe.directory=${DEPLOY_PATH}" fetch origin
+            git -c "safe.directory=${DEPLOY_PATH}" checkout -B "${DEPLOY_BRANCH}" "origin/${DEPLOY_BRANCH}"
+            git -c "safe.directory=${DEPLOY_PATH}" reset --hard "origin/${DEPLOY_BRANCH}"
+            git -c "safe.directory=${DEPLOY_PATH}" clean -fd
             test -f index.html
             test -f programacion_index.html
             date -u "+[deploy] %Y-%m-%dT%H:%M:%SZ yearplan ready at ${DEPLOY_PATH}"

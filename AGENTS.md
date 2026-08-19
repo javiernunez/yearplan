@@ -23,7 +23,37 @@ Carla necesita la programación en un navegador (pizarra digital), no como un PD
 | Materiales enlazados | `padlet_files/`, `Feed me monster/`, `FAN & PICK PLICKERS/`, `SONGS/`, `assets/` |
 | Deploy | `.github/workflows/deploy.yml` → SSH al VPS y `scripts/remote-deploy.sh` |
 
-Push a `master`/`main` hace `git pull` en el servidor. No hay build step.
+Push a `master`/`main` dispara GitHub Actions (no hay build step).
+
+## GitHub Actions (deploy)
+
+Workflow: `.github/workflows/deploy.yml` — job **Deploy static site to yearplan.sermestre.es**.
+
+| Trigger | Qué pasa |
+| --- | --- |
+| Push a `master` o `main` | SSH al VPS y ejecuta `scripts/remote-deploy.sh` |
+| **Actions → Deploy → Run workflow** | Mismo deploy manual |
+
+**Secretos** (Settings → Secrets and variables → Actions): `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`; opcionales `DEPLOY_PORT` (default 22), `DEPLOY_PATH` (default `/opt/yearplan.sermestre.es`).
+
+**En el servidor**, el script hace:
+
+```bash
+git fetch origin
+git checkout -B "$DEPLOY_BRANCH" "origin/$DEPLOY_BRANCH"
+git reset --hard "origin/$DEPLOY_BRANCH"
+git clean -fd
+```
+
+Comprueba que existan `index.html` y `programacion_index.html`. Si el repo en el VPS aún no tiene `scripts/remote-deploy.sh`, el workflow usa un bootstrap inline equivalente (misma lógica).
+
+**Fallo habitual — `dubious ownership`:** el clone en `/opt/yearplan.sermestre.es` pertenece a otro usuario (p. ej. root) y el SSH del Action entra con `DEPLOY_USER`. Git ≥ 2.35 lo bloquea. Fix en repo: `git -c safe.directory=…` en `scripts/remote-deploy.sh` y el workflow hace `git config --global --add safe.directory …` antes de ejecutar el script (desbloquea aunque el VPS aún no tenga el script nuevo). Si sigue fallando: entrar al VPS como `DEPLOY_USER` y `git config --global --add safe.directory /opt/yearplan.sermestre.es`.
+
+**Alternativa de setup:** clonar con el mismo usuario que `DEPLOY_USER` (`sudo chown` del directorio antes del clone; ver README).
+
+**Concurrencia:** `concurrency: deploy-yearplan` — un deploy en curso cancela el anterior.
+
+**No tocar en el workflow:** no commitear secretos; la clave va solo en `DEPLOY_SSH_KEY`.
 
 ### Servidor
 

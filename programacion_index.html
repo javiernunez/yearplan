@@ -20,7 +20,12 @@
 :root{
   --ink:#1a3558;
   --white:#fff;
+  /* Base ~18–20px; --text-ui compensa el zoom 0.75 de in-ls-view (~18–20px en pantalla) */
+  --text-base:clamp(18px,0.35vw + 16.5px,20px);
+  --text-ui:clamp(1.34rem,1.2rem + 0.35vw,1.48rem);
+  --text-label:clamp(0.78rem,0.72rem + 0.2vw,0.88rem);
 }
+html{font-size:var(--text-base);}
 .theme-ls1{
   --accent:#f26522;
   --accent-deep:#d44a0c;
@@ -259,7 +264,7 @@ body.in-ls-view footer{
   z-index:7;
   font:inherit;
   font-weight:900;
-  font-size:clamp(.72rem,1.35vw,.88rem);
+  font-size:clamp(0.88rem,0.82rem + 0.25vw,0.98rem);
   letter-spacing:.08em;
   text-transform:uppercase;
   text-decoration:none;
@@ -409,7 +414,7 @@ body.in-ls-view footer{
   border-radius:999px;
   background:rgba(26,53,88,.08);
   font-family:var(--font-carla);
-  font-size:clamp(.95rem,1.9vw,1.18rem);
+  font-size:clamp(1rem,0.95rem + 0.35vw,1.12rem);
   font-weight:400;
   letter-spacing:var(--carla-letter-spacing);
   word-spacing:var(--carla-word-spacing);
@@ -663,7 +668,8 @@ footer{flex:0 0 auto;}
   align-items:flex-end;
 }
 button.ls-chip{
-  font:inherit;
+  font-family:inherit;
+  font-size:var(--text-ui);
   font-weight:800;
   cursor:pointer;
   padding:11px 22px 10px;
@@ -701,6 +707,7 @@ button.ls-chip.active{
   overflow-x:hidden;
   padding:0 0 12px;
   box-sizing:border-box;
+  font-size:var(--text-ui);
 }
 /* Misma anchura útil que el carrusel: rejilla; columnas las fija JS según LESSON_LABELS */
 .lesson-row{
@@ -723,10 +730,10 @@ button.lesson{
   white-space:nowrap;
   overflow:hidden;
   border-radius:999px;
-  padding:7px clamp(4px,0.5vw,8px);
-  min-height:2.15em;
-  font-size:min(0.92rem,max(0.48rem,0.36rem + 1.2vw));
-  line-height:1.05;
+  padding:8px clamp(6px,0.55vw,10px);
+  min-height:2.1em;
+  font-size:1em;
+  line-height:1.1;
   border:1.5px solid;
   letter-spacing:var(--carla-letter-spacing);
   word-spacing:calc(var(--carla-word-spacing) * 0.28);
@@ -864,7 +871,7 @@ button.ls-chip:disabled,button.lesson:disabled{opacity:.45;cursor:not-allowed;}
 }
 .mgmt-title{
   margin:0 0 16px;
-  font-size:clamp(.68rem,1.5vw,.78rem);
+  font-size:var(--text-label);
   font-weight:900;
   letter-spacing:.07em;
   text-transform:uppercase;
@@ -876,7 +883,7 @@ button.ls-chip:disabled,button.lesson:disabled{opacity:.45;cursor:not-allowed;}
   gap:12px 16px;
   justify-content:center;
   align-items:center;
-  font-size:clamp(.85rem,2vw,.95rem);
+  font-size:1em;
 }
 /* Enlaces como botones: borde + texto del mismo grupo de color (reposo); más relleno al hover / al pulsar */
 a.mgmt-link{
@@ -887,7 +894,7 @@ a.mgmt-link{
   border-radius:999px;
   font-family:var(--font-carla);
   font-weight:400;
-  font-size:clamp(1.15rem,2.2vw,1.38rem);
+  font-size:var(--text-ui);
   letter-spacing:var(--carla-letter-spacing);
   word-spacing:var(--carla-word-spacing);
   -webkit-text-stroke:0.55px currentColor;
@@ -969,7 +976,7 @@ a.mgmt-link--eval:active{
   padding:9px 18px;
   border-radius:999px;
   font-weight:400;
-  font-size:clamp(1.15rem,2.2vw,1.38rem);
+  font-size:var(--text-ui);
   text-decoration:none;
   border:2px solid #f26522;
   background:#fff;
