@@ -45,6 +45,8 @@ Workflow: `.github/workflows/deploy.yml` — job **Deploy static site to yearpla
 
 Si el clone es de root y el Action entra como `deploy` → `Permission denied` en `.git/FETCH_HEAD`. No es un bug del workflow: hay que alinear dueño del directorio y usuario SSH.
 
+**`.git/objects` permission denied tras fetch:** si root hizo `git fetch` después del `chown`, creó ficheros en `.git/objects` como root. Vuelve a: `chown -R deploy:deploy /opt/yearplan.sermestre.es` (o tu `DEPLOY_USER`).
+
 **Arreglo one-shot (como root en el VPS):**
 
 ```bash
