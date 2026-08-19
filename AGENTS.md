@@ -19,7 +19,7 @@ Carla necesita la programación en un navegador (pizarra digital), no como un PD
 | Programación (HTML enorme + JS) | `programacion_index.html` |
 | Ruleta | `monster_roulette_widget.html` |
 | Flipbook de cuentos | `cuento_flipbook.html?ls=1` … `?ls=9` |
-| Slides | `LS 1 POWERPOINT.pdf (1)/`, `LS 2 POWERPOINT/` … `LS 10 POWERPOINT/` (`File 00001.png` …) |
+| Slides | `LS 1 POWERPOINT.pdf (1)/`, `LS 2 POWERPOINT/` … `LS 10 POWERPOINT/` (`File 00001.jpg` …). Comprimir PNG nuevas con `scripts/optimize-slides.sh`. |
 | Materiales enlazados | `padlet_files/`, `Feed me monster/`, `FAN & PICK PLICKERS/`, `SONGS/`, `assets/` |
 | Deploy | `.github/workflows/deploy.yml` → SSH al VPS y `scripts/remote-deploy.sh` |
 
