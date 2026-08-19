@@ -27,7 +27,7 @@
   --text-label:clamp(0.78rem,0.72rem + 0.2vw,0.88rem);
   --sidebar-w:190px;
   --roulette-iframe-w:172px;
-  --roulette-iframe-h:200px;
+  --roulette-iframe-h:168px;
   --content-max:1320px;
 }
 html{font-size:var(--text-base);}
@@ -48,6 +48,7 @@ html{font-size:var(--text-base);}
 .theme-ls7{--accent:#d35400;--accent-deep:#9c3d00;--accent-soft:#f5cba7;}
 .theme-ls8{--accent:#16a085;--accent-deep:#117864;--accent-soft:#a3e4d7;}
 .theme-ls9{--accent:#8e44ad;--accent-deep:#633974;--accent-soft:#d7bde2;}
+.theme-ls10{--accent:#27ae60;--accent-deep:#1e8449;--accent-soft:#a9dfbf;}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;}
 body{
@@ -111,7 +112,7 @@ body.in-ls-view footer{
   padding:0 6px;
   box-sizing:border-box;
 }
-/* Título de la Learning Situation: izquierda; color = botón activo */
+/* Título de la Learning Situation: izquierda; color = LS activa (theme-lsN / footer) */
 .ls-situation-head{
   width:100%;
   margin:0;
@@ -128,13 +129,8 @@ body.in-ls-view footer{
   word-spacing:var(--carla-word-spacing);
   -webkit-text-stroke:0.9px currentColor;
   paint-order:stroke fill;
+  color:var(--accent);
 }
-.ls-situation-title.intro{color:var(--ink);}
-.ls-situation-title.g123{color:#1c9a6a;}
-.ls-situation-title.g45{color:#6d4bb5;}
-.ls-situation-title.g6{color:#e88f6e;}
-.ls-situation-title.g78{color:#7a1528;}
-.ls-situation-title.g9{color:#1d6fd6;}
 
 h2 {
   font-size: 40px !important;
@@ -338,10 +334,13 @@ h2 {
   border-radius:4px;
 }
 .roulette-panel-inner{
-  display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  gap:2px;
+  padding:6px 8px 10px;
+  box-sizing:border-box;
 }
 .roulette-panel iframe{
   border:none;
@@ -350,6 +349,7 @@ h2 {
   flex-shrink:0;
   width:var(--roulette-iframe-w);
   height:var(--roulette-iframe-h);
+  margin:0;
 }
 .roulette-panel iframe.ruleta-expanded{
   position:fixed !important;
@@ -370,10 +370,10 @@ h2 {
   :root{
     --sidebar-w:172px;
     --roulette-iframe-w:156px;
-    --roulette-iframe-h:182px;
+    --roulette-iframe-h:154px;
   }
   .roulette-panel{width:var(--sidebar-w);}
-  .roulette-panel-inner{padding:10px 4px 16px;gap:12px;}
+  .roulette-panel-inner{padding:6px 4px 10px;gap:2px;}
   .main-content{margin-left:var(--sidebar-w);}
 }
 @media(max-width:800px){
@@ -1963,11 +1963,11 @@ a.mgmt-link--eval:active{
 
   <div class="roulette-panel">
     <div class="roulette-panel-inner">
-      <iframe src="monster_roulette_widget.html?cat=0" data-roulette-cat="0" width="172" height="200" scrolling="no" allowtransparency="true" loading="lazy" title="Brain Breaks"></iframe>
-      <iframe src="monster_roulette_widget.html?cat=1" data-roulette-cat="1" width="172" height="200" scrolling="no" allowtransparency="true" loading="lazy" title="Games with Flashcards"></iframe>
-      <iframe src="monster_roulette_widget.html?cat=2" data-roulette-cat="2" width="172" height="200" scrolling="no" allowtransparency="true" loading="lazy" title="Games with Mini Whiteboards"></iframe>
-      <iframe src="monster_roulette_widget.html?cat=3" data-roulette-cat="3" width="172" height="200" scrolling="no" allowtransparency="true" loading="lazy" title="Speaking Games"></iframe>
-      <iframe src="monster_roulette_widget.html?cat=4" data-roulette-cat="4" width="172" height="200" scrolling="no" allowtransparency="true" loading="lazy" title="Drama & Games"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=0" data-roulette-cat="0" width="172" height="168" scrolling="no" allowtransparency="true" loading="lazy" title="Brain Breaks"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=1" data-roulette-cat="1" width="172" height="168" scrolling="no" allowtransparency="true" loading="lazy" title="Games with Flashcards"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=2" data-roulette-cat="2" width="172" height="168" scrolling="no" allowtransparency="true" loading="lazy" title="Games with Mini Whiteboards"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=3" data-roulette-cat="3" width="172" height="168" scrolling="no" allowtransparency="true" loading="lazy" title="Speaking Games"></iframe>
+      <iframe src="monster_roulette_widget.html?cat=4" data-roulette-cat="4" width="172" height="168" scrolling="no" allowtransparency="true" loading="lazy" title="Drama & Games"></iframe>
     </div>
   </div>
 
@@ -1975,7 +1975,7 @@ a.mgmt-link--eval:active{
 
   <div class="ls-index-column">
     <div class="ls-situation-head">
-      <h2 class="ls-situation-title intro" id="lsSituationTitle">Learning situation</h2>
+      <h2 class="ls-situation-title" id="lsSituationTitle">Learning situation</h2>
     </div>
 
     <nav class="lesson-nav" aria-label="Lecciones">
@@ -3571,8 +3571,7 @@ function renderSlide() {
   const lsTitle = document.getElementById("lsSituationTitle");
   if (lsTitle) {
     lsTitle.textContent = LS_META[lsIndex].title;
-    lsTitle.className =
-      "ls-situation-title " + lessonGroupClass(lessonTab);
+    lsTitle.className = "ls-situation-title";
   }
 
   const pd = padletForLs();
@@ -5313,7 +5312,7 @@ renderSlide();
       activeIframe.setAttribute('style', activeIframe._origInlineStyle);
     }
     activeIframe.width  = activeIframe._origWidth  || 172;
-    activeIframe.height = activeIframe._origHeight || 200;
+    activeIframe.height = activeIframe._origHeight || 168;
     isRuletaFull = false;
     fsBtn.textContent = '⛶';
     fsBtn.style.display = 'none';
