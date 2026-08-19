@@ -1,0 +1,19 @@
+# Bloque del sitio — importar desde el Caddyfile principal del VPS, p. ej.:
+#   import /opt/yearplan.sermestre.es/deploy/yearplan.caddy
+#
+# La contraseña se configura en /opt/yearplan.sermestre.es/.env
+# y el fragmento basicauth se genera con scripts/sync-site-auth.sh
+
+yearplan.sermestre.es {
+	root * /opt/yearplan.sermestre.es
+
+	encode gzip
+
+	# Generado por scripts/sync-site-auth.sh si existe .env con contraseña
+	import /opt/yearplan.sermestre.es/deploy/caddy.d/*.caddy
+
+	@spa not file {path}
+	rewrite @spa /index.html
+
+	file_server
+}

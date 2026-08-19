@@ -136,6 +136,7 @@ Al publicar, no “arregles” el gitignore para meter esos PDF: GitHub los rech
 - Sitio estático: cambia HTML/CSS/JS/assets y haz push; no hay npm/build.
 - **Commit + push tras cada cambio:** cuando la IA (o quien edite) modifique ficheros del repo, debe hacer `git commit` y `git push origin master` al terminar, sin esperar a que lo pidan. Mensaje breve en imperativo; un commit por tanda lógica de cambios. Dispara el deploy de GitHub Actions.
 - No commits de secretos, `.env`, ni claves SSH.
+- **Contraseña del sitio:** `.env` en el VPS (`YEARPLAN_AUTH_USER` / `YEARPLAN_AUTH_PASSWORD`) + `scripts/sync-site-auth.sh` → basic auth en Caddy. Ver README § «Contraseña de acceso».
 - No force-push a `master`.
 - No reescribas `programacion_index.html` entero si solo hay que tocar un enlace o un nombre de fichero.
 - Nombres con espacios y apóstrofes: al probar URLs, hay que URL-encode; en disco el carácter tiene que ser el mismo que en `PDFS` / `story_pdfs.json`.

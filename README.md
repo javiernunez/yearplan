@@ -77,3 +77,51 @@ O en el servidor:
 ```bash
 DEPLOY_PATH=/opt/yearplan.sermestre.es bash scripts/remote-deploy.sh
 ```
+
+## Contraseña de acceso (HTTP Basic Auth)
+
+La web es estática; la protección va en **Caddy** (producción) leyendo un `.env` **solo en el VPS** (no en git).
+
+### 1. Caddy (recomendado)
+
+En el Caddyfile principal del servidor, importa el bloque del repo (una vez):
+
+```
+import /opt/yearplan.sermestre.es/deploy/yearplan.caddy
+```
+
+Si el sitio ya está definido a mano, añade dentro del bloque `yearplan.sermestre.es`:
+
+```
+import /opt/yearplan.sermestre.es/deploy/caddy.d/*.caddy
+```
+
+### 2. Crear `.env` en el VPS
+
+```bash
+cd /opt/yearplan.sermestre.es
+cp .env.example .env
+chmod 600 .env
+# Edita YEARPLAN_AUTH_USER y YEARPLAN_AUTH_PASSWORD
+bash scripts/sync-site-auth.sh
+sudo systemctl reload caddy
+```
+
+Variables:
+
+| Variable | Uso |
+| --- | --- |
+| `YEARPLAN_AUTH_USER` | Usuario del popup del navegador |
+| `YEARPLAN_AUTH_PASSWORD` | Contraseña en texto plano (solo en disco del VPS) |
+
+El script genera `deploy/caddy.d/10-basicauth.caddy` (gitignored). Si borras `.env` o dejas la contraseña vacía, el sitio vuelve a ser público.
+
+Cada deploy (`git pull`) vuelve a ejecutar el script si existe `.env`. Para recargar Caddy sin sudo interactivo, el usuario `deploy` puede tener:
+
+```
+deploy ALL=(root) NOPASSWD: /bin/systemctl reload caddy
+```
+
+### 3. nginx (alternativa)
+
+Descomenta `auth_basic` en `deploy/nginx-yearplan.sermestre.es.conf`, ejecuta `sync-site-auth.sh` (genera `deploy/.htpasswd`) y `sudo systemctl reload nginx`.

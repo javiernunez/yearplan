@@ -30,4 +30,9 @@ If2cXTr6YS-zF4S-kcSWSVi_sxjsohD9F50Ruu7B1i0HTQ.ttf
 *.docx
 ~$*
 
+# Secrets / generated auth (server only)
+.env
+deploy/.htpasswd
+deploy/caddy.d/10-basicauth.caddy
+
 # Oversized story PDFs (>= 100 MiB) are listed in CUENTOS/.gitignore
