@@ -1,0 +1,33 @@
+# macOS / local helpers
+.DS_Store
+Thumbs.db
+Abrir programacion.command
+
+# Build / patch / restore scripts (local only)
+*.py
+__pycache__/
+
+# Working / QA scratch folders
+_*/
+
+# HTML backups and version history
+versions/
+programacion_index_BACKUP*.html
+
+# Not linked from the published site
+NUEVOS POWERPOINTS/
+posters/
+EVALUATION/
+ls3_eco_adapt/
+
+# Source/export artefacts not served by the HTML
+YP PROGRAMACION SUPER FINAL.pdf
+GUION_YEAR_PLAN_20min_RECITABLE.*
+Padlet - *.xlsx
+If2cXTr6YS-zF4S-kcSWSVi_sxjsohD9F50Ruu7B1i0HTQ.ttf
+
+# Editor / OS noise
+*.docx
+~$*
+
+# Oversized story PDFs (>= 100 MiB) are listed in CUENTOS/.gitignore

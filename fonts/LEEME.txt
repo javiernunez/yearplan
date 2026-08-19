@@ -1,0 +1,65 @@
+LETRA DE CARLA (manuscrita propia)
+==================================
+Archivo: fonts/Carla-Regular.ttf
+CSS: fonts/carla.css  →  clase .letra-carla
+     o variables --font-carla / --carla-letter-spacing / --carla-word-spacing
+
+La fuente, tal cual, separa mucho las letras y poco las palabras.
+Nunca la uses sin letter-spacing negativo y word-spacing extra
+(eso ya va en carla.css).
+
+Se usa en los títulos de cada LS (p. ej. «LS 7 — What is my monster doing?»),
+en los ladrillos que caen (Year Plan, MAYÚSCULAS) y en las ruletas.
+La escritura animada del centro de la intro NO usa Carla
+(sigue con Madelyn / Dancing Script).
+
+
+FUENTE PARA "Structure" (escritura a mano en la intro)
+====================================================
+
+La web busca estos archivos EN ESTA CARPETA (fonts/):
+
+  1) Madelyn-Regular.woff2        (preferido � la de Canva)
+  2) Madelyn-Fill-Regular.woff2   (opcional, si la tienes)
+
+Ruta completa en tu Mac:
+  /Users/carlamortes/Projects/programacion/fonts/
+
+
+MADELYN (igual que en Canva)
+----------------------------
+Es una fuente de pago. No se puede sacar el archivo desde Canva.
+
+Compra / descarga con licencia web aqu�:
+  https://www.fontfabric.com/fonts/madelyn/
+
+Tras descargar, convierte a .woff2 si solo tienes .ttf/.otf
+(por ejemplo en https://cloudconvert.com/ttf-to-woff2)
+y guarda el archivo con el nombre exacto:
+  Madelyn-Regular.woff2
+
+Col�calo en esta carpeta fonts/ y recarga programacion_index.html.
+
+
+SI NO TIENES MADELYN (alternativa gratis, ya activa en la web)
+-------------------------------------------------------------
+Dancing Script se carga sola desde internet (no hace falta copiar nada).
+
+Si quieres tenerla tambi�n en esta carpeta (por si no hay red):
+
+  Descarga:
+  https://fonts.gstatic.com/s/dancingscript/v29/If2cXTr6YS-zF4S-kcSWSVi_sxjsohD9F50Ruu7B1i0HTQ.ttf
+
+  Gu�rdala como:
+  fonts/DancingScript-Bold.ttf
+
+  (La web seguir� usando Madelyn si existe; si no, Dancing Script.)
+
+
+RESUMEN R�PIDO
+--------------
+1. Abre la URL de Fontfabric (Madelyn) o la de Google (Dancing Script).
+2. Descarga el archivo.
+3. Si hace falta, convi�rtelo a .woff2 y ren�mbralo como arriba.
+4. Arrastra el archivo a la carpeta fonts/ de este proyecto.
+5. Recarga la p�gina en el navegador.

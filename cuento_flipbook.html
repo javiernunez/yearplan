@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Melody Moo Storybook</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{ --ink:#1a3558; --accent:#f26522; }
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  color:var(--ink);
+  background:linear-gradient(180deg,#e8f6fc 0%,#cfecf8 18%,#b9e3f4 42%,#a8daf1 72%,#9bd4ef 100%);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.top{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 16px 6px;
+}
+.top h1{
+  margin:0;
+  font-size:clamp(.9rem,2vw,1.15rem);
+  font-weight:900;
+  letter-spacing:.04em;
+  text-align:center;
+  flex:1;
+}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.top button,.nav button{
+  appearance:none;
+  border:2px solid rgba(26,53,88,.18);
+  background:#fff;
+  color:var(--ink);
+  font:inherit;
+  font-weight:800;
+  border-radius:999px;
+  padding:8px 14px;
+  cursor:pointer;
+}
+.top button:hover,.nav button:hover{ border-color:var(--accent); color:var(--accent); }
+.top button:disabled,.nav button:disabled{ opacity:.35; cursor:default; }
+.stage-wrap{
+  flex:1;
+  min-height:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 18px 8px;
+  perspective:1800px;
+}
+.book{
+  position:relative;
+  width:min(92vw,980px);
+  height:min(72vh,640px);
+  transform-style:preserve-3d;
+  cursor:pointer;
+}
+.page{
+  position:absolute;
+  inset:0;
+  border-radius:10px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:0 18px 50px rgba(26,53,88,.22);
+  transform-origin:left center;
+  display:none;
+}
+.page img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#f7fbfe;
+  display:block;
+  user-select:none;
+  -webkit-user-drag:none;
+  pointer-events:none;
+}
+.page.is-current{ display:block; z-index:3; }
+.caption{
+  flex:0 0 auto;
+  max-width:min(92vw,980px);
+  width:100%;
+  margin:0 auto;
+  padding:0 18px 8px;
+}
+.caption-box{
+  max-height:min(18vh,140px);
+  overflow:auto;
+  background:rgba(255,255,255,.88);
+  border:1px solid rgba(26,53,88,.12);
+  border-radius:14px;
+  padding:10px 14px;
+  font-size:clamp(.85rem,1.6vw,.98rem);
+  line-height:1.45;
+  font-weight:700;
+  color:rgba(26,53,88,.92);
+  display:none;
+}
+.caption-box.is-on{ display:block; }
+.nav{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  padding:4px 16px 14px;
+}
+.nav .counter{
+  min-width:7ch;
+  text-align:center;
+  font-weight:900;
+  letter-spacing:.04em;
+  color:rgba(26,53,88,.7);
+}
+.hint{
+  position:absolute;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+  font-size:.75rem;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:rgba(26,53,88,.4);
+  pointer-events:none;
+}
+.err{
+  max-width:520px;
+  margin:auto;
+  padding:24px;
+  background:rgba(255,255,255,.85);
+  border-radius:16px;
+  text-align:center;
+  font-weight:700;
+}
+@keyframes flipNextOut{
+  from{ transform:rotateY(0deg); opacity:1; }
+  to{ transform:rotateY(-92deg); opacity:.2; }
+}
+@keyframes flipNextIn{
+  from{ transform:rotateY(92deg); opacity:.2; }
+  to{ transform:rotateY(0deg); opacity:1; }
+}
+@keyframes flipPrevOut{
+  from{ transform:rotateY(0deg); opacity:1; }
+  to{ transform:rotateY(92deg); opacity:.2; }
+}
+@keyframes flipPrevIn{
+  from{ transform:rotateY(-92deg); opacity:.2; }
+  to{ transform:rotateY(0deg); opacity:1; }
+}
+</style>
+</head>
+<body>
+  <div class="top">
+    <button type="button" id="btnClose">Close</button>
+    <h1 id="title">Melody Moo Storybook</h1>
+    <div class="top-actions">
+      <button type="button" id="btnGemini" hidden>Open in Gemini</button>
+      <button type="button" id="btnPdf" hidden>Open PDF</button>
+    </div>
+  </div>
+  <div class="stage-wrap" id="stage">
+    <div class="book" id="book" aria-live="polite"></div>
+  </div>
+  <div class="caption"><div class="caption-box" id="caption"></div></div>
+  <div class="nav">
+    <button type="button" id="btnPrev">Prev</button>
+    <div class="counter" id="counter">1 / 1</div>
+    <button type="button" id="btnNext">Next</button>
+  </div>
+  <div class="hint">Click · Space / arrow keys to turn pages</div>
+<script>
+(function(){
+  var TITLES = {
+    1:"LS1  Melody Moo's Happy Song",
+    2:"LS2  Melody Moo and the Missing Lantern",
+    3:"LS3  Melody Moo's Zero Waste Challenge",
+    4:"LS4  Melody Moo's Monster Christmas",
+    5:"LS5  Melody Moo's Magic Letter",
+    6:"LS6  Melody Moo's Busy Weather Day",
+    7:"LS7  A Busy Day for Melody Moo",
+    8:"LS8  Melody Moo's Easter Adventure",
+    9:"LS9  The Musical Day of Melody Moo"
+  };
+  var PDFS = {
+    1:"CUENTOS/LS1 Melody Moos Happy Song.pdf",
+    2:"CUENTOS/LS2 Melody Moo and the Missing Lantern.pdf",
+    3:"CUENTOS/LS3 Melody Moo's Zero Waste Challenge.pdf",
+    4:"CUENTOS/LS4 Melody Moos Monster Christmas.pdf",
+    5:"CUENTOS/LS 5Melody Moo's Magic Letter.pdf",
+    6:"CUENTOS/LS6 Melody Moo's Busy Weather Day.pdf",
+    7:"CUENTOS/LS 7 A Busy Day for Melody Moo.pdf",
+    8:"CUENTOS/LS8 Melody Moos Easter Adventure.pdf",
+    9:"CUENTOS/LS 9 The Musical Day of Melody Moo.pdf"
+  };
+  // Deep Gemini links for LS3/LS8 redirect to Storybook home; use local pages.
+  var GEMINI_APP = {
+    6:"https://gemini.google.com/share/caeab5e8a623"
+  };
+
+  var ls = parseInt(new URLSearchParams(location.search).get('ls') || '1', 10);
+  if(!(ls >= 1 && ls <= 9)) ls = 1;
+
+  var book = document.getElementById('book');
+  var titleEl = document.getElementById('title');
+  var counter = document.getElementById('counter');
+  var caption = document.getElementById('caption');
+  var btnPrev = document.getElementById('btnPrev');
+  var btnNext = document.getElementById('btnNext');
+  var btnClose = document.getElementById('btnClose');
+  var btnPdf = document.getElementById('btnPdf');
+  var btnGemini = document.getElementById('btnGemini');
+  var pageCount = 0;
+  var index = 0;
+  var busy = false;
+  var pageTexts = {};
+
+  var isEmbed = /(?:\?|&)embed=1(?:&|$)/.test(location.search) || window.parent !== window;
+  titleEl.textContent = TITLES[ls] || ('LS' + ls);
+  if(PDFS[ls]){
+    btnPdf.hidden = false;
+    btnPdf.onclick = function(){ window.open(PDFS[ls], '_blank', 'noopener,noreferrer'); };
+  }
+  if(GEMINI_APP[ls]){
+    btnGemini.hidden = false;
+    btnGemini.onclick = function(){ window.open(GEMINI_APP[ls], '_blank', 'noopener,noreferrer'); };
+  }
+  btnClose.onclick = function(){
+    if(isEmbed && window.parent && window.parent !== window){
+      try { window.parent.postMessage({ type: 'mb-close-story' }, '*'); } catch(e) {}
+      return;
+    }
+    window.close();
+    setTimeout(function(){
+      try {
+        if(!window.closed && history.length > 1) history.back();
+      } catch(e) {}
+    }, 150);
+  };
+
+  function pageSrc(n){
+    return 'CUENTOS/pages/LS' + ls + '/page-' + String(n).padStart(2,'0') + '.jpg?v=fix';
+  }
+
+  function probePages(done){
+    var found = 0;
+    var i = 1;
+    (function step(){
+      if(i > 24){ done(found); return; }
+      var img = new Image();
+      var n = i;
+      img.onload = function(){ found = n; i++; step(); };
+      img.onerror = function(){ done(found); };
+      img.src = pageSrc(n);
+    })();
+  }
+
+  function build(n){
+    pageCount = n;
+    book.innerHTML = '';
+    for(var i = 1; i <= n; i++){
+      var el = document.createElement('div');
+      el.className = 'page';
+      el.dataset.i = String(i - 1);
+      var img = document.createElement('img');
+      img.alt = 'Page ' + i;
+      img.src = pageSrc(i);
+      el.appendChild(img);
+      book.appendChild(el);
+    }
+    show(0);
+  }
+
+  function updateCaption(){
+    var t = pageTexts[index + 1] || '';
+    if(t){
+      caption.textContent = t;
+      caption.classList.add('is-on');
+    } else {
+      caption.textContent = '';
+      caption.classList.remove('is-on');
+    }
+  }
+
+  function show(i){
+    index = Math.max(0, Math.min(pageCount - 1, i));
+    var nodes = book.querySelectorAll('.page');
+    nodes.forEach(function(el, idx){
+      el.classList.toggle('is-current', idx === index);
+      el.style.animation = '';
+      el.style.zIndex = '';
+      el.style.transformOrigin = '';
+      el.style.display = '';
+    });
+    counter.textContent = (index + 1) + ' / ' + pageCount;
+    btnPrev.disabled = index <= 0;
+    btnNext.disabled = index >= pageCount - 1;
+    updateCaption();
+  }
+
+  function turn(delta){
+    if(busy) return;
+    var next = index + delta;
+    if(next < 0 || next >= pageCount) return;
+    busy = true;
+    var nodes = book.querySelectorAll('.page');
+    var cur = nodes[index];
+    var tgt = nodes[next];
+    nodes.forEach(function(el){ el.classList.remove('is-current'); });
+    cur.style.display = 'block';
+    tgt.style.display = 'block';
+    if(delta > 0){
+      cur.style.transformOrigin = 'left center';
+      tgt.style.transformOrigin = 'left center';
+      cur.style.zIndex = 5;
+      tgt.style.zIndex = 4;
+      cur.style.animation = 'flipNextOut .55s ease forwards';
+      tgt.style.animation = 'flipNextIn .55s ease forwards';
+    } else {
+      cur.style.transformOrigin = 'right center';
+      tgt.style.transformOrigin = 'right center';
+      cur.style.zIndex = 4;
+      tgt.style.zIndex = 5;
+      cur.style.animation = 'flipPrevOut .55s ease forwards';
+      tgt.style.animation = 'flipPrevIn .55s ease forwards';
+    }
+    setTimeout(function(){
+      busy = false;
+      show(next);
+    }, 560);
+  }
+
+  btnPrev.addEventListener('click', function(e){ e.stopPropagation(); turn(-1); });
+  btnNext.addEventListener('click', function(e){ e.stopPropagation(); turn(1); });
+  book.addEventListener('click', function(e){
+    var rect = book.getBoundingClientRect();
+    if((e.clientX - rect.left) < rect.width * 0.4) turn(-1);
+    else turn(1);
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown'){ e.preventDefault(); turn(1); }
+    else if(e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); turn(-1); }
+    else if(e.key === 'Escape') btnClose.click();
+  });
+
+  function start(){
+    probePages(function(n){
+      if(!n){
+        document.getElementById('stage').innerHTML =
+          '<div class="err">Story pages not found for LS' + ls + '.<br>Expected: CUENTOS/pages/LS' + ls + '/</div>';
+        return;
+      }
+      build(n);
+    });
+  }
+
+  fetch('CUENTOS/texts/LS' + ls + '.json')
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(data){
+      if(data && data.pages){
+        data.pages.forEach(function(p){
+          if(p && p.n && p.text) pageTexts[p.n] = p.text;
+        });
+        if(data.gemini_app && !GEMINI_APP[ls]){
+          GEMINI_APP[ls] = data.gemini_app;
+          btnGemini.hidden = false;
+          btnGemini.onclick = function(){ window.open(data.gemini_app, '_blank', 'noopener,noreferrer'); };
+        }
+      }
+    })
+    .catch(function(){})
+    .finally(start);
+})();
+</script>
+</body>
+</html>

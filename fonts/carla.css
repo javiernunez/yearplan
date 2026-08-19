@@ -1,0 +1,21 @@
+/* Letra de Carla — siempre con tracking compacto y palabras más separadas.
+   No uses font-family:'Carla' suelta: usa .letra-carla o estas variables. */
+@font-face{
+  font-family:'Carla';
+  src:url('Carla-Regular.ttf') format('truetype');
+  font-weight:400;
+  font-style:normal;
+  font-display:swap;
+}
+:root{
+  --font-carla:'Carla',cursive;
+  --carla-letter-spacing:-0.1em;
+  --carla-word-spacing:0.5em;
+}
+.letra-carla{
+  font-family:var(--font-carla);
+  font-weight:400;
+  letter-spacing:var(--carla-letter-spacing);
+  word-spacing:var(--carla-word-spacing);
+  font-kerning:normal;
+}

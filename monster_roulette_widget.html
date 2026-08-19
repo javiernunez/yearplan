@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Activity Roulette Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="fonts/carla.css"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: transparent;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: .25rem;
+}
+
+.widget {
+  position: relative;
+  width: 100%;
+  max-width: 230px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Category selector — small pills */
+.cat-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  width: 100%;
+}
+
+.cat-pill {
+  font-family: 'Fredoka One', cursive;
+  font-size: .68rem;
+  padding: 4px 9px;
+  border-radius: 50px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  background: rgba(255,255,255,0.6);
+  color: #555;
+  transition: all .18s;
+  line-height: 1;
+}
+.cat-pill:hover { transform: translateY(-1px); background: #fff; }
+.cat-pill.active { color: #fff; }
+
+/* Wheel */
+.wheel-wrap {
+  position: relative;
+  width: min(210px, 75%);
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+
+.pin {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 20px solid #1a1a2e;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
+  z-index: 10;
+}
+
+canvas { display: block; border-radius: 50%; width: 100%; height: 100%; }
+
+/* Title strip — hidden, moved to spin button */
+.cat-label {
+  display: none;
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(.7rem, 3vw, .9rem);
+  text-align: center;
+  color: #1a1a2e;
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.6);
+  letter-spacing: .3px;
+  min-height: 1.4rem;
+}
+
+/* Spin button */
+.spin-btn {
+  font-family: var(--font-carla);
+  font-size: clamp(1.15rem, 3.8vw, 1.38rem);
+  font-weight: 400;
+  padding: 9px 14px 10px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  transition: transform .1s, box-shadow .1s, opacity .15s;
+  letter-spacing: -0.12em;
+  word-spacing: 0.35em;
+  width: 100%;
+  line-height: 1.15;
+}
+.spin-btn:hover:not(:disabled) { transform: translateY(-2px); }
+.spin-btn:active:not(:disabled) { transform: translateY(1px); }
+.spin-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Result popup — ocupa todo el iframe expandido */
+.result-pop-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 9998;
+}
+.result-pop-backdrop.show { display: block; }
+.result-pop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  overflow-y: auto;
+  animation: popIn .3s cubic-bezier(.34,1.56,.64,1);
+  display: none;
+  flex-direction: column;
+  justify-content: flex-start;
+  z-index: 9999;
+  padding: .75rem;
+  box-sizing: border-box;
+}
+.result-pop.show { display: flex; }
+@keyframes popIn {
+  from { opacity: 0; transform: scale(.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.rp-head {
+  padding: .4rem 0 .3rem;
+  display: flex; align-items: center; gap: 6px;
+}
+.rp-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.rp-name { font-family: var(--font-carla); font-size: 1.75rem; font-weight: 400; letter-spacing: var(--carla-letter-spacing); word-spacing: var(--carla-word-spacing); color: #1a1a2e; flex: 1; line-height: 1.2; }
+.rp-sc {
+  font-size: .65rem; font-weight: 800; padding: 3px 8px;
+  border-radius: 50px; color: #fff; flex-shrink: 0;
+  text-transform: uppercase; letter-spacing: .4px;
+}
+.rp-body {
+  padding: .3rem 0 .5rem;
+  font-size: 1.15rem;
+  color: #445;
+  line-height: 1.55;
+  font-family: var(--font-carla);
+  font-weight: 400;
+  letter-spacing: var(--carla-letter-spacing);
+  word-spacing: var(--carla-word-spacing);
+}
+.rp-author {
+  display: inline-block;
+  margin-top: .4rem;
+  font-size: .64rem;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 50px;
+}
+.rp-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #888;
+  line-height: 1;
+  padding: 4px;
+}
+.rp-close:hover { color: #333; }
+
+/* Confetti */
+.confetti-wrap {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; z-index: 999;
+}
+.cdot {
+  position: absolute;
+  animation: fall 1.1s ease-in forwards;
+}
+@keyframes fall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(540deg); opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="widget">
+  <div class="cat-pills" id="catPills"></div>
+  <div class="cat-label" id="catLabel"></div>
+  <div class="wheel-wrap">
+    <div class="pin"></div>
+    <canvas id="wheel" width="210" height="210"></canvas>
+  </div>
+  <button class="spin-btn" id="spinBtn">🎲 Spin!</button>
+</div><!-- end widget -->
+
+<div class="result-pop-backdrop" id="resultBackdrop">
+  <div class="result-pop" id="resultPop">
+    <button class="rp-close" id="rpClose" aria-label="Cerrar">✕</button>
+    <div class="rp-head">
+      <div class="rp-dot" id="rpDot"></div>
+      <div class="rp-name" id="rpName"></div>
+      <div class="rp-sc" id="rpSc"></div>
+    </div>
+    <div class="rp-body" id="rpBody"></div>
+  </div>
+</div>
+
+<div class="confetti-wrap" id="confWrap"></div>
+
+<script>
+const cats = [
+  {
+    name:"Brain Breaks", emoji:"🧠",
+    color:"#8b6cc8", dark:"#5a3ea0", light:"#ede8f9",
+    acts:[
+      {n:"Let's Unwind",sc:"",d:"__LETSUNWIND__",auth:"",isLetsUnwind:true},
+      {n:"Rainbow Breath",sc:"",d:"__RAINBOWBREATH__",auth:"",isRainbowBreath:true},
+      {n:"Freeze Dance",sc:"",d:"Play this song → https://www.youtube.com/watch?v=ZbZSe6N_BXs — Everyone dances. When the music stops, FREEZE! Anyone who moves is out. Play 3 rounds then back to seats.",auth:"",isFreezeDance:true},
+      {n:"Simon Says",sc:"",d:"Stand up! I'll give commands with the flashcard vocabulary: «Simon says touch your horns!» Only do it if I say «Simon says». If you move without it, sit down!",auth:"",isSimonSays:true},
+      {n:"Write in the Air",sc:"",d:"Choose one of the flashcards we're learning this topic. Write it in the air with your whole arm — BIG letters! The rest of the class has to guess the word.",auth:"",isWriteInAir:true},
+      {n:"Jumping Jacks Vocab",sc:"",d:"I'll say a word from our flashcards — you do one jumping jack and repeat the word out loud. Ready? Let's go through all 8 words!",auth:"",isJumpingJacks:true},
+      {n:"Say It With Feeling",sc:"",d:"__INTONATIONPICK__",auth:"",isIntonationPick:true,intonationEmotions:["😊 Happy","😠 Angry","😨 Scared","😲 Surprised","😐 Bored","🤩 Excited","😢 Sad","🤢 Disgusted"],intonationActions:["🍌 peel a banana","🪥 brush your teeth","🚴 ride a bike","🎁 open a present","🍝 eat spaghetti","📦 lift a heavy box","🐕 walk a dog","👃 smell something bad","🕷️ find a spider","🚌 miss the bus"]},
+      {n:"Body Spelling",sc:"",d:"Get into groups of 4–5. I'll say a word from our topic. Your group has to spell it using your BODIES — each person is one letter. You have 30 seconds. Go!",auth:"",isBodySpelling:true},
+      {n:"Tongue Twister",sc:"",d:"__TWISTER__",auth:"",isTongueTwister:true,prompts:["She sells seashells by the seashore.","How much wood would a woodchuck chuck if a woodchuck could chuck wood?","Peter Piper picked a peck of pickled peppers.","Red lorry, yellow lorry.","Unique New York, unique New York, you know you need unique New York.","Betty Botter bought some butter but the butter was bitter.","I scream, you scream, we all scream for ice cream!","Six slippery snails slid slowly seaward.","Fuzzy Wuzzy was a bear. Fuzzy Wuzzy had no hair.","A big black bug bit a big black bear.","She sees cheese. She sees cheese. She sees cheese.","How can a clam cram in a clean cream can?","I saw Susie sitting in a shoeshine shop.","Fresh French fried fish, fresh French fried fish.","Toy boat. Toy boat. Toy boat."],promptPrefix:"Pairs race — who can say it 3 times fast without a mistake?\n\n"},
+      {n:"Count to 20",sc:"",d:"We're going to count to 20 as a class — but NOBODY can speak at the same time! No order, no signals. Anyone says the next number whenever they feel like it. If two people speak at once — back to 1! Can we reach 20? Let's try!",auth:"",isCountTo20:true},
+      {n:"Synphony Number 5",sc:"",d:"__SCARFTRACING__",auth:"",isScarfTracing:true},
+      {n:"We Will Rock You",sc:"",d:"Put on this video → https://www.youtube.com/watch?v=xshgioG7zjE — Let pupils clap and stomp along to the iconic Queen rhythm. No instructions needed — the beat does all the work. A high-energy reset that gets the whole class in sync in under a minute!",auth:"",isWeWillRockYou:true},
+      {n:"Mirror Pairs",sc:"",d:"In pairs, one pupil is the actor and the other is the mirror. The actor makes slow movements and the mirror must imitate them exactly. When I shout 'Change!' — swap roles. No material needed.",auth:"",isMirrorPairs:true},
+      {n:"The Wiggle Dance",sc:"",d:"Put on the video and follow along. A fun full-body wiggle routine to shake off tension and reset energy in under 2 minutes. → https://www.youtube.com/watch?v=DsUPVERZFlI",auth:"",isWiggleDance:true}
+    ]
+  },
+  {
+    name:"Games with Flashcards", emoji:"🃏",
+    color:"#d4920a", dark:"#7a4e00", light:"#fef6e0",
+    acts:[
+      {n:"Flashcard Pointer",sc:"",d:"All flashcards on the board — everyone can see them. Two volunteers come to the front, one from each team. Teacher says a word — first one to touch the right card wins a point for their team! Back to your seats, next two come up. Ready? Eyes on the board!<br><br><img src=\"flashcard_pointer.png\" style=\"width:100%;max-width:500px;border-radius:12px;margin-top:8px;\" alt=\"Flashcard Pointer\">",auth:""},
+      {n:"What's Missing?",sc:"",d:"Look at these 8 flashcards carefully. Now close your eyes… Open! Which card is missing? Raise your hand if you know!<br><br><img src=\"whats_missing.png\" style=\"width:100%;max-width:500px;border-radius:12px;margin-top:8px;\" alt=\"What's Missing?\">",auth:""},
+      {n:"Card on Your Head",sc:"",d:"__CARDONYOURHEAD__",isCardOnHead:true,auth:""},
+      {n:"Back to Back",sc:"",d:"__BACKTOBACK__",isBackToBack:true,auth:""},
+      {n:"Grid Race",sc:"",d:"Two chairs at the back — one per team — with flashcards laid out in a grid. On the board I draw the same empty grid. One at a time, run to the back, look at the cards, run back and write ONE word in the correct position. Next teammate goes! First team to complete the grid correctly wins!<br><br><img src=\"grid_race.png\" style=\"width:100%;max-width:500px;border-radius:12px;margin-top:8px;\" alt=\"Grid Race\">",auth:""},
+      {n:"Don't Let It Explode",sc:"",d:"__EXPLODE__",isExplode:true,auth:""},
+      {n:"Hot Seat Flashcard",sc:"",d:"One volunteer sits with their back to the board. I stick a flashcard behind you. Class, give clues in English! The person in the hot seat — can you guess your card?<br><br><img src=\"hot_seat_flashcard.png\" style=\"width:100%;max-width:500px;border-radius:12px;margin-top:8px;\" alt=\"Hot Seat Flashcard\">",auth:""},
+      {n:"Describe It",sc:"",d:"__DESCRIBEITFC__",isDescribeItFC:true,auth:""},
+      {n:"Pass and Say",sc:"",d:"__PASSANDSAY__",isPassAndSay:true,auth:""},
+      {n:"Countdown",sc:"",d:"6 flashcards on the board. Look carefully! I remove one — now say ALL the words that are left. I remove another — say them again! Can you remember them all when there's only 1 left?<br><br><img src=\"countdown.png\" style=\"width:100%;max-width:500px;border-radius:12px;margin-top:8px;\" alt=\"Countdown\">",auth:""}
+    ]
+  },
+  {
+    name:"Mini Whiteboards", emoji:"📋",
+    color:"#5dba5d", dark:"#2e7d2e", light:"#e6f7e6",
+    acts:[
+      {n:"Show Me",sc:"",d:"__SHOWME__",auth:"",prompts:["Write a number between 1 and 100","Draw the weather today","Write a colour","Draw a face — happy or sad","Write your favourite food","Write a day of the week","Draw an animal","Write a number — odd or even?","Draw something round","Write a word with 3 letters","Write something cold","Draw something you can eat","Write a month","Draw something bigger than you","Write something you can find in a kitchen","Draw your favourite animal","Write a number between 1 and 10","Draw something that flies","Write a word that starts with B","Draw something you wear","Write something hot","Draw something small","Write a fruit","Draw something with four legs","Write a word that starts with S","Draw your house","Write something you drink","Draw something in the classroom","Write a sport","Draw something scary","Write a vegetable","Draw something that lives in the sea","Write a word with 4 letters","Draw something you do at the weekend","Write something yellow","Draw a vehicle","Write a word that starts with C","Draw something you find in a bedroom","Write something loud","Draw something soft","Write an animal that lives in Africa","Draw something you can find in a garden","Write something sweet","Draw something with wings","Write a word that starts with T","Draw your favourite season","Write something you do every morning","Draw something that makes music","Write a word that starts with M","Draw something that makes you happy","Write something blue","Draw something you find at the beach","Write a word with 5 letters","Draw something that lives underground","Write something you do at school","Draw something bigger than a car","Write a word that starts with P","Draw something you can find in a kitchen","Write something that moves very fast","Draw your favourite food"],promptPrefix:"Everyone write or draw on your whiteboard… and SHOW ME!\n\n"},
+      {n:"Draw It",sc:"",d:"__DRAWIT__",auth:"",isPictionary:true,words:["cat","dog","elephant","pizza","bicycle","rainbow","umbrella","guitar","butterfly","castle","rocket","sandwich","penguin","volcano","dinosaur","ice cream","football","robot","strawberry","cloud","dragon","submarine","cactus","snowman","kangaroo","lighthouse","popcorn","shark","telescope","pineapple","witch","astronaut","waterfall","banana","spider","crown","backpack","octopus","sunflower","train","camera","ghost","lemon","parachute","seahorse","trophy","blanket","scorpion","cupcake","compass","ladder","candle","drum","mirror","flag","coin","balloon","scissors","paintbrush","trumpet","A dog eating ice cream","A robot at the beach","A cat playing guitar","A monster with three eyes","A shark wearing a hat","A penguin on a bicycle","A dinosaur eating pizza","A witch on a skateboard","An elephant in a swimming pool","A dragon drinking tea","A frog wearing sunglasses","A snowman at the beach","A spider in a spaceship","A cow playing football","A bear eating a sandwich","A monkey driving a car","A fish riding a bicycle","A ghost eating popcorn","A lion wearing pyjamas","A crocodile playing piano","A rabbit taking a photo","A duck wearing a crown","A giraffe playing basketball","A wolf baking a cake","A turtle on a rocket","A fox drinking hot chocolate","A zebra wearing sunglasses","A crab reading a book","A gorilla eating spaghetti","A panda doing yoga","A cat driving a bus","A polar bear eating sushi","A parrot flying a plane","A chicken playing video games","A snail winning a race","A dolphin cooking dinner","A bat going shopping","A worm wearing a hat","A sloth running a race","A dog playing tennis","A cat watching TV","A frog eating a burger","A horse doing ballet","A shark riding a bike","A mouse eating a cake","A cow wearing a dress","A pig at the beach","A bear playing drums","A monkey eating pizza","A cat sleeping on a cloud","A dog flying a kite","A rabbit eating ice cream","A lion riding a horse","A fish playing football","A bird driving a car","A penguin eating hot dogs","A dinosaur riding a bike","A robot eating a banana","A monster playing guitar","A witch eating chips"],drawItDesc:"Boards ready! Everyone draws the same word or sentence — no letters, no numbers, only pictures! When I say «Show me!» — boards up! Look around — same word, totally different drawings!"},
+      {n:"Spell Race",sc:"",d:"__SPELLRACE__",auth:"",isSpellRace:true,words:["apple","house","table","chair","water","green","happy","school","friend","bread","clock","tiger","flower","window","garden","orange","monkey","purple","cheese","rabbit","finger","summer","winter","spider","rocket","banana","pencil","letter","basket","mirror","pillow","dragon","chicken","kitchen","morning","balloon","dolphin","rainbow","picture","blanket","brother","sister","mother","father","animal","yellow","bottle","guitar","castle","forest","island","planet","bridge","market","silver","button","circle","square","number","jacket","pepper","tomato","potato","carrot","lemon","ocean","river","cloud","storm","heart","light","stone","paper","honey","sugar","cream","plant","train","truck","plane","horse","sheep","mouse","snake","whale","eagle","puppy","berry","peach","grape","melon","mango","pizza","salad","spoon","plate","glass","towel","brush","month","world","music","dance","smile","dream","sleep","awake","wrong","right","first","after","under","above","early","quiet","young","sharp","sweet","fresh","brave","proud","angry","tired","scary","silly","funny","dirty","clean","empty","lucky","magic"]},
+      {n:"True or False",sc:"",d:"__TF__",auth:"",isTF:true,bank:["Dogs have four legs","Fish can fly","The sky is blue","Cats bark","Ice is cold","Apples are red","Birds have wings","A cat has eight legs","The sun is hot","Fish live in water","Elephants are small","Bananas are yellow","You eat with your ears","Dogs can swim","Snow is white","A week has seven days","Frogs are green","The moon is a star","Milk is white","Spiders have eight legs","Ice cream is cold","A triangle has three sides","Penguins can fly","Carrots are orange","You sleep in a bed","The sky is green","Sharks live in the ocean","Honey is sweet","Butterflies have wings","A circle has corners","Dolphins live in the sea","Lemons are sweet","Birds have feathers","Snakes have legs","The sun is cold","Bees make honey","A rainbow has colours","Owls sleep during the day","Whales are fish","A caterpillar turns into a butterfly","The Earth goes around the sun","Ice melts when it's hot","Polar bears live in Africa","Giraffes have long necks","Crocodiles are reptiles","December is a summer month","The Pacific is the biggest ocean","Humans have 206 bones","Camels store water in their humps","The heart pumps blood","You have two eyes","A spider is an insect","Oranges are orange","You drink water","A dog says meow","The grass is green","Stars come out at night","You have ten fingers","A fish has legs","Chocolate is sweet","You brush your teeth every day","A lion is a pet","The sea is salty","You wear shoes on your hands","A baby cow is called a calf","Tomatoes are a vegetable","You have one nose","A clock has numbers","Robots are alive","The moon comes out at night","You wash your face with juice","A piano makes music","Penguins live in hot places","You have five senses","A ball is square","Elephants can swim","You sleep during the day","A butterfly starts as an egg","Fire is cold","You have two ears","A shark is a mammal","Strawberries are red","You go to school to learn","A door can fly","The number after nine is eleven","You can see with your eyes","A baby dog is called a kitten","Bread is made from flour","You walk with your hands","A tree has roots","The colour of the sun is purple","You have a heart in your body","A whale is bigger than a dog","Frogs can jump","You eat three meals a day","A chair has legs","The wind makes noise","You can touch clouds","A rainbow appears after rain","The number ten comes before nine"],bankCount:1,promptPrefix:"Write T or F on your whiteboard… and SHOW ME!\n\n"},
+      {n:"Finish the Sentence",sc:"",d:"__FINISHSENTENCE__",isFinishSentence:true,auth:"",prompts:["My favourite animal is… because…","At the weekend I like to…","In my bedroom I have got…","My best friend is… because…","I am happy when…","My favourite food is… but I hate…","In summer I always…","I can… but I can't…","My monster has got… and…","School is… because…"],promptPrefix:"Complete the sentence on your whiteboard. You have 30 seconds!\n\n"},
+      {n:"Think, Pair, Share",sc:"",d:"__THINKPAIRSHARE__",isThinkPairShare:true,auth:"",tpsCategories:["Animals","Food","Colours","Sports","Clothes","Body parts","Things in a classroom","Things in a bedroom","Things in a kitchen","Fruits","Vegetables","Things that fly","Things that live in the sea","Things with four legs","Things you do at the weekend","Things you wear in winter","Things you wear in summer","Things that are round","Things that are cold","Things that are hot","Things that make noise","Things you find at the beach","Things you find in a garden","Things that are yellow","Things that are red","Things that are blue","Things bigger than you","Things smaller than your hand","Things you do every morning","Things you do at school","Musical instruments","Means of transport","Jobs / professions","Wild animals","Farm animals","Things with wings","Things made of wood","Things made of plastic","Things you can drink","Things you can eat for breakfast","Things you can eat for lunch","Things you find in a supermarket","Things that move very fast","Things that move very slowly","Things you find in a park","Things you find in a hospital","Things that are soft","Things that are hard","Things that are scary","Things that make you happy","Things with wheels","Things with legs","Things with a screen","Things you use to draw or write","Things that live underground","Things you find at a birthday party","Things in the sky","Things that are alive","Things that are not alive","Things you love"]},
+      {n:"Secret Word",sc:"",d:"__SECRET__",auth:"",secrets:[{w:"Pizza",c:["It's food","You eat it hot","It's round"]},{w:"Elephant",c:["It's an animal","It's very big","It's grey"]},{w:"Sun",c:["It's in the sky","It's very hot","It gives us light"]},{w:"Bike",c:["It has two wheels","You ride it","No engine"]},{w:"Book",c:["You find it at school","You read it","It has pages"]},{w:"Dog",c:["It's a pet","It barks","It has four legs"]},{w:"Cat",c:["It's a pet","It meows","It has whiskers"]},{w:"Apple",c:["It's a fruit","It's red or green","You eat it"]},{w:"Ball",c:["It's round","You play with it","It can bounce"]},{w:"Chair",c:["You sit on it","It has four legs","It's in the classroom"]},{w:"Tree",c:["It's very tall","It has leaves","It grows outside"]},{w:"Fish",c:["It lives in water","It has fins","It can't breathe air"]},{w:"Star",c:["It's in the sky","It shines at night","It's very far away"]},{w:"Rain",c:["It falls from the sky","It's water","It makes puddles"]},{w:"Shoe",c:["You wear it","It goes on your foot","It has laces"]},{w:"Hat",c:["You wear it","It goes on your head","It keeps you warm"]},{w:"Milk",c:["It's white","You drink it","It comes from cows"]},{w:"Egg",c:["It's oval","A bird lays it","You can eat it"]},{w:"Bread",c:["It's food","You make toast with it","It's made from flour"]},{w:"Bed",c:["You sleep in it","It's in your bedroom","It's soft"]},{w:"Door",c:["You open it","It has a handle","It's in every room"]},{w:"Window",c:["You look through it","It's made of glass","It lets light in"]},{w:"Table",c:["It has four legs","You eat on it","It's in the kitchen"]},{w:"Pencil",c:["You write with it","It's at school","It has a rubber on top"]},{w:"Ruler",c:["You use it at school","It measures things","It's long and straight"]},{w:"Clock",c:["It has numbers","It tells the time","It has hands"]},{w:"Phone",c:["You call people with it","It has a screen","You carry it"]},{w:"Car",c:["It has four wheels","You drive it","It has an engine"]},{w:"Bus",c:["It's big","Many people travel in it","It stops at bus stops"]},{w:"Butterfly",c:["It has colourful wings","It starts as a caterpillar","It's an insect"]},{w:"Spider",c:["It has eight legs","It makes webs","It's not an insect"]},{w:"Bee",c:["It flies","It makes honey","It can sting you"]},{w:"Frog",c:["It jumps","It lives near water","It starts as a tadpole"]},{w:"Bird",c:["It has wings","It sings","It lays eggs"]},{w:"Rabbit",c:["It has long ears","It hops","It eats carrots"]},{w:"Horse",c:["It's a big animal","You can ride it","It runs very fast"]},{w:"Cow",c:["It lives on a farm","It gives us milk","It says moo"]},{w:"Sheep",c:["It lives on a farm","It has wool","It says baa"]},{w:"Lion",c:["It's a big cat","It lives in Africa","It roars"]},{w:"Tiger",c:["It has stripes","It's orange and black","It's a big cat"]},{w:"Bear",c:["It's big and fluffy","It loves honey","It hibernates in winter"]},{w:"Penguin",c:["It's black and white","It can't fly","It lives where it's very cold"]},{w:"Dolphin",c:["It lives in the sea","It's very intelligent","It jumps out of the water"]},{w:"Whale",c:["It lives in the ocean","It's the biggest animal","It breathes air"]},{w:"Shark",c:["It lives in the sea","It has sharp teeth","It's a fish"]},{w:"Monkey",c:["It lives in the jungle","It climbs trees","It loves bananas"]},{w:"Carrot",c:["It's a vegetable","It's orange","It grows underground"]},{w:"Banana",c:["It's a fruit","It's yellow","Monkeys love it"]},{w:"Strawberry",c:["It's a fruit","It's red","It's small and sweet"]},{w:"Orange",c:["It's a fruit","It's orange","You drink its juice"]},{w:"Lemon",c:["It's a fruit","It's yellow","It's very sour"]},{w:"Tomato",c:["It's red","It's round","You put it in salad"]},{w:"Potato",c:["It's a vegetable","It grows underground","You make chips with it"]},{w:"Chocolate",c:["It's sweet","It's brown","Children love it"]},{w:"Ice cream",c:["It's cold","It's sweet","It melts in the sun"]},{w:"Cake",c:["It's sweet","You eat it at birthdays","It has candles"]},{w:"Water",c:["You drink it","It has no colour","It fills the sea"]},{w:"Balloon",c:["It's round","It floats in the air","You blow it up"]},{w:"Candle",c:["It gives light","It has a flame","You blow it out"]},{w:"Scissors",c:["You cut with them","They have two blades","You use them at school"]},{w:"Paintbrush",c:["You paint with it","It has bristles","You use it in art class"]},{w:"Drum",c:["It's a musical instrument","You hit it","It makes a loud noise"]},{w:"Guitar",c:["It's a musical instrument","It has strings","You play it with your fingers"]},{w:"Piano",c:["It's a musical instrument","It has black and white keys","It's very big"]},{w:"Rainbow",c:["It appears after rain","It has many colours","It's in the sky"]},{w:"Snow",c:["It's white","It's cold","It falls in winter"]},{w:"Moon",c:["It's in the sky","It shines at night","It goes around the Earth"]},{w:"Cloud",c:["It's in the sky","It's white or grey","It brings rain"]},{w:"Umbrella",c:["You use it when it rains","It opens and closes","It keeps you dry"]},{w:"Bag",c:["You carry things in it","You take it to school","It has handles"]},{w:"Key",c:["You use it to open doors","It's small and metal","You carry it in your pocket"]},{w:"Camera",c:["You take photos with it","It has a lens","You look through it"]},{w:"Mirror",c:["You look at yourself in it","It's made of glass","It's in the bathroom"]},{w:"Map",c:["You use it to find places","It shows roads and cities","Explorers use it"]},{w:"Flag",c:["Every country has one","It has colours and symbols","It flies in the wind"]},{w:"Coin",c:["It's money","It's round and metal","You use it to buy things"]},{w:"Ladder",c:["You climb up it","It has steps","Firefighters use it"]},{w:"Trumpet",c:["It's a musical instrument","You blow into it","It's made of metal"]},{w:"Sandwich",c:["It's food","It has bread","You eat it at lunch"]},{w:"Soup",c:["It's food","It's hot","You eat it with a spoon"]},{w:"Garden",c:["It's outside","It has plants","You play there"]},{w:"Park",c:["It's outside","You play there","It has trees and grass"]},{w:"Beach",c:["It's next to the sea","It has sand","You swim there"]},{w:"Mountain",c:["It's very tall","It's made of rock","You can climb it"]},{w:"River",c:["It's water","It flows","Fish live in it"]},{w:"Fire",c:["It's hot","It's orange","It gives light"]},{w:"School",c:["You go there to learn","It has classrooms","You go Monday to Friday"]},{w:"Hospital",c:["You go there when you're ill","Doctors work there","It has lots of beds"]}]},
+      {n:"Correct the Mistake",sc:"",d:"__CORRECTMISTAKE__",isCorrectMistake:true,auth:"",corrections:[["She have got a dog","She has got a dog"],["I is eight years old","I am eight years old"],["He don't like carrots","He doesn't like carrots"],["They was at school yesterday","They were at school yesterday"],["We goed to the park","We went to the park"],["I have got two feets","I have got two feet"],["She don't can swim","She can't swim"],["My mum have got brown hair","My mum has got brown hair"],["Yesterday I eated pizza","Yesterday I ate pizza"],["He are my best friend","He is my best friend"],["I has a red pencil","I have a red pencil"],["She go to school every day","She goes to school every day"],["They is very happy","They are very happy"],["He don't like apples","He doesn't like apples"],["I buyed a new book","I bought a new book"],["She have two brothers","She has two brothers"],["We was at the beach","We were at the beach"],["He runned very fast","He ran very fast"],["I don't has a pet","I don't have a pet"],["She are my sister","She is my sister"],["The dog have four legs","The dog has four legs"],["I seen a big elephant","I saw a big elephant"],["He don't eat vegetables","He doesn't eat vegetables"],["She were at home","She was at home"],["He have got blue eyes","He has got blue eyes"],["We doesn't like rain","We don't like rain"],["She taked a photo","She took a photo"],["I are very tired","I am very tired"],["He go to bed at nine","He goes to bed at nine"],["My cat have got green eyes","My cat has got green eyes"],["I writed a letter","I wrote a letter"],["She don't has a bike","She doesn't have a bike"],["We was very cold","We were very cold"],["He sayed hello to me","He said hello to me"],["I has got two hands","I have got two hands"],["She were in the garden","She was in the garden"],["They doesn't like spiders","They don't like spiders"],["He comed to my house","He came to my house"],["She have a red bag","She has a red bag"],["We is in the classroom","We are in the classroom"],["I finded a coin","I found a coin"],["My dog don't bark","My dog doesn't bark"],["I drawed a picture","I drew a picture"],["He have got a new phone","He has got a new phone"],["We doesn't go to school on Sunday","We don't go to school on Sunday"],["I is very hungry","I am very hungry"],["He don't likes chocolate","He doesn't like chocolate"],["She have got long hair","She has got long hair"],["We was playing football","We were playing football"],["I catched the ball","I caught the ball"]]},
+      {n:"First Letter",sc:"",d:"__FIRSTLETTER__",auth:"",isLetter:true},
+      {n:"Pictionary Solo",sc:"",d:"__PICTIONARY__",auth:"",isPictionary:true,words:["cat","dog","elephant","pizza","bicycle","rainbow","umbrella","guitar","butterfly","castle","rocket","sandwich","penguin","volcano","dinosaur","ice cream","football","robot","strawberry","cloud","dragon","submarine","cactus","snowman","kangaroo","lighthouse","popcorn","shark","telescope","pineapple","witch","astronaut","waterfall","banana","spider","crown","backpack","octopus","sunflower","train","camera","ghost","lemon","parachute","seahorse","trophy","blanket","scorpion","cupcake","compass"]}
+    ]
+  },
+  {
+    name:"Speaking Games", emoji:"🎙️",
+    color:"#2cb8a0", dark:"#1a7d6e", light:"#e0f7f4",
+    acts:[
+      {n:"This or That",sc:"",d:"Press Reveal! — two options appear. Stand LEFT for the first, stand RIGHT for the second! Face the person opposite and debate for 30 seconds — defend your option! Then hands up — who wants to share?",auth:"",isThisOrThat:true,totPairs:[["🏖️","Beach","🏔️","Mountains"],["🐶","Dogs","🐱","Cats"],["🍕","Pizza","🍔","Hamburger"],["☀️","Summer","❄️","Winter"],["🏊","Swimming","🚴","Cycling"],["🌅","Morning","🌙","Night"],["🍫","Chocolate","🍦","Vanilla"],["⚽","Football","🏀","Basketball"],["🎬","Cinema","🌳","Park"],["🌧️","Rain","❄️","Snow"],["🍎","Apples","🍌","Bananas"],["📚","Reading","✏️","Drawing"],["🎤","Singing","💃","Dancing"],["🦁","Lions","🐯","Tigers"],["☕","Hot chocolate","🍊","Orange juice"],["🤖","Robots","🦕","Dinosaurs"],["🌊","Sea","🏊","Swimming pool"],["🍝","Pasta","🍚","Rice"],["🛹","Skateboard","🛴","Scooter"],["🎂","Cake","🍦","Ice cream"],["🕷️","Spiders","🐍","Snakes"],["☀️","Day","🌙","Night"],["🏙️","City","🌿","Countryside"],["🥕","Carrots","🥦","Broccoli"],["🦸","Superheroes","🧙","Wizards"],["🚂","Trains","✈️","Planes"],["🐒","Monkeys","🐧","Penguins"],["✏️","Drawing","🎨","Painting"],["🍪","Biscuits","🥔","Crisps"],["🏃","Running","🤸","Jumping"],["🦈","Sharks","🐊","Crocodiles"],["🍳","Breakfast","🍽️","Dinner"],["☀️","Sun","🌙","Moon"],["🐱","Cats","🐰","Rabbits"],["🧃","Juice","💧","Water"],["👢","Boots","👟","Trainers"],["🐘","Elephants","🦒","Giraffes"],["📚","Books","🎬","Films"],["👨‍🍳","Cooking","🍽️","Eating"],["⭐","Stars","☁️","Clouds"],["🐸","Frogs","🦎","Lizards"],["🥪","Sandwiches","🍲","Soup"],["🎵","Loud music","🤫","Silence"],["🏫","Big school","🏠","Small school"],["🎁","One big present","🎀","Lots of small presents"],["👻","Be invisible","🦸","Be able to fly"],["🐉","Pet dragon","🦕","Pet dinosaur"],["🍬","Only sweet things","🧂","Only salty things"],["😴","Never sleep","🍽️","Never eat"],["🦒","Be very tall","🐭","Be very small"],["🌙","Live on the moon","🌊","Live under the sea"],["🤖","Robot friend","🧙","Magic friend"],["🌍","Speak all languages","💨","Run super fast"],["👩‍🏫","Be a teacher","👨‍⚕️","Be a doctor"],["📚","No homework","📝","No exams"],["🏰","Live in a castle","⛵","Live on a boat"],["💪","Be very strong","💨","Be very fast"],["🪶","Have wings","🦊","Have a tail"],["🍕","Only eat pizza forever","🚫","Never eat pizza again"],["😂","Be the funniest person","🧠","Be the smartest"]]},
+      {n:"Superpower Pick",sc:"",d:"Press Reveal! — two superpowers appear. Pick your favourite and explain why to your partner. Partner defends the other one. Then hands up — who wants to share?",auth:"",isSuperpowerPick:true,powers:[["🦸","Fly","go anywhere / no cars / fast / free"],["👻","Be invisible","nobody sees you / go anywhere / spy on people"],["💪","Super strength","lift a bus / lift an elephant / never tired"],["⚡","Run super fast","faster than a car / never late"],["🔮","Read minds","know what people think / no secrets"],["🌊","Control water","move the sea / make it rain"],["🔥","Control fire","make flames / never cold"],["❄️","Freeze things","turn anything to ice / make ice cream anytime"],["🌪️","Control the weather","sunshine every day / snow when you want"],["🐾","Talk to animals","understand everything / make animal friends"],["🌍","Teleport","anywhere in one second / free holidays"],["⏱️","Stop time","only you move / finish homework fast"],["🔙","Time travel","see dinosaurs / visit the future"],["🧲","Control metal","move cars / feel like a superhero"],["🌱","Control plants","trees grow fast / flowers everywhere"],["💊","Heal people","fix any injury / no more hospitals"],["🦁","Transform into animals","be a cheetah / swim like a dolphin"],["🌈","Be elastic","stretch your arms / reach anything"],["🧠","Super intelligence","know everything / best at school"],["👁️","X-ray vision","see through walls / find hidden things"],["🔊","Super hearing","hear everything / hear secrets"],["🌙","Control dreams","no more nightmares / enter friends dreams"],["🎨","Bring drawings to life","draw food and eat it"],["🍕","Summon any food","any food anytime / never hungry"],["🗣️","Speak all languages","talk to anyone / travel everywhere"],["💨","Breathe underwater","swim deep / meet fish"],["🌟","Shoot lasers from eyes","zap anything / heat up food"],["🧊","Walk through walls","no doors needed / go anywhere"],["🦋","Shrink","tiny as an ant / hide anywhere"],["🐘","Grow giant","big as a building / very scary"],["☁️","Walk on clouds","high in the sky / amazing views"],["🎭","Change your face","look like anyone / no one knows"],["🤝","Copy powers","touch anyone / collect all powers"],["🔮","See the future","know what happens / always prepared"],["💤","Never need sleep","more time / always energetic"],["🎁","Grant wishes","make dreams come true / help everyone"],["🌊","Breathe fire","like a dragon / impressive at parties"],["🐾","Speak to plants","find treasure / know the weather"],["🎵","Control people with music","everyone dances / very powerful"],["🌍","Be in two places at once","never miss anything"]]},
+      {n:"Describe It!",sc:"",d:"A random place appears. You have 60 seconds to describe it to your partner using the words on screen. Partner listens and asks one question at the end!",auth:"",isDescribeIt:true,places:[{name:"🛏️ My bedroom",vocab:["🛏️ bed","🪟 window","🚪 wardrobe","💡 lamp","🖥️ desk","📌 poster","🧸 toys","📚 books","🛌 pillow","🪞 mirror"],adj:["📏 big","🐭 small","🌀 messy","✨ tidy","🌑 dark","☀️ bright","🤗 cosy"],say:["There is a…","I have got a…","It is…","My bedroom is…"],like:["🤗 it is cosy","🏠 it is my space","🤫 it is quiet","😴 I can sleep there","🧸 my toys are there"],dislike:["🌀 it is messy","🌑 it is dark","🐭 it is too small","📚 I have to do homework there"]},{name:"🍳 The kitchen",vocab:["🧊 fridge","🔥 oven","🪑 table","🍽️ plates","☕ cups","🚿 sink","🍎 food","🪟 window"],adj:["🧊 cold","🔥 hot","✨ clean","🤢 dirty","📏 big","🐭 small","📢 noisy"],say:["There is a…","We have got…","In my kitchen…"],like:["🍎 the food is there","👃 it smells nice","🔥 it is warm","👩‍🍳 my mum cooks there"],dislike:["📢 it is noisy","🤢 it gets dirty","🔥 it is too hot"]},{name:"🏫 My classroom",vocab:["📋 board","🪑 desks","✏️ pencils","📚 books","💻 computer","🖼️ posters","🚪 door","🪟 window"],adj:["📏 big","🐭 small","📢 noisy","🤫 quiet","🌈 colourful","💙 blue","💚 green"],say:["There is a…","We have got…","My classroom is…"],like:["👫 my friends are there","🌈 it is colourful","📚 I learn things","😄 it is fun"],dislike:["📢 it is noisy","🪑 the chairs are hard","😴 sometimes it is boring"]},{name:"🌳 The park",vocab:["🌳 trees","🌿 grass","🛝 swings","🛝 slide","🪑 bench","🌸 flowers","🐦 birds","🐟 pond"],adj:["💚 green","📏 big","😍 beautiful","🤫 quiet","☀️ sunny","🥶 cold","🟫 muddy"],say:["There is a…","I can see…","The park is…"],like:["🛝 I can play there","🌿 it is green","👫 I go with my friends"],dislike:["🟫 it is muddy","🥶 it is cold in winter"]},{name:"🛒 The supermarket",vocab:["🗄️ shelves","🍎 food","🛒 trolley","🛍️ bags","🍊 fruit","🥦 vegetables","👥 people","💡 lights"],adj:["📏 big","😤 busy","📢 noisy","🧊 cold","🌈 colourful"],say:["There is a…","I can see…","The supermarket is…"],like:["🍎 there is lots of food","🍫 I choose snacks","🌈 it is colourful"],dislike:["📢 it is noisy","🧊 it is very cold"]},{name:"🏖️ The beach",vocab:["🏖️ sand","🌊 sea","☀️ sun","⛱️ umbrella","🏖️ towel","🍦 ice cream","🐚 shells","⛵ boats"],adj:["🔥 hot","☀️ sunny","😍 beautiful","💙 blue","🌟 golden"],say:["There is a…","I can see…","The beach is…"],like:["☀️ it is hot and sunny","🏊 I can swim","🍦 I eat ice cream"],dislike:["🏖️ sand gets everywhere","🔥 it is too hot"]},{name:"🏠 The living room",vocab:["🛋️ sofa","📺 TV","💡 lamp","🪟 window","🛋️ cushions","🟫 carpet","🖼️ pictures"],adj:["😌 comfortable","🔥 warm","🤗 cosy","📏 big","☀️ bright"],say:["There is a…","We have got…","My living room is…"],like:["😌 it is comfortable","📺 I watch TV","🔥 it is warm"],dislike:["📢 it is noisy","📺 boring programmes"]},{name:"🏥 The hospital",vocab:["🛏️ beds","👨‍⚕️ doctors","👩‍⚕️ nurses","🪑 chairs","🖥️ machines","💡 lights"],adj:["🤍 white","✨ clean","🤫 quiet","🧊 cold","😨 scary"],say:["There is a…","I can see…","The hospital is…"],like:["👨‍⚕️ doctors help people","✨ it is very clean"],dislike:["😨 it is scary","🧊 it is very cold"]},{name:"🎠 The funfair",vocab:["🎡 rides","💡 lights","🎵 music","🍕 food","🎮 games","🏆 prizes","🤡 clowns"],adj:["🌈 colourful","📢 loud","😃 exciting","😨 scary","😄 fun"],say:["There is a…","I can see…","The funfair is…"],like:["😃 it is exciting","🏆 I win prizes"],dislike:["😨 the clowns are scary","🤢 the rides make me dizzy"]},{name:"🏰 A castle",vocab:["🏰 towers","🧱 walls","🚪 door","🪜 stairs","🚩 flag","🌳 garden"],adj:["👴 old","📏 big","🌑 dark","🧊 cold","😨 scary","🔮 mysterious"],say:["There is a…","I can see…","The castle is…"],like:["🔮 it is mysterious","🧚 like a fairy tale"],dislike:["🧊 it is very cold","👻 it could be haunted"]},{name:"🚂 A train station",vocab:["🚂 trains","👥 people","🪑 benches","🛤️ tracks","🎒 bags"],adj:["😤 busy","📢 noisy","📏 big","⚡ fast","😃 exciting"],say:["There is a…","I can see…","The station is…"],like:["⚡ the trains are fast","😃 it is exciting"],dislike:["📢 it is very noisy","👥 it is too crowded"]},{name:"🌌 Outer space",vocab:["⭐ stars","🪐 planets","🌙 moon","🚀 rockets","👽 aliens","🌍 Earth"],adj:["⬛ black","🌑 dark","🧊 cold","🤫 silent","😍 beautiful","🔮 mysterious"],say:["There is a…","I can see…","Space is…"],like:["🔮 it is mysterious","⭐ the stars are beautiful"],dislike:["🧊 it is very cold","😨 it is scary and dark"]}]},
+      {n:"Favourite Things",sc:"",d:"A question appears. Answer it with your partner — 60 seconds each! Use the sentence starters below. Then swap!",auth:"",isFavThings:true,ftQuestions:["🐾 What is your favourite animal? Why?","🍕 What is your favourite food? Why?","🎨 What is your favourite colour? Why?","⚽ What is your favourite sport? Why?","📚 What is your favourite subject at school? Why?","🌸 What is your favourite season? Why?","🎬 What is your favourite film? Why?","🎵 What is your favourite song? Why?","📅 What is your favourite day of the week? Why?","🍎 What is your favourite fruit? Why?","🥤 What is your favourite drink? Why?","🎮 What is your favourite game? Why?","🏠 What is your favourite place in your house? Why?","🎉 What is your favourite thing to do at the weekend? Why?","🧸 What is your favourite toy? Why?","🦸 What is your favourite superhero? Why?","🌤️ What is your favourite type of weather? Why?","✈️ What is your favourite holiday destination? Why?","🥞 What is your favourite thing to eat for breakfast? Why?","🦁 What is your favourite animal at the zoo? Why?","🏫 What is your favourite thing about school? Why?","☀️ What is your favourite thing to do in summer? Why?","❄️ What is your favourite thing to do in winter? Why?","📖 What is your favourite book? Why?","🪐 What is your favourite planet? Why?","🔢 What is your favourite number? Why?","👃 What is your favourite smell? Why?","👕 What is your favourite thing to wear? Why?","💭 What is your favourite memory? Why?","⭐ What is your favourite thing about yourself? Why?"]},
+      {n:"Would You Rather?",sc:"",d:"A dilemma appears. Discuss with your partner — which would you choose? 30 seconds each! Then hands up — who wants to share?",auth:"",isWouldYouRather:true,wyrPairs:[["🐛","Eat a worm","🕷️","A spider"],["🦸","Fly","👻","Be invisible"],["🏰","Live in a castle","⛵","On a boat"],["🦒","Be very tall","🐭","Very small"],["🐉","Have a pet dragon","🦕","A pet dinosaur"],["🐬","Swim with dolphins","🦅","Fly with eagles"],["📚","No homework","📝","No exams"],["🍦","Eat ice cream every day","🍕","Pizza every day"],["💪","Be very strong","⚡","Very fast"],["🪶","Have wings","🦊","Have a tail"],["☀️","Always summer","❄️","Always winter"],["👩‍🏫","Be a teacher","👨‍⚕️","A doctor"],["🤖","Robot friend","🧙","Magic friend"],["🌙","Live on the moon","🌊","Under the sea"],["🐾","Speak to animals","🌍","Speak all languages"],["😂","Be the funniest","🧠","The smartest"],["🍝","Hair made of spaghetti","🍫","Nose made of chocolate"],["😴","Never sleep","🍽️","Never eat"],["🦸","Be a superhero","🧙","A wizard"],["🐶","Ten dogs","🐱","Ten cats"],["🍬","Only sweet things","🧂","Only salty things"],["🐟","Be a fish","🐦","A bird"],["🏠","Big house","💰","Lots of money"],["🥵","Always hot","🥶","Always cold"],["🖐️","No fingers","🦶","No toes"],["🤸","Jump very high","🏃","Run very fast"],["🥦","Only vegetables","🍎","Only fruit"],["🐘","Be a giant","🐜","Be tiny"],["🪄","Magic wand","🧹","Magic carpet"],["🦕","Meet a dinosaur","👽","Meet an alien"]]},
+      {n:"Emoji Story",sc:"",d:"Two students come to the front. Student A taps to reveal each emoji and says the sentence out loud: \"The [character] is [action] in/at/on the [place]!\" Student B listens and acts it out! Then swap roles.",auth:"",isEmojiStory:true,esChars:[["👧","girl"],["👦","boy"],["👩‍🏫","teacher"],["👨‍🍳","chef"],["🧙","wizard"],["🦸","superhero"],["👻","ghost"],["🤖","robot"],["👽","alien"],["🐶","dog"],["🐱","cat"],["🐸","frog"],["🦁","lion"],["🐘","elephant"],["🦊","fox"],["🐧","penguin"],["🦕","dinosaur"],["🐉","dragon"],["🧜","mermaid"],["🦄","unicorn"]],esActs:[["🍕","eating pizza"],["😴","sleeping"],["🎵","singing"],["🏊","swimming"],["🚴","cycling"],["🎨","painting"],["📚","reading"],["🤸","doing gymnastics"],["🛹","skateboarding"],["🎮","playing games"],["🍳","cooking"],["💃","dancing"],["🏆","winning a trophy"],["🏃","running"],["✈️","flying"]],esPlaces:[["🏖️","the beach"],["🏰","a castle"],["🌙","the moon"],["🚂","a train"],["🏫","school"],["🌳","the forest"],["🛒","the supermarket"],["🎠","the funfair"],["🚀","a rocket"],["🌊","the sea"],["🏠","a house"],["🏝️","a desert island"],["❄️","the North Pole"],["🌋","a volcano"],["🗼","Paris"]]},
+      {n:"Best Day Ever",sc:"",d:"Describe your perfect day in 4 sentences — one for each part of the day. Partner listens and asks one question at the end!",auth:"",isBestDay:true},
+      {n:"What's in Your Bag?",sc:"",d:"Think of 3 things in your school bag. Describe each one without saying the name. Partner guesses!",auth:"",isBagGame:true},
+      {n:"Describe Your Partner - Guess Who?",sc:"",d:"One pupil stands up and describes someone in the class. The rest listen in silence — no guessing yet! When they finish, everyone guesses: Who is it?",auth:"",isDescribePartner:true},
+      {n:"Two Truths One Lie",sc:"",d:"Think of two true things about yourself and one lie. Say all three to your partner. Partner guesses which one is the lie! Try to make the lie sound believable!",auth:"",isTwoTruths:true}
+    ]
+  },
+  {
+    name:"Drama & Games", emoji:"🎭",
+    color:"#e8445a", dark:"#a0202f", light:"#fde8eb",
+    acts:[
+      {n:"Mime It",sc:"",d:"__MIMEIT__",auth:"",isPictionary:true,words:["swimming","sleeping","eating","drinking","running","jumping","dancing","singing","crying","laughing","brushing your teeth","washing your hair","driving a car","riding a bike","playing football","taking a photo","reading a book","writing","painting","cooking","opening a door","climbing a tree","flying a kite","throwing a ball","catching a ball","kicking a ball","knocking on a door","putting on shoes","combing your hair","looking through a telescope","rowing a boat","skiing","surfing","skateboarding","playing guitar","playing piano","playing drums","lifting something heavy","carrying a baby","feeding a baby","blowing out candles","opening a present","wrapping a present","watering flowers","sweeping the floor","ironing","typing on a computer","talking on the phone","taking a selfie","eating spaghetti","cat","dog","elephant","monkey","frog","snake","bird","rabbit","fish","lion","bear","penguin","horse","cow","crab"],customDesc:"I whisper a word to one volunteer. You mime it — NO sounds, NO words! Class, guess using full sentences: «Are you swimming?» «Is it a cat?» First correct sentence wins!"},
+      {n:"Chinese Whispers",sc:"",d:"__WHISPERS__",auth:"",isPictionary:true,words:["The cat is eating a banana","My dog sleeps on the sofa","There is a monster in the kitchen","The teacher has got green hair","I can see a pink elephant","The robot is drinking orange juice","My backpack is full of frogs","The penguin is wearing a hat","There is a dragon in the garden","The fish is riding a bicycle","My mum is dancing in the rain","The bear is eating ice cream","I found a dinosaur in my bedroom","The cow is playing football","There is a ghost in the library","The monkey is driving a bus","My cat is watching television","The shark is wearing sunglasses","There is a spider in my sandwich","The lion is sleeping in the classroom","My dad is cooking spaghetti","The frog is jumping on the bed","There is a witch in the supermarket","The dog is flying a kite","I can hear a dinosaur outside","The elephant is playing the guitar","My teacher has got a pet dragon","The rabbit is eating my homework","There is a crocodile in the swimming pool","The bird is driving a car","My sandwich has got legs","The penguin is eating hot dogs","There is a monster under my bed","The horse is wearing pyjamas","I saw a robot in the park","The snake is playing the piano","My school bag is full of carrots","The duck is wearing a crown","There is a dinosaur on the bus","The wolf is baking a cake","My pencil case is full of spiders","The giraffe is playing basketball","There is a frog in my soup","The parrot is flying a plane","I have got a dinosaur in my bag","The zebra is wearing sunglasses","My cat is eating my homework","The turtle is riding a rocket","There is a shark in the swimming pool","The fox is drinking hot chocolate","My dog is wearing my shoes","The gorilla is eating spaghetti","There is a ghost in the toilet","The polar bear is eating pizza","I can see a dragon in the sky","The chicken is playing video games","My goldfish is driving a car","The sloth is running very fast","There is a cow on the roof","The snail is winning the race"],customDesc:"Line up! I whisper a sentence to the first person. Pass it along the line — whisper only! Last person says it out loud. Let's compare with the original!"},
+      {n:"Emotional Sentences",sc:"",d:"__EMOTIONALSENTENCES__",auth:"",isEmotionalSentences:true,emotionWheel:["Happy","Angry","Scared","Surprised","Bored","Excited","Sad","Disgusted"],emotionEmoji:{Happy:"😊",Angry:"😠",Scared:"😨",Surprised:"😲",Bored:"😐",Excited:"🤩",Sad:"😢",Disgusted:"🤢"},emotionSentenceBank:{Happy:["I got a present!","We are going to the park!","I can play with my friends!","Today is my birthday!","I got full marks!"],Angry:["My brother took my pencil!","I lost my toy!","Stop pushing me!","That is not fair!","Someone broke my crayon!"],Scared:["I heard a strange noise!","It is very dark here!","I saw a big spider!","The door opened by itself!","I am alone in the house!"],Surprised:["Wow, a dragon in the garden!","Oh no, it is snowing!","My teacher can sing!","A monster said hello!","Look, it is my friend here!"],Bored:["This game is too easy.","I have nothing to do.","I am waiting and waiting.","This film is too long.","Can we do something fun?"],Excited:["Let us start the game!","I am going on a trip!","We have a party today!","I can not wait to play!","My team is winning!"],Sad:["My ice cream fell down.","I can not find my cat.","My friend is not here today.","I lost my favourite pen.","I missed the school bus."],Disgusted:["Yuck, this smells bad!","This soup tastes horrible!","There is mud in my shoe!","I touched something slimy!","That is really gross!"]}},
+      {n:"What Are You Doing?",sc:"",d:"__WHATAREYOU__",auth:"",isPictionary:true,words:["swimming","sleeping","eating","drinking","running","jumping","dancing","singing","crying","laughing","brushing your teeth","washing your hair","driving a car","riding a bike","playing football","taking a photo","reading a book","writing","painting","cooking","opening a door","climbing a tree","flying a kite","throwing a ball","catching a ball","kicking a ball","knocking on a door","putting on shoes","combing your hair","rowing a boat","skiing","surfing","skateboarding","playing guitar","playing piano","playing drums","lifting something heavy","blowing out candles","opening a present","watering flowers","sweeping the floor","typing on a computer","talking on the phone","taking a selfie","eating spaghetti"],customDesc:"Stand in a circle. One pupil mimes an action. The next asks: «What are you doing?» The miming pupil says a DIFFERENT action — the next pupil mimes that one. And so on! Stuck? Use the action bank below!",btnLabel:"Get an action 🎲"},
+      {n:"Sound Effects Story",sc:"",d:"__SOUNDFX__",auth:"",isSoundFx:true,stories:["🌩️ The Storm:\nIt was a quiet afternoon. Suddenly the wind started blowing through the trees 🔊. Leaves flew everywhere. Then the first drops of rain fell on the window 🔊. Slowly at first — drip, drip, drip 🔊. Then faster and faster and faster 🔊. A huge crack of thunder shook the walls 🔊. Lightning lit up the sky. The rain was pouring down now 🔊. Then slowly it stopped. One bird started singing 🔊. Then another 🔊. The sun came out.","🐄 The Farm:\nYou opened the big wooden gate and walked in 🔊. A dog ran up and barked at you 🔊. You walked past the cows — they looked at you and mooed 🔊. The sheep were in the field 🔊. A horse galloped past really fast 🔊. Then from the top of the barn, the cockerel crowed as loud as he could 🔊. Every single animal went quiet. Then they all started again at the same time 🔊.","🚗 The Car Journey:\nYou got in the car and closed the door 🔊. Dad turned the key and the engine started 🔊. You drove down the road — faster and faster 🔊. You stopped suddenly at the traffic lights 🔊. A big lorry beeped its horn right next to you 🔊. The lights turned green. You drove through a puddle 🔊. You went through a tunnel — everything went dark and echoey 🔊. Finally you arrived and everyone jumped out and slammed their doors 🔊.","🌴 The Jungle:\nYou pushed through the thick leaves and entered the jungle 🔊. Exotic birds were singing all around you 🔊. A monkey jumped from tree to tree above your head 🔊. You heard something hissing very close by 🔊 — you didn't look back. You started running 🔊. You splashed through a wide muddy river 🔊. Your feet squelched in the mud on the other side 🔊. You heard a lion roar in the distance 🔊. You climbed the nearest tree as fast as you could 🔊 and held on tight.","🍳 The Kitchen:\nMum was cooking dinner. The oil in the pan was sizzling loudly 🔊. She stirred the pot 🔊. The oven timer beeped three times 🔊. Something started boiling over 🔊. Then the smoke alarm went off 🔊! The dog woke up and started barking 🔊. The baby started crying 🔊. Dad ran in and opened the window 🔊. Everything went quiet. Then mum said — dinner is ready 🔊!","⚽ The Football Match:\nThe referee blew the whistle 🔊. Everyone ran onto the pitch 🔊. The crowd started cheering 🔊. Someone passed the ball 🔊. Another player kicked it really hard 🔊. It hit the post with a loud clang 🔊. The goalkeeper dived across the goal 🔊. The crowd gasped 🔊. Then — GOAL! Everyone screamed and jumped 🔊. Then the final whistle blew 🔊. One team cheered 🔊. The other team groaned 🔊.","🌲 The Forest at Night:\nYou walked slowly into the dark forest. Every step made the dry leaves crunch 🔊. An owl hooted somewhere above you 🔊. You stopped. A branch snapped nearby 🔊. You held your breath. Something moved in the bushes 🔊. You took one step back 🔊. Then another 🔊. Then you turned and ran as fast as you could 🔊 all the way home. You slammed the door shut 🔊. Your heart was pounding 🔊.","👶 The Baby:\nIt was the middle of the night. The baby woke up and started crying 🔊. Mum picked it up and rocked it 🔊 — shhhh shhhh shhhh 🔊. The baby hiccupped 🔊. Then it laughed 🔊. Then it sneezed three times in a row 🔊. Then it yawned a huge yawn 🔊 and started crying again 🔊. Dad came in rubbing his eyes 🔊. The baby looked at Dad — and laughed again 🔊. Then finally it closed its eyes and started snoring very quietly 🔊.","🐕 The Dog Walk:\nYou clipped on the lead and the dog immediately started barking with excitement 🔊. You walked down the street 🔊. The dog sniffed everything 🔊. Then it started to rain 🔊. First slowly, then really heavily 🔊. You started to run 🔊. The dog splashed through every single puddle on the way home 🔊. You arrived at the front door absolutely soaking wet 🔊. You opened the door and the dog shook itself 🔊 — water flew everywhere. You groaned 🔊.","🏫 The Classroom:\nThe bell rang loudly 🔊. Feet thundered down the corridor 🔊. The classroom door burst open 🔊. Everyone ran to their seats — chairs scraped across the floor 🔊, bags dropped with a thud 🔊, pencil cases clattered onto desks 🔊. Someone knocked over their water bottle 🔊. Someone else dropped their entire pencil case 🔊 — pens and pencils scattered everywhere. Then the teacher walked in. She clapped her hands twice 🔊. Complete silence. Then a phone beeped in someone's bag 🔊. Everyone turned to look."]},
+      {n:"Pass the Imaginary Object",sc:"",d:"__PASSOBJ__",auth:"",isPassObj:true,objects:[{obj:"🪨 A rock",adj:"HEAVY 🏋️"},{obj:"🚿 A washing machine",adj:"VERY HEAVY 🏋️"},{obj:"🍉 A watermelon",adj:"HEAVY AND ROUND 🏋️"},{obj:"💰 A bag of gold",adj:"HEAVY 🏋️"},{obj:"📦 A big box",adj:"HEAVY AND BIG 🏋️"},{obj:"🪶 A feather",adj:"LIGHT 🪶"},{obj:"🫧 A bubble",adj:"VERY LIGHT 🪶"},{obj:"📄 A piece of paper",adj:"LIGHT AND FLAT 🪶"},{obj:"🎈 A balloon",adj:"LIGHT AND FLOATY 🪶"},{obj:"🦋 A butterfly",adj:"LIGHT AND SOFT 🪶"},{obj:"🔥 A ball of fire",adj:"HOT 🔥"},{obj:"🍕 A hot pizza",adj:"HOT AND YUMMY 🔥"},{obj:"☕ A cup of hot tea",adj:"HOT AND CAREFUL 🔥"},{obj:"🌡️ A hot stone",adj:"VERY HOT 🔥"},{obj:"🕯️ A candle",adj:"HOT AND BRIGHT 🔥"},{obj:"🧊 An ice cube",adj:"COLD AND WET ❄️"},{obj:"☃️ A snowball",adj:"COLD AND ROUND ❄️"},{obj:"🍦 An ice cream",adj:"COLD AND SWEET ❄️"},{obj:"❄️ A snowflake",adj:"COLD AND TINY ❄️"},{obj:"🧊 A frozen bottle",adj:"COLD AND HARD ❄️"},{obj:"🐜 A tiny ant",adj:"VERY SMALL 🐜"},{obj:"💍 A ring",adj:"TINY AND SHINY 🐜"},{obj:"🫧 A grape",adj:"SMALL AND ROUND 🐜"},{obj:"🐁 A baby mouse",adj:"TINY AND SOFT 🐜"},{obj:"🌱 A seed",adj:"TINY AND ROUND 🐜"},{obj:"🎈 A giant balloon",adj:"BIG AND LIGHT 🎈"},{obj:"🎃 A big pumpkin",adj:"BIG AND ROUND 🎈"},{obj:"🏀 A giant ball",adj:"BIG AND BOUNCY 🎈"},{obj:"🥚 A giant egg",adj:"BIG AND CAREFUL 🎈"},{obj:"🧸 A giant teddy bear",adj:"BIG AND SOFT 🎈"},{obj:"🐍 A snake",adj:"LONG AND WIGGLY 🐍"},{obj:"🐸 A frog",adj:"SLIPPERY AND JUMPY 🐸"},{obj:"🐛 A worm",adj:"SLIMY AND WIGGLY 🐛"},{obj:"🏀 A bouncing ball",adj:"BOUNCY 🏀"},{obj:"🐦 A bird",adj:"LIGHT AND FLAPPY 🐦"},{obj:"🤢 Slime",adj:"STICKY AND GROSS 🤢"},{obj:"💩 Something smelly",adj:"SMELLY AND HORRIBLE 🤢"},{obj:"📢 A loud drum",adj:"LOUD AND BIG 📢"},{obj:"👻 A ghost",adj:"INVISIBLE AND COLD 👻"},{obj:"🕷️ A spider",adj:"SCARY AND HAIRY 🕷️"}]},
+      {n:"One Sentence Story",sc:"",d:"__ONESENTENCE__",auth:"",isOneSentence:true},
+      {n:"Slow Motion",sc:"",d:"__SLOWMO__",auth:"",isPictionary:true,words:["I am opening a door","I am sitting down","I am picking up a pencil","I am putting on a jacket","I am opening a present","I am eating a burger","I am drinking water","I am throwing a ball","I am catching a ball","I am kicking a football","I am jumping over a puddle","I am climbing a ladder","I am opening a window","I am closing a book","I am putting on sunglasses","I am blowing out a candle","I am cutting with scissors","I am pouring juice","I am turning off the light","I am walking through mud","I am pushing a heavy box","I am lifting a heavy bag","I am falling off a chair","I am sneezing","I am waking up","I am brushing my teeth","I am washing my face","I am combing my hair","I am putting on a crown","I am opening a magic box","I am stepping on something sticky","I am walking into a spider web","I am slipping on a banana","I am opening an umbrella","I am knocking on a big door","I am high fiving someone","I am eating spaghetti","I am riding a bike","I am swimming in the sea","I am running very fast","I am jumping very high","I am picking up something very heavy","I am carrying a sleeping baby","I am tip toeing","I am looking for something","I am finding a treasure box","I am opening a treasure box","I am counting lots of coins","I am painting a wall","I am drawing a picture","I am writing a letter","I am reading a very long book","I am eating a very hot pizza","I am eating a very sour lemon","I am smelling something horrible","I am tasting something disgusting","I am touching something very cold","I am touching something very hot","I am touching something very slimy","I am touching something very soft","I am carrying a very tall cake","I am walking a very big dog","I am trying to open a jar","I am trying to put on a very small shoe","I am trying to lift a very heavy rock","I am trying to catch a butterfly","I am trying to reach something very high","I am trying to be very quiet","I am trying not to laugh","I am trying not to cry","I am wrapping a present","I am blowing up a balloon","I am flying a kite","I am rowing a boat","I am surfing a big wave","I am skiing down a mountain","I am climbing a very tall tree","I am jumping into a swimming pool"],customDesc:"One pupil comes to the front. Press «Get an action 🎲» — only they can see the screen for a second! They act it out in super slow motion. The class watches and puts their hand up to guess: «He is… / She is…» Who guesses first? Who does the best slow motion?",btnLabel:"Get an action 🎲"},
+      {n:"Hot and Cold",sc:"",d:"__HOTCOLD__",auth:"",isHotCold:true},
+      {n:"Statues",sc:"",d:"I say an emotion or situation: «You\u2019re scared of a spider!» FREEZE in that pose! Now I walk around and ask: «What are you doing? Where are you? How do you feel?» Answer in character!",auth:"",isStatues:true,situationBank:["You're scared of a spider!","You find a bag of gold!","You smell something disgusting!","You're waiting for the bus in the rain!","You just got the best news ever!","You're walking on hot sand!","You're trying to open a jar that won't open!","You're bored in a very long meeting!","You're sneaking through a haunted house!","You just bit into a super sour lemon!","You're carrying something incredibly heavy!","You're freezing cold and can't stop shivering!","You just saw your favourite celebrity!","You're trying to catch a fly!","You're stuck in quicksand!","You're dancing at a party but nobody else is!","You just lost your pet!","You're trying to be very quiet but keep making noise!","You're riding a rollercoaster for the first time!","You open a present and it's the best gift ever!","You open a present and it's the worst gift ever!","You're walking on a tightrope really high up!","You're eating the most delicious thing ever!","You just stepped in something horrible!","You're watching a really scary film!","You're telling a secret and someone nearly hears!","You're winning a race — almost at the finish line!","You drop your ice cream!","You find a surprise in your pocket!","You're on a boat in a massive storm!"]}
+    ]
+  }
+];
+
+let cur=0, spinning=false, angle=0;
+const cv=document.getElementById('wheel');
+const ctx=cv.getContext('2d');
+const spinBtn=document.getElementById('spinBtn');
+const catLabel=document.getElementById('catLabel');
+const resultPop=document.getElementById('resultPop');
+const rpDot=document.getElementById('rpDot');
+const rpName=document.getElementById('rpName');
+const rpSc=document.getElementById('rpSc');
+const rpBody=document.getElementById('rpBody');
+
+function hexRgb(h){return{r:parseInt(h.slice(1,3),16),g:parseInt(h.slice(3,5),16),b:parseInt(h.slice(5,7),16)}}
+
+function sliceColors(hex,n){
+  const b=hexRgb(hex),cols=[];
+  for(let i=0;i<n;i++){
+    const t=(i/n)*0.42;
+    cols.push(`rgb(${Math.round(b.r+(255-b.r)*t)},${Math.round(b.g+(255-b.g)*t)},${Math.round(b.b+(255-b.b)*t)})`);
+  }
+  return cols;
+}
+
+function draw(a){
+  const c=cats[cur],acts=c.acts,n=acts.length,cx=105,cy=105,r=100;
+  const cols=sliceColors(c.color,n);
+  ctx.clearRect(0,0,210,210);
+  acts.forEach((act,i)=>{
+    const s=a+i*(2*Math.PI/n)-Math.PI/2, e=s+2*Math.PI/n;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,s,e);ctx.closePath();
+    ctx.fillStyle=cols[i];ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.65)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.save();
+    ctx.translate(cx,cy);ctx.rotate(s+Math.PI/n);
+    ctx.translate(r*0.62,0);ctx.rotate(Math.PI/2);
+    ctx.fillStyle='rgba(255,255,255,0.96)';
+    ctx.font='700 8.5px Nunito,sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    const words=act.n.split(' '),maxW=62;
+    let lines=[],cur2='';
+    words.forEach(w=>{const t=cur2?cur2+' '+w:w;if(ctx.measureText(t).width>maxW&&cur2){lines.push(cur2);cur2=w;}else cur2=t;});
+    if(cur2)lines.push(cur2);
+    const lh=10,sy=-((lines.length-1)*lh)/2;
+    lines.forEach((l,li)=>ctx.fillText(l,0,sy+li*lh));
+    ctx.restore();
+  });
+  ctx.beginPath();ctx.arc(cx,cy,r+2,0,2*Math.PI);
+  ctx.strokeStyle=c.dark;ctx.lineWidth=4;ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,14,0,2*Math.PI);
+  ctx.fillStyle='#fff';ctx.fill();
+  ctx.strokeStyle=c.dark;ctx.lineWidth=3;ctx.stroke();
+}
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function showResult(i){
+  const c=cats[cur],a=c.acts[i];
+  let desc=a.d;
+  if(a.isEmotionalSentences){
+    desc='__EMOTIONALSENTENCES__';
+  } else if(a.isBodySpelling){
+    desc='__BODYSPELLING__';
+  } else if(a.isLetsUnwind){
+    desc='__LETSUNWIND__';
+  } else if(a.isRainbowBreath){
+    desc='__RAINBOWBREATH__';
+  } else if(a.isFreezeDance){
+    desc='__FREEZEDANCE__';
+  } else if(a.isSimonSays){
+    desc='__SIMONSAYS__';
+  } else if(a.isWriteInAir){
+    desc='__WRITEINAIR__';
+  } else if(a.isJumpingJacks){
+    desc='__JUMPINGJACKS__';
+  } else if(a.isIntonationPick){
+    desc='__INTONATIONPICK__';
+  } else if(a.isTwoTruths){
+    desc='__TWOTRUTHSONELIE__';
+  } else if(a.isDescribePartner){
+    desc='__DESCRIBEPARTNER__';
+  } else if(a.isBagGame){
+    desc='__WHATSINYOURBAG__';
+  } else if(a.isBestDay){
+    desc='__BESTDAYEVER__';
+  } else if(a.isEmojiSentence){
+    desc='__EMOJISENTENCE__';
+  } else if(a.isEmojiStory){
+    desc='__EMOJISTORY__';
+  } else if(a.isWouldYouRather){
+    desc='__WOULDYOURATHER__';
+  } else if(a.isFavThings){
+    desc='__FAVOURITETHINGS__';
+  } else if(a.isDescribeIt){
+    desc='__DESCRIBEIT__';
+  } else if(a.isThisOrThat){
+    desc='__THISORTHAT__';
+  } else if(a.isSuperpowerPick){
+    desc='__SUPERPOWERPICK__';
+  } else if(a.isHotCold){
+    desc='__HOTCOLD__';
+  } else if(a.isStatues){
+    desc='__STATUES__';
+  } else if(a.isOneSentence){
+    desc='__ONESENTENCE__';
+  } else if(a.isPassObj){
+    desc='__PASSOBJ__';
+  } else if(a.isSoundFx){
+    desc='__SOUNDFX__';
+  } else if(a.isLetter){
+    desc='__LETTERMODE__';
+  } else if(a.isSpellRace){
+    desc='__SPELLRACE__';
+  } else if(a.isPictionary){
+    desc='__PICTIONARY__';
+  } else if(a.secrets&&a.secrets.length){
+    desc='__SECRETMODE__';
+  } else if(a.isFinishSentence){
+    desc='__FINISHSENTENCE__';
+  } else if(a.isCorrectMistake){
+    desc='__CORRECTMISTAKE__';
+  } else if(a.isTF){
+    desc='__TF__';
+  } else if(a.isThinkPairShare){
+    desc='__THINKPAIRSHARE__';
+  } else if(a.isTongueTwister){
+    desc='__TONGUETWISTER__';
+  } else if(a.isCountTo20){
+    desc='__COUNTTO20__';
+  } else if(a.isMirrorPairs){
+    desc='__MIRRORPAIRS__';
+  } else if(a.isWeWillRockYou){
+    desc='__WEWILLROCKYOU__';
+  } else if(a.isWiggleDance){
+    desc='__WIGGLEDANCE__';
+  } else if(a.isScarfTracing){
+    desc='__SCARFTRACING__';
+  } else if(a.prompts&&a.prompts.length){
+    desc='__PROMPTS__';
+  } else if(a.bank&&a.bank.length){
+    const count=a.bankCount||10;
+    if(count===1){
+      desc='__BANKONE__'+(a.promptPrefix||'');
+    } else {
+      desc='__BANKMULTI__';
+    }
+  }
+  if(a.isEmotionalSentences){
+    const emotions = a.emotionWheel || ["Happy","Angry","Scared","Surprised","Bored","Excited","Sad","Disgusted"];
+    const emojiMap = a.emotionEmoji || {};
+    const sentenceBankByEmotion = a.emotionSentenceBank || {};
+    let revealed = false;
+    let currentEmotion = null;
+    let currentSentence = "Spin first, then create a sentence.";
+    const lastSentenceByEmotion = {};
+    let spinningLocal = false;
+    let localAngle = 0;
+    let rafId = null;
+
+    rpDot.style.background = c.color;
+    rpName.textContent = a.n;
+    rpSc.textContent = c.name;
+    rpSc.style.background = c.color;
+    rpBody.innerHTML = '';
+
+    const descP = document.createElement('p');
+    descP.style.cssText = 'font-size:.8rem;color:#445;line-height:1.55;margin-bottom:10px;font-weight:700;';
+    descP.textContent = 'Spin the wheel, keep the emotion hidden, and say the sentence with that feeling. The class listens and guesses.';
+    rpBody.appendChild(descP);
+
+    const wheelWrap = document.createElement('div');
+    wheelWrap.style.cssText = 'position:relative;display:flex;justify-content:center;align-items:center;margin:8px auto 12px;width:190px;height:190px;';
+    wheelWrap.innerHTML = '<div style="position:absolute;top:-2px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:0;border-bottom:22px solid #1f2937;z-index:2;"></div>';
+
+    const miniCanvas = document.createElement('canvas');
+    miniCanvas.width = 190;
+    miniCanvas.height = 190;
+    miniCanvas.style.cssText = 'width:190px;height:190px;border-radius:50%;display:block;';
+    wheelWrap.appendChild(miniCanvas);
+    rpBody.appendChild(wheelWrap);
+
+    const wctx = miniCanvas.getContext('2d');
+    function drawMiniWheel(angleRad){
+      const cx = 95, cy = 95, r = 88;
+      const cols = ['#ffd166','#ef476f','#6c5ce7','#4ecdc4','#95a5a6','#f78c6b','#5dade2','#9b59b6'];
+      wctx.clearRect(0,0,190,190);
+      emotions.forEach((emotion, i) => {
+        const s = angleRad + i * (2 * Math.PI / emotions.length) - Math.PI / 2;
+        const e = s + 2 * Math.PI / emotions.length;
+        wctx.beginPath();
+        wctx.moveTo(cx, cy);
+        wctx.arc(cx, cy, r, s, e);
+        wctx.closePath();
+        wctx.fillStyle = cols[i % cols.length];
+        wctx.fill();
+        wctx.strokeStyle = 'rgba(255,255,255,.85)';
+        wctx.lineWidth = 1.5;
+        wctx.stroke();
+        wctx.save();
+        wctx.translate(cx, cy);
+        wctx.rotate(s + Math.PI / emotions.length);
+        wctx.translate(r * 0.62, 0);
+        wctx.rotate(Math.PI / 2);
+        wctx.textAlign = 'center';
+        wctx.textBaseline = 'middle';
+        wctx.fillStyle = '#fff';
+        wctx.font = '700 11px Nunito, sans-serif';
+        const label = (emojiMap[emotion] ? emojiMap[emotion] + ' ' : '') + emotion;
+        const parts = label.split(' ');
+        if(parts.length > 1){
+          wctx.fillText(parts[0], 0, -7);
+          wctx.fillText(parts.slice(1).join(' '), 0, 7);
+        } else {
+          wctx.fillText(label, 0, 0);
+        }
+        wctx.restore();
+      });
+      wctx.beginPath();
+      wctx.arc(cx, cy, r + 2, 0, 2*Math.PI);
+      wctx.strokeStyle = c.dark;
+      wctx.lineWidth = 4;
+      wctx.stroke();
+      wctx.beginPath();
+      wctx.arc(cx, cy, 18, 0, 2*Math.PI);
+      wctx.fillStyle = '#fff';
+      wctx.fill();
+      wctx.strokeStyle = c.dark;
+      wctx.lineWidth = 3;
+      wctx.stroke();
+    }
+    drawMiniWheel(localAngle);
+
+    const controls = document.createElement('div');
+    controls.style.cssText = 'display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;';
+
+    const spinEmotionBtn = document.createElement('button');
+    spinEmotionBtn.textContent = 'Spin emotion 🎲';
+    spinEmotionBtn.style.cssText = 'padding:10px 16px;font-size:1rem;font-weight:800;font-family:var(--font-carla);letter-spacing:var(--carla-letter-spacing);word-spacing:var(--carla-word-spacing);border:none;border-radius:10px;background:#f4763a;color:#fff;cursor:pointer;';
+
+    const nextSentenceBtn = document.createElement('button');
+    nextSentenceBtn.textContent = 'New sentence for emotion ✨';
+    nextSentenceBtn.style.cssText = 'padding:10px 16px;font-size:1rem;font-weight:800;font-family:var(--font-carla);letter-spacing:var(--carla-letter-spacing);word-spacing:var(--carla-word-spacing);border:none;border-radius:10px;background:#8b6cc8;color:#fff;cursor:pointer;';
+
+    controls.appendChild(spinEmotionBtn);
+    controls.appendChild(nextSentenceBtn);
+    rpBody.appendChild(controls);
+
+    const sentenceBox = document.createElement('div');
+    sentenceBox.style.cssText = 'background:#f8fafc;border:2px solid #dbeafe;border-radius:12px;padding:10px 12px;margin-bottom:10px;';
+    sentenceBox.innerHTML = '<div style="font-size:.74rem;font-weight:800;color:#64748b;margin-bottom:4px;">Sentence</div><div style="font-size:1.1rem;font-weight:800;color:#1f2937;">' + currentSentence + '</div>';
+    rpBody.appendChild(sentenceBox);
+
+    const resultBox = document.createElement('div');
+    resultBox.style.cssText = 'background:#fff7ed;border:2px solid #fdba74;border-radius:12px;padding:10px 12px;';
+    const resultTop = document.createElement('div');
+    resultTop.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;';
+    const resultLabel = document.createElement('div');
+    resultLabel.style.cssText = 'font-size:.78rem;font-weight:800;color:#9a3412;';
+    resultLabel.textContent = 'Chosen emotion';
+    const eyeBtn = document.createElement('button');
+    eyeBtn.textContent = '👁 Show';
+    eyeBtn.style.cssText = 'padding:6px 10px;font-size:.78rem;font-weight:800;border:none;border-radius:8px;background:#1f2937;color:#fff;cursor:pointer;';
+    resultTop.appendChild(resultLabel);
+    resultTop.appendChild(eyeBtn);
+    resultBox.appendChild(resultTop);
+    const resultValue = document.createElement('div');
+    resultValue.style.cssText = 'font-size:1.25rem;font-weight:900;letter-spacing:.02em;color:#111827;text-align:center;min-height:1.6em;';
+    resultValue.textContent = 'Spin first!';
+    resultBox.appendChild(resultValue);
+    rpBody.appendChild(resultBox);
+
+    function renderMaskedEmotion(){
+      if(!currentEmotion){
+        resultValue.textContent = 'Spin first!';
+        return;
+      }
+      const shown = (emojiMap[currentEmotion] ? emojiMap[currentEmotion] + ' ' : '') + currentEmotion.toUpperCase();
+      resultValue.textContent = revealed ? shown : '● ● ● ● ●';
+      eyeBtn.textContent = revealed ? '🙈 Hide' : '👁 Show';
+    }
+
+    function chooseNewSentenceForEmotion(){
+      if(!currentEmotion){
+        currentSentence = "Spin first!";
+        sentenceBox.innerHTML = '<div style="font-size:.74rem;font-weight:800;color:#64748b;margin-bottom:4px;">Sentence</div><div style="font-size:1.1rem;font-weight:800;color:#1f2937;">' + currentSentence + '</div>';
+        return;
+      }
+      const bank = sentenceBankByEmotion[currentEmotion] || ["I am ready."];
+      let next = bank[Math.floor(Math.random()*bank.length)];
+      if(bank.length > 1){
+        while(next === lastSentenceByEmotion[currentEmotion]){
+          next = bank[Math.floor(Math.random()*bank.length)];
+        }
+      }
+      lastSentenceByEmotion[currentEmotion] = next;
+      currentSentence = next;
+      sentenceBox.innerHTML = '<div style="font-size:.74rem;font-weight:800;color:#64748b;margin-bottom:4px;">Sentence</div><div style="font-size:1.1rem;font-weight:800;color:#1f2937;">' + currentSentence + '</div>';
+    }
+
+    nextSentenceBtn.onclick = chooseNewSentenceForEmotion;
+    eyeBtn.onclick = function(){
+      if(!currentEmotion) return;
+      revealed = !revealed;
+      renderMaskedEmotion();
+    };
+
+    spinEmotionBtn.onclick = function(){
+      if(spinningLocal) return;
+      spinningLocal = true;
+      revealed = false;
+      const idx = Math.floor(Math.random() * emotions.length);
+      currentEmotion = emotions[idx];
+
+      // Colocar el sector elegido bajo la flecha (robusto en todos los navegadores)
+      const slice = 2 * Math.PI / emotions.length;
+      localAngle = -Math.PI / 2 - (idx * slice + slice / 2);
+      drawMiniWheel(localAngle);
+
+      chooseNewSentenceForEmotion();
+      renderMaskedEmotion();
+      spinningLocal = false;
+    };
+
+    openResultPop();
+    burst(c.color);
+    return;
+  }
+  if(a.isStatues){
+    const situations = a.situationBank || ["You're scared of a spider!"];
+    let currentSituation = situations[Math.floor(Math.random()*situations.length)];
+    let revealed = false;
+
+    rpDot.style.background = c.color;
+    rpName.textContent = a.n;
+    rpSc.textContent = c.name;
+    rpSc.style.background = c.color;
+    rpBody.innerHTML = '';
+
+    const descP = document.createElement('p');
+    descP.style.cssText = 'font-size:.8rem;color:#445;line-height:1.55;margin-bottom:14px;font-weight:700;';
+    descP.textContent = a.d;
+    rpBody.appendChild(descP);
+
+    // Situation box
+    const sitBox = document.createElement('div');
+    sitBox.style.cssText = 'background:#fff7ed;border:2px solid #fdba74;border-radius:14px;padding:12px 14px;margin-bottom:12px;';
+    const sitTop = document.createElement('div');
+    sitTop.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;';
+    const sitLabel = document.createElement('div');
+    sitLabel.style.cssText = 'font-size:.78rem;font-weight:800;color:#9a3412;letter-spacing:.03em;';
+    sitLabel.textContent = 'SITUATION';
+    const eyeBtn = document.createElement('button');
+    eyeBtn.textContent = '👁 Show';
+    eyeBtn.style.cssText = 'padding:6px 12px;font-size:.78rem;font-weight:800;border:none;border-radius:8px;background:#1f2937;color:#fff;cursor:pointer;font-family:var(--font-carla);letter-spacing:var(--carla-letter-spacing);word-spacing:var(--carla-word-spacing);';
+    sitTop.appendChild(sitLabel);
+    sitTop.appendChild(eyeBtn);
+    sitBox.appendChild(sitTop);
+
+    const sitValue = document.createElement('div');
+    sitValue.style.cssText = 'font-size:1.25rem;font-weight:900;color:#111827;text-align:center;min-height:1.8em;display:flex;align-items:center;justify-content:center;font-family:var(--font-carla);letter-spacing:var(--carla-letter-spacing);word-spacing:var(--carla-word-spacing);transition:filter .25s;';
+    sitBox.appendChild(sitValue);
+    rpBody.appendChild(sitBox);
+
+    function renderSituation(){
+      if(revealed){
+        sitValue.textContent = currentSituation;
+        sitValue.style.filter = 'none';
+        eyeBtn.textContent = '🙈 Hide';
+      } else {
+        sitValue.textContent = currentSituation;
+        sitValue.style.filter = 'blur(7px)';
+        eyeBtn.textContent = '👁 Show';
+      }
+    }
+    renderSituation();
+
+    eyeBtn.onclick = function(){
+      revealed = !revealed;
+      renderSituation();
+    };
+
+    const newBtn = document.createElement('button');
+    newBtn.textContent = 'New situation ✨';
+    newBtn.style.cssText = 'display:block;width:100%;padding:12px;font-size:1rem;font-weight:800;border:none;border-radius:12px;background:#e8445a;color:#fff;cursor:pointer;font-family:var(--font-carla);letter-spacing:var(--carla-letter-spacing);word-spacing:var(--carla-word-spacing);';
+    newBtn.onclick = function(){
+      let next;
+      do { next = situations[Math.floor(Math.random()*situations.length)]; } while(next === currentSituation && situations.length > 1);
+      currentSituation = next;
+      revealed = false;
+      renderSituation();
+    };
+    rpBody.appendChild(newBtn);
+
+    openResultPop();
+    burst(c.color);
+    return;
+  }
+  if(a.isThisOrThat){
+    const pairs=a.totPairs;
+    let shuffled=shuffle(pairs),pIdx=0;
+    if(resultPop._totTimer){clearInterval(resultPop._totTimer);resultPop._totTimer=null;}
+    let timerInterval=null;
+    rpDot.style.background=c.color;
+    rpName.textContent=a.n;
+    rpSc.textContent=c.name;rpSc.style.background=c.color;
+    rpBody.innerHTML='';
+    const descP=document.createElement('p');
+    descP.style.cssText='font-size:.78rem;color:#445;line-height:1.5;margin-bottom:10px;font-weight:700;';
+    descP.textContent=a.d;
+    rpBody.appendChild(descP);
+    const timerBtn=document.createElement('button');
+    timerBtn.textContent='⏱️ Start 30s';
+    timerBtn.style.cssText='display:block;width:100%;padding:10px;font-size:1.1rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:10px;background:#2cb8a0;color:#fff;cursor:pointer;margin-bottom:10px;transition:background .3s;';
+    timerBtn.onclick=function(){
+      if(timerInterval){clearInterval(timerInterval);timerInterval=null;resultPop._totTimer=null;timerBtn.textContent='⏱️ Start 30s';timerBtn.style.background='#2cb8a0';return;}
+      let sec=30;
+      timerBtn.textContent='⏱️ '+sec+'s';
+      timerBtn.style.background='#2cb8a0';
+      timerInterval=setInterval(function(){
+        sec--;
+        if(sec<=0){clearInterval(timerInterval);timerInterval=null;resultPop._totTimer=null;timerBtn.textContent='⏱️ Done!';timerBtn.style.background='#e8445a';return;}
+        timerBtn.textContent='⏱️ '+sec+'s';
+        if(sec<=10)timerBtn.style.background='#e8445a';
+      },1000);
+      resultPop._totTimer=timerInterval;
+    };
+    rpBody.appendChild(timerBtn);
+    const startersBox=document.createElement('div');
+    startersBox.style.cssText='background:#e0f7f4;border-radius:10px;padding:10px;margin-bottom:10px;border:2px solid #2cb8a0;';
+    startersBox.innerHTML='<div style="font-size:14px;font-weight:800;line-height:1.8;color:#1a1a2e;">💬 I prefer… because…<br>💬 I think… is better because…<br>💬 I like… more than… because…</div>';
+    rpBody.appendChild(startersBox);
+    const revealArea=document.createElement('div');
+    revealArea.style.cssText='text-align:center;';
+    const revealBtn=document.createElement('button');
+    revealBtn.textContent='Reveal! 🎲';
+    revealBtn.style.cssText='padding:10px 20px;font-size:1rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:10px;background:#f4763a;color:#fff;cursor:pointer;margin-bottom:8px;';
+    const pairDisplay=document.createElement('div');
+    pairDisplay.style.cssText='display:none;margin-top:8px;';
+    const nextBtn=document.createElement('button');
+    nextBtn.textContent='Next →';
+    nextBtn.style.cssText='display:none;padding:7px 16px;font-size:.85rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:8px;background:#8b6cc8;color:#fff;cursor:pointer;margin-top:8px;';
+    function showPair(){
+      if(pIdx>=shuffled.length){shuffled=shuffle(pairs);pIdx=0;}
+      const p=shuffled[pIdx];pIdx++;
+      pairDisplay.style.display='flex';
+      pairDisplay.style.cssText='display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;flex-wrap:nowrap;';
+      pairDisplay.innerHTML='<div style="flex:1;background:#4ecdc4;border-radius:10px;padding:10px 6px;text-align:center;"><div style="font-size:2rem;">'+p[0]+'</div><div style="font-weight:800;font-size:.85rem;color:#fff;margin-top:4px;">'+p[1]+'</div></div><div style="font-weight:900;font-size:1rem;color:#e8445a;">OR</div><div style="flex:1;background:#f4763a;border-radius:10px;padding:10px 6px;text-align:center;"><div style="font-size:2rem;">'+p[2]+'</div><div style="font-weight:800;font-size:.85rem;color:#fff;margin-top:4px;">'+p[3]+'</div></div>';
+      nextBtn.style.display='inline-block';
+    }
+    revealBtn.onclick=showPair;
+    nextBtn.onclick=showPair;
+    revealArea.appendChild(revealBtn);
+    revealArea.appendChild(pairDisplay);
+    revealArea.appendChild(nextBtn);
+    rpBody.appendChild(revealArea);
+    openResultPop();
+    burst(c.color);
+  }
+  if(a.isSuperpowerPick){
+    const powers=a.powers;
+    if(resultPop._spTimer){clearInterval(resultPop._spTimer);resultPop._spTimer=null;}
+    let spTimerInterval=null;
+    rpDot.style.background=c.color;
+    rpName.textContent=a.n;
+    rpSc.textContent=c.name;rpSc.style.background=c.color;
+    rpBody.innerHTML='';
+    const descP=document.createElement('p');
+    descP.style.cssText='font-size:.78rem;color:#445;line-height:1.5;margin-bottom:10px;font-weight:700;';
+    descP.textContent=a.d;
+    rpBody.appendChild(descP);
+    const timerBtn=document.createElement('button');
+    timerBtn.textContent='⏱️ Start 30s';
+    timerBtn.style.cssText='display:block;width:100%;padding:10px;font-size:1.1rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:10px;background:#2cb8a0;color:#fff;cursor:pointer;margin-bottom:10px;transition:background .3s;';
+    timerBtn.onclick=function(){
+      if(spTimerInterval){clearInterval(spTimerInterval);spTimerInterval=null;resultPop._spTimer=null;timerBtn.textContent='⏱️ Start 30s';timerBtn.style.background='#2cb8a0';return;}
+      let sec=30;
+      timerBtn.textContent='⏱️ '+sec+'s';
+      timerBtn.style.background='#2cb8a0';
+      spTimerInterval=setInterval(function(){
+        sec--;
+        if(sec<=0){clearInterval(spTimerInterval);spTimerInterval=null;resultPop._spTimer=null;timerBtn.textContent='⏱️ Done!';timerBtn.style.background='#e8445a';return;}
+        timerBtn.textContent='⏱️ '+sec+'s';
+        if(sec<=10)timerBtn.style.background='#e8445a';
+      },1000);
+      resultPop._spTimer=spTimerInterval;
+    };
+    rpBody.appendChild(timerBtn);
+    const startersBox=document.createElement('div');
+    startersBox.style.cssText='background:#e0f7f4;border-radius:10px;padding:10px;margin-bottom:10px;border:2px solid #2cb8a0;';
+    startersBox.innerHTML='<div style="font-size:14px;font-weight:800;line-height:1.8;color:#1a1a2e;">💬 I prefer… because…<br>💬 I think… is better because…</div>';
+    rpBody.appendChild(startersBox);
+    const revealArea2=document.createElement('div');
+    revealArea2.style.cssText='text-align:center;';
+    const revealBtn2=document.createElement('button');
+    revealBtn2.textContent='Reveal! 🎲';
+    revealBtn2.style.cssText='padding:10px 20px;font-size:1rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:10px;background:#f4763a;color:#fff;cursor:pointer;margin-bottom:8px;';
+    const pwDisplay=document.createElement('div');
+    pwDisplay.style.cssText='display:none;margin-top:8px;';
+    const nextBtn2=document.createElement('button');
+    nextBtn2.textContent='Next →';
+    nextBtn2.style.cssText='display:none;padding:7px 16px;font-size:.85rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:8px;background:#8b6cc8;color:#fff;cursor:pointer;margin-top:8px;';
+    function showPowers(){
+      var i1=Math.floor(Math.random()*powers.length);
+      var i2=i1;while(i2===i1)i2=Math.floor(Math.random()*powers.length);
+      var pw1=powers[i1],pw2=powers[i2];
+      pwDisplay.style.display='flex';
+      pwDisplay.style.cssText='display:flex;align-items:stretch;justify-content:center;gap:6px;margin-top:8px;flex-wrap:nowrap;';
+      pwDisplay.innerHTML='<div style="flex:1;background:#dbeafe;border-radius:10px;padding:10px 6px;text-align:center;"><div style="font-size:2rem;">'+pw1[0]+'</div><div style="font-weight:800;font-size:.82rem;color:#1e40af;margin-top:4px;">'+pw1[1]+'</div><div style="font-size:.65rem;color:#475569;margin-top:3px;font-weight:600;">'+pw1[2]+'</div></div><div style="font-weight:900;font-size:1rem;color:#e8445a;align-self:center;">OR</div><div style="flex:1;background:#fce7f3;border-radius:10px;padding:10px 6px;text-align:center;"><div style="font-size:2rem;">'+pw2[0]+'</div><div style="font-weight:800;font-size:.82rem;color:#9d174d;margin-top:4px;">'+pw2[1]+'</div><div style="font-size:.65rem;color:#475569;margin-top:3px;font-weight:600;">'+pw2[2]+'</div></div>';
+      nextBtn2.style.display='inline-block';
+    }
+    revealBtn2.onclick=showPowers;
+    nextBtn2.onclick=showPowers;
+    revealArea2.appendChild(revealBtn2);
+    revealArea2.appendChild(pwDisplay);
+    revealArea2.appendChild(nextBtn2);
+    rpBody.appendChild(revealArea2);
+    openResultPop();
+    burst(c.color);
+  }
+  if(a.isDescribeIt){
+    const places=a.places;
+    if(resultPop._diTimer){clearInterval(resultPop._diTimer);resultPop._diTimer=null;}
+    let diTimerInterval=null;
+    rpDot.style.background=c.color;
+    rpName.textContent=a.n;
+    rpSc.textContent=c.name;rpSc.style.background=c.color;
+    rpBody.innerHTML='';
+    const descP=document.createElement('p');
+    descP.style.cssText='font-size:.78rem;color:#445;line-height:1.5;margin-bottom:10px;font-weight:700;';
+    descP.textContent=a.d;
+    rpBody.appendChild(descP);
+    const timerBtn=document.createElement('button');
+    timerBtn.textContent='⏱️ Start 60s';
+    timerBtn.style.cssText='display:block;width:100%;padding:10px;font-size:1.1rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:10px;background:#2cb8a0;color:#fff;cursor:pointer;margin-bottom:10px;transition:background .3s;';
+    timerBtn.onclick=function(){
+      if(diTimerInterval){clearInterval(diTimerInterval);diTimerInterval=null;resultPop._diTimer=null;timerBtn.textContent='⏱️ Start 60s';timerBtn.style.background='#2cb8a0';return;}
+      let sec=60;
+      timerBtn.textContent='⏱️ '+sec+'s';
+      timerBtn.style.background='#2cb8a0';
+      diTimerInterval=setInterval(function(){
+        sec--;
+        if(sec<=0){clearInterval(diTimerInterval);diTimerInterval=null;resultPop._diTimer=null;timerBtn.textContent='⏱️ Done!';timerBtn.style.background='#e8445a';return;}
+        timerBtn.textContent='⏱️ '+sec+'s';
+        if(sec<=10)timerBtn.style.background='#e8445a';
+      },1000);
+      resultPop._diTimer=diTimerInterval;
+    };
+    rpBody.appendChild(timerBtn);
+    const placeArea=document.createElement('div');
+    placeArea.style.cssText='text-align:center;';
+    const placeBtn=document.createElement('button');
+    placeBtn.textContent='Get a place 🎲';
+    placeBtn.style.cssText='padding:10px 20px;font-size:1rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:10px;background:#f4763a;color:#fff;cursor:pointer;margin-bottom:8px;';
+    const placeDisplay=document.createElement('div');
+    placeDisplay.style.cssText='display:none;text-align:left;margin-top:8px;';
+    const placeNext=document.createElement('button');
+    placeNext.textContent='Next place →';
+    placeNext.style.cssText='display:none;padding:7px 16px;font-size:.85rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:8px;background:#8b6cc8;color:#fff;cursor:pointer;margin-top:8px;';
+    function renderPlace(){
+      var pl=places[Math.floor(Math.random()*places.length)];
+      var h='<div style="font-weight:900;font-size:.9rem;text-align:center;margin-bottom:6px;color:#1a1a2e;">'+pl.name+'</div>';
+      h+='<div style="background:#eff6ff;border:2px solid #93c5fd;border-radius:8px;padding:6px 8px;margin-bottom:5px;"><div style="font-weight:800;font-size:.7rem;margin-bottom:4px;">📝 VOCABULARY</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'+pl.vocab.map(function(v){return '<span style="background:#dbeafe;border-radius:6px;padding:3px 6px;font-size:.68rem;font-weight:700;">'+v+'</span>';}).join('')+'</div></div>';
+      h+='<div style="background:#fefce8;border:2px solid #fde047;border-radius:8px;padding:6px 8px;margin-bottom:5px;"><div style="font-weight:800;font-size:.7rem;margin-bottom:4px;">⭐ ADJECTIVES</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'+pl.adj.map(function(a){return '<span style="background:#fef9c3;border-radius:6px;padding:3px 6px;font-size:.68rem;font-weight:700;">'+a+'</span>';}).join('')+'</div></div>';
+      h+='<div style="background:#f0fdf4;border:2px solid #86efac;border-radius:8px;padding:6px 8px;margin-bottom:5px;"><div style="font-weight:800;font-size:.7rem;margin-bottom:4px;">💬 SAY IT</div><div style="font-size:.68rem;font-weight:700;line-height:1.6;">'+pl.say.join(' · ')+'</div></div>';
+      h+='<div style="background:#dcfce7;border:2px solid #4ade80;border-radius:8px;padding:6px 8px;margin-bottom:5px;"><div style="font-weight:800;font-size:.7rem;margin-bottom:4px;">😍 I like it because…</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'+pl.like.map(function(l){return '<span style="background:#bbf7d0;border-radius:6px;padding:3px 6px;font-size:.68rem;font-weight:700;">'+l+'</span>';}).join('')+'</div></div>';
+      h+='<div style="background:#fee2e2;border:2px solid #fca5a5;border-radius:8px;padding:6px 8px;"><div style="font-weight:800;font-size:.7rem;margin-bottom:4px;">😤 I don\'t like it because…</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'+pl.dislike.map(function(dl){return '<span style="background:#fecaca;border-radius:6px;padding:3px 6px;font-size:.68rem;font-weight:700;">'+dl+'</span>';}).join('')+'</div></div>';
+      placeDisplay.style.display='block';
+      placeDisplay.innerHTML=h;
+      placeBtn.style.display='none';
+      placeNext.style.display='inline-block';
+    }
+    placeBtn.onclick=renderPlace;
+    placeNext.onclick=renderPlace;
+    placeArea.appendChild(placeBtn);
+    placeArea.appendChild(placeDisplay);
+    placeArea.appendChild(placeNext);
+    rpBody.appendChild(placeArea);
+    openResultPop();
+    burst(c.color);
+  }
+  if(a.isFavThings){
+    const ftQs=a.ftQuestions;
+    if(resultPop._ftTimer){clearInterval(resultPop._ftTimer);resultPop._ftTimer=null;}
+    let ftTimerInterval=null;
+    rpDot.style.background=c.color;
+    rpName.textContent=a.n;
+    rpSc.textContent=c.name;rpSc.style.background=c.color;
+    rpBody.innerHTML='';
+    const descP=document.createElement('p');
+    descP.style.cssText='font-size:.78rem;color:#445;line-height:1.5;margin-bottom:10px;font-weight:700;';
+    descP.textContent=a.d;
+    rpBody.appendChild(descP);
+    const timerBtn=document.createElement('button');
+    timerBtn.textContent='⏱️ Start 60s';
+    timerBtn.style.cssText='display:block;width:100%;padding:10px;font-size:1.1rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:10px;background:#2cb8a0;color:#fff;cursor:pointer;margin-bottom:10px;transition:background .3s;';
+    timerBtn.onclick=function(){
+      if(ftTimerInterval){clearInterval(ftTimerInterval);ftTimerInterval=null;resultPop._ftTimer=null;timerBtn.textContent='⏱️ Start 60s';timerBtn.style.background='#2cb8a0';return;}
+      let sec=60;
+      timerBtn.textContent='⏱️ '+sec+'s';
+      timerBtn.style.background='#2cb8a0';
+      ftTimerInterval=setInterval(function(){
+        sec--;
+        if(sec<=0){clearInterval(ftTimerInterval);ftTimerInterval=null;resultPop._ftTimer=null;timerBtn.textContent='⏱️ Done!';timerBtn.style.background='#e8445a';return;}
+        timerBtn.textContent='⏱️ '+sec+'s';
+        if(sec<=10)timerBtn.style.background='#e8445a';
+      },1000);
+      resultPop._ftTimer=ftTimerInterval;
+    };
+    rpBody.appendChild(timerBtn);
+    const startersBox=document.createElement('div');
+    startersBox.style.cssText='background:#fefce8;border-radius:10px;padding:10px;margin-bottom:10px;border:2px solid #fde047;';
+    startersBox.innerHTML='<div style="font-size:14px;font-weight:800;line-height:1.8;color:#1a1a2e;">💬 My favourite… is… because…<br>💬 I love… because…<br>💬 I think… is the best because…</div>';
+    rpBody.appendChild(startersBox);
+    const qArea=document.createElement('div');
+    qArea.style.cssText='text-align:center;';
+    const qBtn=document.createElement('button');
+    qBtn.textContent='Get a question 🎲';
+    qBtn.style.cssText='padding:10px 20px;font-size:1rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:10px;background:#f4763a;color:#fff;cursor:pointer;margin-bottom:8px;';
+    const qDisplay=document.createElement('div');
+    qDisplay.style.cssText='display:none;margin-top:8px;padding:12px;background:#fff3cd;border-radius:10px;border:2px solid #ffc107;';
+    const qNext=document.createElement('button');
+    qNext.textContent='Next question →';
+    qNext.style.cssText='display:none;padding:7px 16px;font-size:.85rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:8px;background:#8b6cc8;color:#fff;cursor:pointer;margin-top:8px;';
+    function showQuestion(){
+      var q=ftQs[Math.floor(Math.random()*ftQs.length)];
+      qDisplay.style.display='block';
+      qDisplay.innerHTML='<div style="font-size:1rem;font-weight:900;color:#1a1a2e;line-height:1.4;">'+q+'</div>';
+      qBtn.style.display='none';
+      qNext.style.display='inline-block';
+    }
+    qBtn.onclick=showQuestion;
+    qNext.onclick=showQuestion;
+    qArea.appendChild(qBtn);
+    qArea.appendChild(qDisplay);
+    qArea.appendChild(qNext);
+    rpBody.appendChild(qArea);
+    openResultPop();
+    burst(c.color);
+  }
+  if(a.isEmojiStory){
+    const chars=a.esChars,acts=a.esActs,plcs=a.esPlaces;
+    rpDot.style.background=c.color;
+    rpName.textContent=a.n;
+    rpSc.textContent=c.name;rpSc.style.background=c.color;
+    rpBody.innerHTML='';
+    const descP=document.createElement('p');
+    descP.style.cssText='font-size:.78rem;color:#445;line-height:1.5;margin-bottom:10px;font-weight:700;';
+    descP.textContent=a.d;
+    rpBody.appendChild(descP);
+    const startersBox=document.createElement('div');
+    startersBox.style.cssText='background:#e8f5e9;border-radius:10px;padding:10px;margin-bottom:10px;border:2px solid #66bb6a;';
+    startersBox.innerHTML='<div style="font-size:14px;font-weight:800;line-height:1.6;color:#1a1a2e;">💬 The [character] is [action] in/at/on the [place]!</div><div style="font-size:.72rem;font-weight:700;color:#555;margin-top:4px;">e.g. 👻 The ghost is 🍕 eating pizza in 🏰 a castle!</div>';
+    rpBody.appendChild(startersBox);
+    const emojiArea=document.createElement('div');
+    emojiArea.style.cssText='text-align:center;';
+    const emojiBtn=document.createElement('button');
+    emojiBtn.textContent='Get emojis 🎲';
+    emojiBtn.style.cssText='padding:10px 20px;font-size:1rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:10px;background:#f4763a;color:#fff;cursor:pointer;margin-bottom:8px;';
+    const emojiDisplay=document.createElement('div');
+    emojiDisplay.style.cssText='display:none;margin-top:8px;';
+    const emojiNext=document.createElement('button');
+    emojiNext.textContent='Next →';
+    emojiNext.style.cssText='display:none;padding:7px 16px;font-size:.85rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:8px;background:#8b6cc8;color:#fff;cursor:pointer;margin-top:8px;';
+    function pickEmojis(){
+      var ch=chars[Math.floor(Math.random()*chars.length)];
+      var ac=acts[Math.floor(Math.random()*acts.length)];
+      var pl=plcs[Math.floor(Math.random()*plcs.length)];
+      emojiDisplay.style.display='flex';
+      emojiDisplay.style.cssText='display:flex;align-items:stretch;justify-content:center;gap:5px;margin-top:8px;';
+      emojiDisplay.innerHTML='<div style="flex:1;background:#e3f2fd;border-radius:10px;padding:8px 4px;text-align:center;"><div style="font-size:3rem;">'+ch[0]+'</div><div style="font-weight:800;font-size:.78rem;color:#1565c0;margin-top:3px;">'+ch[1]+'</div><div style="font-size:.6rem;color:#888;margin-top:2px;">who</div></div><div style="flex:1;background:#fff3e0;border-radius:10px;padding:8px 4px;text-align:center;"><div style="font-size:3rem;">'+ac[0]+'</div><div style="font-weight:800;font-size:.78rem;color:#e65100;margin-top:3px;">'+ac[1]+'</div><div style="font-size:.6rem;color:#888;margin-top:2px;">doing what</div></div><div style="flex:1;background:#f3e5f5;border-radius:10px;padding:8px 4px;text-align:center;"><div style="font-size:3rem;">'+pl[0]+'</div><div style="font-weight:800;font-size:.78rem;color:#7b1fa2;margin-top:3px;">'+pl[1]+'</div><div style="font-size:.6rem;color:#888;margin-top:2px;">where</div></div>';
+      emojiBtn.style.display='none';
+      emojiNext.style.display='inline-block';
+    }
+    emojiBtn.onclick=pickEmojis;
+    emojiNext.onclick=pickEmojis;
+    emojiArea.appendChild(emojiBtn);
+    emojiArea.appendChild(emojiDisplay);
+    emojiArea.appendChild(emojiNext);
+    rpBody.appendChild(emojiArea);
+    openResultPop();
+    burst(c.color);
+  }
+  if(a.isWouldYouRather){
+    const wyrPairs=a.wyrPairs;
+    let wyrShuffled=shuffle(wyrPairs),wyrIdx=0;
+    if(resultPop._wyrTimer){clearInterval(resultPop._wyrTimer);resultPop._wyrTimer=null;}
+    let wyrTimerInterval=null;
+    rpDot.style.background=c.color;
+    rpName.textContent=a.n;
+    rpSc.textContent=c.name;rpSc.style.background=c.color;
+    rpBody.innerHTML='';
+    const descP=document.createElement('p');
+    descP.style.cssText='font-size:.78rem;color:#445;line-height:1.5;margin-bottom:10px;font-weight:700;';
+    descP.textContent=a.d;
+    rpBody.appendChild(descP);
+    const timerBtn=document.createElement('button');
+    timerBtn.textContent='⏱️ Start 30s';
+    timerBtn.style.cssText='display:block;width:100%;padding:10px;font-size:1.1rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:10px;background:#2cb8a0;color:#fff;cursor:pointer;margin-bottom:10px;transition:background .3s;';
+    timerBtn.onclick=function(){
+      if(wyrTimerInterval){clearInterval(wyrTimerInterval);wyrTimerInterval=null;resultPop._wyrTimer=null;timerBtn.textContent='⏱️ Start 30s';timerBtn.style.background='#2cb8a0';return;}
+      let sec=30;
+      timerBtn.textContent='⏱️ '+sec+'s';
+      timerBtn.style.background='#2cb8a0';
+      wyrTimerInterval=setInterval(function(){
+        sec--;
+        if(sec<=0){clearInterval(wyrTimerInterval);wyrTimerInterval=null;resultPop._wyrTimer=null;timerBtn.textContent='⏱️ Done!';timerBtn.style.background='#e8445a';return;}
+        timerBtn.textContent='⏱️ '+sec+'s';
+        if(sec<=10)timerBtn.style.background='#e8445a';
+      },1000);
+      resultPop._wyrTimer=wyrTimerInterval;
+    };
+    rpBody.appendChild(timerBtn);
+    const startersBox=document.createElement('div');
+    startersBox.style.cssText='background:#ede9fe;border-radius:10px;padding:10px;margin-bottom:10px;border:2px solid #c4b5fd;';
+    startersBox.innerHTML='<div style="font-size:14px;font-weight:800;line-height:1.8;color:#1a1a2e;">💬 I would rather… because…<br>💬 I prefer… because…<br>💬 I think… is better because…</div>';
+    rpBody.appendChild(startersBox);
+    const revealArea=document.createElement('div');
+    revealArea.style.cssText='text-align:center;';
+    const revealBtn=document.createElement('button');
+    revealBtn.textContent='Get a question 🎲';
+    revealBtn.style.cssText='padding:10px 20px;font-size:1rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:10px;background:#f4763a;color:#fff;cursor:pointer;margin-bottom:8px;';
+    const pairDisplay=document.createElement('div');
+    pairDisplay.style.cssText='display:none;margin-top:8px;';
+    const nextBtn=document.createElement('button');
+    nextBtn.textContent='Next →';
+    nextBtn.style.cssText='display:none;padding:7px 16px;font-size:.85rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:8px;background:#8b6cc8;color:#fff;cursor:pointer;margin-top:8px;';
+    function showWyr(){
+      if(wyrIdx>=wyrShuffled.length){wyrShuffled=shuffle(wyrPairs);wyrIdx=0;}
+      const p=wyrShuffled[wyrIdx];wyrIdx++;
+      pairDisplay.style.display='flex';
+      pairDisplay.style.cssText='display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;flex-wrap:nowrap;';
+      pairDisplay.innerHTML='<div style="flex:1;background:#dbeafe;border-radius:10px;padding:10px 6px;text-align:center;"><div style="font-size:2rem;">'+p[0]+'</div><div style="font-weight:800;font-size:.82rem;color:#1e40af;margin-top:4px;">'+p[1]+'</div></div><div style="font-weight:900;font-size:1rem;color:#e8445a;">OR</div><div style="flex:1;background:#fce7f3;border-radius:10px;padding:10px 6px;text-align:center;"><div style="font-size:2rem;">'+p[2]+'</div><div style="font-weight:800;font-size:.82rem;color:#9d174d;margin-top:4px;">'+p[3]+'</div></div>';
+      revealBtn.style.display='none';
+      nextBtn.style.display='inline-block';
+    }
+    revealBtn.onclick=showWyr;
+    nextBtn.onclick=showWyr;
+    revealArea.appendChild(revealBtn);
+    revealArea.appendChild(pairDisplay);
+    revealArea.appendChild(nextBtn);
+    rpBody.appendChild(revealArea);
+    openResultPop();
+    burst(c.color);
+  }
+  if(a.isBestDay){
+    if(resultPop._bdTimer){clearInterval(resultPop._bdTimer);resultPop._bdTimer=null;}
+    let bdTimerInterval=null;
+    rpDot.style.background=c.color;
+    rpName.textContent=a.n;
+    rpSc.textContent=c.name;rpSc.style.background=c.color;
+    rpBody.innerHTML='';
+    const descP=document.createElement('p');
+    descP.style.cssText='font-size:.78rem;color:#445;line-height:1.5;margin-bottom:10px;font-weight:700;';
+    descP.textContent=a.d;
+    rpBody.appendChild(descP);
+    const timerBtn=document.createElement('button');
+    timerBtn.textContent='⏱️ Start 60s';
+    timerBtn.style.cssText='display:block;width:100%;padding:10px;font-size:1.1rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:10px;background:#2cb8a0;color:#fff;cursor:pointer;margin-bottom:10px;transition:background .3s;';
+    timerBtn.onclick=function(){
+      if(bdTimerInterval){clearInterval(bdTimerInterval);bdTimerInterval=null;resultPop._bdTimer=null;timerBtn.textContent='⏱️ Start 60s';timerBtn.style.background='#2cb8a0';return;}
+      let sec=60;
+      timerBtn.textContent='⏱️ '+sec+'s';
+      timerBtn.style.background='#2cb8a0';
+      bdTimerInterval=setInterval(function(){
+        sec--;
+        if(sec<=0){clearInterval(bdTimerInterval);bdTimerInterval=null;resultPop._bdTimer=null;timerBtn.textContent='⏱️ Done!';timerBtn.style.background='#e8445a';return;}
+        timerBtn.textContent='⏱️ '+sec+'s';
+        if(sec<=10)timerBtn.style.background='#e8445a';
+      },1000);
+      resultPop._bdTimer=bdTimerInterval;
+    };
+    rpBody.appendChild(timerBtn);
+    const structBox=document.createElement('div');
+    structBox.style.cssText='background:#fff8e1;border-radius:10px;padding:10px;margin-bottom:10px;border:2px solid #ffca28;';
+    structBox.innerHTML='<div style="display:flex;flex-direction:column;gap:5px;"><span style="background:#ffe0b2;border-radius:8px;padding:5px 8px;font-size:14px;font-weight:800;color:#1a1a2e;">🌅 In the morning I…</span><span style="background:#fff9c4;border-radius:8px;padding:5px 8px;font-size:14px;font-weight:800;color:#1a1a2e;">🌞 In the afternoon I…</span><span style="background:#ffe0b2;border-radius:8px;padding:5px 8px;font-size:14px;font-weight:800;color:#1a1a2e;">🌆 In the evening I…</span><span style="background:#e1f5fe;border-radius:8px;padding:5px 8px;font-size:14px;font-weight:800;color:#1a1a2e;">⭐ It was the best day because…</span></div>';
+    rpBody.appendChild(structBox);
+    const qBox=document.createElement('div');
+    qBox.style.cssText='background:#e8f5e9;border-radius:10px;padding:10px;border:2px solid #66bb6a;';
+    qBox.innerHTML='<div style="font-weight:800;font-size:.75rem;color:#2e7d32;margin-bottom:5px;">❓ Partner — ask one question!</div><div style="display:flex;flex-direction:column;gap:4px;"><span style="font-size:14px;font-weight:800;color:#1a1a2e;">❓ What did you eat?</span><span style="font-size:14px;font-weight:800;color:#1a1a2e;">❓ Who were you with?</span><span style="font-size:14px;font-weight:800;color:#1a1a2e;">❓ Where did you go?</span><span style="font-size:14px;font-weight:800;color:#1a1a2e;">❓ Why did you like it?</span><span style="font-size:14px;font-weight:800;color:#1a1a2e;">❓ What was the best part?</span></div>';
+    rpBody.appendChild(qBox);
+    openResultPop();
+    burst(c.color);
+  }
+  if(a.isDescribePartner){
+    rpDot.style.background=c.color;
+    rpName.textContent=a.n;
+    rpSc.textContent=c.name;rpSc.style.background=c.color;
+    rpBody.innerHTML='';
+    const descP=document.createElement('p');
+    descP.style.cssText='font-size:.78rem;color:#445;line-height:1.5;margin-bottom:10px;font-weight:700;';
+    descP.textContent=a.d;
+    rpBody.appendChild(descP);
+    const startersBox=document.createElement('div');
+    startersBox.style.cssText='background:#e3f2fd;border-radius:10px;padding:10px;margin-bottom:10px;border:2px solid #64b5f6;';
+    startersBox.innerHTML='<div style="font-size:14px;font-weight:800;line-height:1.8;color:#1a1a2e;">💬 He / She has got…<br>💬 He / She is wearing…<br>💬 He / She is…<br>💬 I think it is…</div>';
+    rpBody.appendChild(startersBox);
+    const sections=[
+      {title:'👤 Physical',words:['📏 tall','🐭 short','💇 long hair','✂️ short hair','🌀 curly hair','📏 straight hair','🌑 dark hair','🌟 blonde hair','👁️ blue eyes','🟫 brown eyes','💚 green eyes','👓 glasses']},
+      {title:'👕 Clothes today',words:['🧥 jumper','👕 t-shirt','👖 trousers','👗 skirt','👟 trainers','👢 boots','🔵 blue','🔴 red','⚪ white','⚫ black','🟢 green','🟡 yellow','🟠 orange','🟣 purple','🦓 striped','🌸 pink']},
+      {title:'🎒 What they have',words:['🎒 backpack','📚 books','✏️ pencil case','💧 water bottle','🧣 scarf','🧤 gloves','⌚ watch','📱 phone']},
+      {title:'😄 Personality',words:['😂 funny','🤗 kind','🤫 quiet','📢 loud','⚽ sporty','🎨 creative','😊 friendly','🧠 clever','😴 sleepy','😃 happy']}
+    ];
+    let dpStep=0;
+    const dpWrap=document.createElement('div');
+    dpWrap.style.cssText='margin-bottom:8px;';
+    const dpBtnWrap=document.createElement('div');
+    dpBtnWrap.style.cssText='text-align:center;margin-top:8px;';
+    const dpNextBtn=document.createElement('button');
+    dpNextBtn.textContent='Next →';
+    dpNextBtn.style.cssText='padding:8px 16px;font-size:.9rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:8px;background:#f4763a;color:#fff;cursor:pointer;';
+    const dpAgainBtn=document.createElement('button');
+    dpAgainBtn.textContent='Play again 🔄';
+    dpAgainBtn.style.cssText='display:none;padding:8px 16px;font-size:.9rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:8px;background:#2cb8a0;color:#fff;cursor:pointer;';
+    function renderSection(idx){
+      var s=sections[idx];
+      var div=document.createElement('div');
+      div.style.cssText='background:#f5f5f5;border-radius:8px;padding:6px 8px;margin-bottom:5px;border:2px solid #e0e0e0;';
+      div.innerHTML='<div style="font-weight:800;font-size:.72rem;margin-bottom:4px;">'+s.title+'</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'+s.words.map(function(w){return '<span style="background:#fff;border-radius:6px;padding:3px 6px;font-size:.7rem;font-weight:700;border:1px solid #ddd;">'+w+'</span>';}).join('')+'</div>';
+      dpWrap.appendChild(div);
+    }
+    function dpAdvance(){
+      dpStep++;
+      if(dpStep<sections.length){
+        renderSection(dpStep);
+        if(dpStep===sections.length-1)dpNextBtn.textContent='Finish 🎯';
+      } else {
+        dpWrap.innerHTML='<div style="text-align:center;padding:16px 8px;"><div style="font-size:1.1rem;font-weight:900;color:#1a1a2e;line-height:1.5;">🎯 Who is it?<br>Hands up!</div><div style="font-size:.85rem;font-weight:800;color:#555;margin-top:6px;">"I think it is…!"</div></div>';
+        dpNextBtn.style.display='none';
+        dpAgainBtn.style.display='inline-block';
+      }
+    }
+    function dpReset(){
+      dpStep=0;
+      dpWrap.innerHTML='';
+      renderSection(0);
+      dpNextBtn.textContent='Next →';
+      dpNextBtn.style.display='inline-block';
+      dpAgainBtn.style.display='none';
+    }
+    renderSection(0);
+    dpNextBtn.onclick=dpAdvance;
+    dpAgainBtn.onclick=dpReset;
+    dpBtnWrap.appendChild(dpNextBtn);
+    dpBtnWrap.appendChild(dpAgainBtn);
+    rpBody.appendChild(dpWrap);
+    rpBody.appendChild(dpBtnWrap);
+    openResultPop();
+    burst(c.color);
+  }
+  if(a.isBagGame){
+    if(resultPop._bgTimer){clearInterval(resultPop._bgTimer);resultPop._bgTimer=null;}
+    let bgTimerInterval=null;
+    rpDot.style.background=c.color;
+    rpName.textContent=a.n;
+    rpSc.textContent=c.name;rpSc.style.background=c.color;
+    rpBody.innerHTML='';
+    const descP=document.createElement('p');
+    descP.style.cssText='font-size:.78rem;color:#445;line-height:1.5;margin-bottom:10px;font-weight:700;';
+    descP.textContent=a.d;
+    rpBody.appendChild(descP);
+    const timerBtn=document.createElement('button');
+    timerBtn.textContent='⏱️ Start 60s';
+    timerBtn.style.cssText='display:block;width:100%;padding:10px;font-size:1.1rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:10px;background:#2cb8a0;color:#fff;cursor:pointer;margin-bottom:10px;transition:background .3s;';
+    timerBtn.onclick=function(){
+      if(bgTimerInterval){clearInterval(bgTimerInterval);bgTimerInterval=null;resultPop._bgTimer=null;timerBtn.textContent='⏱️ Start 60s';timerBtn.style.background='#2cb8a0';return;}
+      let sec=60;
+      timerBtn.textContent='⏱️ '+sec+'s';
+      timerBtn.style.background='#2cb8a0';
+      bgTimerInterval=setInterval(function(){
+        sec--;
+        if(sec<=0){clearInterval(bgTimerInterval);bgTimerInterval=null;resultPop._bgTimer=null;timerBtn.textContent='⏱️ Done!';timerBtn.style.background='#e8445a';return;}
+        timerBtn.textContent='⏱️ '+sec+'s';
+        if(sec<=10)timerBtn.style.background='#e8445a';
+      },1000);
+      resultPop._bgTimer=bgTimerInterval;
+    };
+    rpBody.appendChild(timerBtn);
+    const wb=document.createElement('div');
+    wb.innerHTML='<div style="background:#fff3e0;border:2px solid #ffb74d;border-radius:8px;padding:6px 8px;margin-bottom:5px;"><div style="font-weight:800;font-size:.72rem;margin-bottom:4px;">🎨 Colour</div><div style="display:flex;flex-wrap:wrap;gap:3px;"><span style="font-size:14px;font-weight:700;">🔴 red</span><span style="font-size:14px;font-weight:700;">🔵 blue</span><span style="font-size:14px;font-weight:700;">🟡 yellow</span><span style="font-size:14px;font-weight:700;">🟢 green</span><span style="font-size:14px;font-weight:700;">⚫ black</span><span style="font-size:14px;font-weight:700;">⚪ white</span><span style="font-size:14px;font-weight:700;">🟠 orange</span><span style="font-size:14px;font-weight:700;">🟣 purple</span><span style="font-size:14px;font-weight:700;">🩶 grey</span><span style="font-size:14px;font-weight:700;">🌸 pink</span></div></div>'
+    +'<div style="background:#e3f2fd;border:2px solid #64b5f6;border-radius:8px;padding:6px 8px;margin-bottom:5px;"><div style="font-weight:800;font-size:.72rem;margin-bottom:4px;">📐 Shape & Size</div><div style="display:flex;flex-wrap:wrap;gap:3px;"><span style="font-size:14px;font-weight:700;">🔵 round</span><span style="font-size:14px;font-weight:700;">🟥 square</span><span style="font-size:14px;font-weight:700;">📏 long</span><span style="font-size:14px;font-weight:700;">▬ flat</span><span style="font-size:14px;font-weight:700;">✏️ thin</span><span style="font-size:14px;font-weight:700;">🧱 thick</span><span style="font-size:14px;font-weight:700;">🐭 small</span><span style="font-size:14px;font-weight:700;">📦 big</span><span style="font-size:14px;font-weight:700;">✂️ short</span><span style="font-size:14px;font-weight:700;">↔️ wide</span></div></div>'
+    +'<div style="background:#f3e5f5;border:2px solid #ba68c8;border-radius:8px;padding:6px 8px;margin-bottom:5px;"><div style="font-weight:800;font-size:.72rem;margin-bottom:4px;">🖐️ Material & Feel</div><div style="display:flex;flex-wrap:wrap;gap:3px;"><span style="font-size:14px;font-weight:700;">🪨 hard</span><span style="font-size:14px;font-weight:700;">🧸 soft</span><span style="font-size:14px;font-weight:700;">🪟 smooth</span><span style="font-size:14px;font-weight:700;">🏔️ rough</span><span style="font-size:14px;font-weight:700;">⚖️ heavy</span><span style="font-size:14px;font-weight:700;">🪶 light</span><span style="font-size:14px;font-weight:700;">🧴 plastic</span><span style="font-size:14px;font-weight:700;">🔩 metal</span><span style="font-size:14px;font-weight:700;">📄 paper</span><span style="font-size:14px;font-weight:700;">🧹 rubber</span><span style="font-size:14px;font-weight:700;">🪵 wood</span></div></div>'
+    +'<div style="background:#e8f5e9;border:2px solid #66bb6a;border-radius:8px;padding:6px 8px;margin-bottom:5px;"><div style="font-weight:800;font-size:.72rem;margin-bottom:4px;">🔧 What is it for?</div><div style="display:flex;flex-wrap:wrap;gap:3px;"><span style="font-size:14px;font-weight:700;">✏️ write</span><span style="font-size:14px;font-weight:700;">🎨 draw</span><span style="font-size:14px;font-weight:700;">✂️ cut</span><span style="font-size:14px;font-weight:700;">🎒 carry</span><span style="font-size:14px;font-weight:700;">📖 read</span><span style="font-size:14px;font-weight:700;">📐 measure</span><span style="font-size:14px;font-weight:700;">🧹 rub out</span><span style="font-size:14px;font-weight:700;">🔓 open</span><span style="font-size:14px;font-weight:700;">🖍️ colour</span><span style="font-size:14px;font-weight:700;">📌 stick</span><span style="font-size:14px;font-weight:700;">📄 fold</span></div></div>'
+    +'<div style="background:#fce4ec;border:2px solid #f06292;border-radius:8px;padding:6px 8px;"><div style="font-weight:800;font-size:.72rem;margin-bottom:4px;">💬 Say it</div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:800;">It is…</span><span style="font-size:14px;font-weight:800;">It is made of…</span><span style="font-size:14px;font-weight:800;">You use it to…</span><span style="font-size:14px;font-weight:800;">It is [size] and [shape]</span></div></div>';
+    rpBody.appendChild(wb);
+    openResultPop();
+    burst(c.color);
+  }
+  if(a.isTwoTruths){
+    if(resultPop._ttTimer){clearInterval(resultPop._ttTimer);resultPop._ttTimer=null;}
+    let ttTimerInterval=null;
+    rpDot.style.background=c.color;
+    rpName.textContent=a.n;
+    rpSc.textContent=c.name;rpSc.style.background=c.color;
+    rpBody.innerHTML='';
+    const descP=document.createElement('p');
+    descP.style.cssText='font-size:.78rem;color:#445;line-height:1.5;margin-bottom:10px;font-weight:700;';
+    descP.textContent=a.d;
+    rpBody.appendChild(descP);
+    const timerBtn=document.createElement('button');
+    timerBtn.textContent='⏱️ Start 60s';
+    timerBtn.style.cssText='display:block;width:100%;padding:10px;font-size:1.1rem;font-weight:800;font-family:Fredoka One,cursive;border:none;border-radius:10px;background:#2cb8a0;color:#fff;cursor:pointer;margin-bottom:10px;transition:background .3s;';
+    timerBtn.onclick=function(){
+      if(ttTimerInterval){clearInterval(ttTimerInterval);ttTimerInterval=null;resultPop._ttTimer=null;timerBtn.textContent='⏱️ Start 60s';timerBtn.style.background='#2cb8a0';return;}
+      let sec=60;
+      timerBtn.textContent='⏱️ '+sec+'s';
+      timerBtn.style.background='#2cb8a0';
+      ttTimerInterval=setInterval(function(){
+        sec--;
+        if(sec<=0){clearInterval(ttTimerInterval);ttTimerInterval=null;resultPop._ttTimer=null;timerBtn.textContent='⏱️ Done!';timerBtn.style.background='#e8445a';return;}
+        timerBtn.textContent='⏱️ '+sec+'s';
+        if(sec<=10)timerBtn.style.background='#e8445a';
+      },1000);
+      resultPop._ttTimer=ttTimerInterval;
+    };
+    rpBody.appendChild(timerBtn);
+    const ttWb=document.createElement('div');
+    ttWb.innerHTML='<div style="background:#e3f2fd;border:2px solid #64b5f6;border-radius:8px;padding:6px 8px;margin-bottom:5px;"><div style="font-weight:800;font-size:.72rem;margin-bottom:4px;">🏠 About me</div><div style="display:flex;flex-wrap:wrap;gap:3px;"><span style="font-size:14px;font-weight:700;">👦 I have got a brother</span><span style="font-size:14px;font-weight:700;">👧 I have got a sister</span><span style="font-size:14px;font-weight:700;">🐶 I have got a dog</span><span style="font-size:14px;font-weight:700;">🐱 I have got a cat</span><span style="font-size:14px;font-weight:700;">🐟 I have got a fish</span><span style="font-size:14px;font-weight:700;">🐰 I have got a rabbit</span><span style="font-size:14px;font-weight:700;">🏖️ I live near the beach</span><span style="font-size:14px;font-weight:700;">🏔️ I live near the mountains</span><span style="font-size:14px;font-weight:700;">👁️ I have got blue eyes</span><span style="font-size:14px;font-weight:700;">💚 I have got green eyes</span><span style="font-size:14px;font-weight:700;">🟫 I have got brown eyes</span><span style="font-size:14px;font-weight:700;">💇 my hair is long</span><span style="font-size:14px;font-weight:700;">✂️ my hair is short</span><span style="font-size:14px;font-weight:700;">🌀 my hair is curly</span><span style="font-size:14px;font-weight:700;">📏 my hair is straight</span></div></div>'
+    +'<div style="background:#fff3e0;border:2px solid #ffb74d;border-radius:8px;padding:6px 8px;margin-bottom:5px;"><div style="font-weight:800;font-size:.72rem;margin-bottom:4px;">🎯 Things I can do</div><div style="display:flex;flex-wrap:wrap;gap:3px;"><span style="font-size:14px;font-weight:700;">🏊 I can swim</span><span style="font-size:14px;font-weight:700;">💃 I can dance</span><span style="font-size:14px;font-weight:700;">🎵 I can sing</span><span style="font-size:14px;font-weight:700;">🍳 I can cook</span><span style="font-size:14px;font-weight:700;">🐴 I can ride a horse</span><span style="font-size:14px;font-weight:700;">🎸 I can play guitar</span><span style="font-size:14px;font-weight:700;">🌍 I can speak three languages</span><span style="font-size:14px;font-weight:700;">🤸 I can do a cartwheel</span><span style="font-size:14px;font-weight:700;">🛹 I can skateboard</span><span style="font-size:14px;font-weight:700;">♟️ I can play chess</span></div></div>'
+    +'<div style="background:#e8f5e9;border:2px solid #66bb6a;border-radius:8px;padding:6px 8px;margin-bottom:5px;"><div style="font-weight:800;font-size:.72rem;margin-bottom:4px;">🌍 Places I have been</div><div style="display:flex;flex-wrap:wrap;gap:3px;"><span style="font-size:14px;font-weight:700;">🇬🇧 I have been to London</span><span style="font-size:14px;font-weight:700;">🇫🇷 I have been to Paris</span><span style="font-size:14px;font-weight:700;">🏖️ I have been to the beach</span><span style="font-size:14px;font-weight:700;">🎠 I have been to a theme park</span><span style="font-size:14px;font-weight:700;">🏰 I have been to a castle</span><span style="font-size:14px;font-weight:700;">🐄 I have been to a farm</span><span style="font-size:14px;font-weight:700;">🦁 I have been to a zoo</span><span style="font-size:14px;font-weight:700;">🏟️ I have been to a stadium</span></div></div>'
+    +'<div style="background:#f3e5f5;border:2px solid #ba68c8;border-radius:8px;padding:6px 8px;margin-bottom:5px;"><div style="font-weight:800;font-size:.72rem;margin-bottom:4px;">🍕 Food</div><div style="display:flex;flex-wrap:wrap;gap:3px;"><span style="font-size:14px;font-weight:700;">🍕 my favourite food is pizza</span><span style="font-size:14px;font-weight:700;">🍣 my favourite food is sushi</span><span style="font-size:14px;font-weight:700;">🍫 my favourite food is chocolate</span><span style="font-size:14px;font-weight:700;">🍝 my favourite food is pasta</span><span style="font-size:14px;font-weight:700;">🥦 I hate broccoli</span><span style="font-size:14px;font-weight:700;">🐟 I love fish</span><span style="font-size:14px;font-weight:700;">🧀 I hate cheese</span><span style="font-size:14px;font-weight:700;">🥛 I love milk</span></div></div>'
+    +'<div style="background:#fce4ec;border:2px solid #f06292;border-radius:8px;padding:6px 8px;"><div style="font-weight:800;font-size:.72rem;margin-bottom:4px;">💬 Say it</div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:800;">Number one: …</span><span style="font-size:14px;font-weight:800;">Number two: …</span><span style="font-size:14px;font-weight:800;">Number three: …</span><span style="font-size:14px;font-weight:800;margin-top:4px;color:#9d174d;">Partner says: I think number ___ is the lie because…</span></div></div>';
+    rpBody.appendChild(ttWb);
+    openResultPop();
+    burst(c.color);
+  }
+  if(window.parent!==window){
+    window.parent.postMessage({type:'roulette-result',name:a.n,sc:a.sc,desc:desc,auth:a.auth,color:c.color,dark:c.dark,light:c.light,cat:c.name,emoji:c.emoji,words:a.words||null,bank:a.bank||null,secrets:a.secrets||null,prompts:a.prompts||null,promptPrefix:a.promptPrefix||'',bankCount:a.bankCount||10,customDesc:a.customDesc||a.drawItDesc||null,btnLabel:a.btnLabel||null,stories:a.stories||null,objects:a.objects||null,emotions:a.emotions||null,actions:a.actions||null,situations:a.situations||null,pairs:a.totPairs||null,powers:a.powers||null,places:a.places||null,questions:a.ftQuestions||a.questions||null,wyrQuestions:a.wyrQuestions||null,wyrPairs:a.wyrPairs||null,esCharacters:a.esChars||a.esCharacters||null,esActions:a.esActs||a.esActions||null,esPlaces:a.esPlaces||null,eEmotions:a.eEmotions||null,eSentences:a.eSentences||null,isExplode:a.isExplode||false,isDescribeItFC:a.isDescribeItFC||false,isPassAndSay:a.isPassAndSay||false,isBackToBack:a.isBackToBack||false,isCardOnHead:a.isCardOnHead||false,isFinishSentence:a.isFinishSentence||false,isCorrectMistake:a.isCorrectMistake||false,corrections:a.corrections||null,isThinkPairShare:a.isThinkPairShare||false,tpsCategories:a.tpsCategories||null,isThisOrThat:a.isThisOrThat||false,totPairs:a.totPairs||null,intonationEmotions:a.intonationEmotions||null,intonationActions:a.intonationActions||null},'*');
+  }
+}
+
+function burst(color){
+  const wrap=document.getElementById('confWrap');
+  wrap.innerHTML='';
+  const cols=[color,'#f9c623','#5dba5d','#e8445a','#2cb8a0','#8b6cc8','#f4763a'];
+  for(let i=0;i<20;i++){
+    const d=document.createElement('div');
+    d.className='cdot';
+    const sz=5+Math.random()*8;
+    d.style.cssText=`left:${15+Math.random()*70}%;top:${Math.random()*25}%;width:${sz}px;height:${sz}px;background:${cols[Math.floor(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'3px'};animation-delay:${Math.random()*.3}s;animation-duration:${.9+Math.random()*.5}s;`;
+    wrap.appendChild(d);
+  }
+  setTimeout(()=>{wrap.innerHTML='';},1600);
+}
+
+function select(i){
+  if(spinning)return;
+  cur=i;angle=0;
+  document.querySelectorAll('.cat-pill').forEach((p,j)=>{
+    p.classList.toggle('active',j===i);
+    if(j===i){p.style.background=cats[i].color;p.style.borderColor=cats[i].dark;}
+    else{p.style.background='rgba(255,255,255,0.6)';p.style.borderColor='transparent';}
+  });
+  catLabel.style.display='none';
+  spinBtn.textContent='🎲 '+cats[i].name.charAt(0)+cats[i].name.slice(1).toLowerCase();
+  spinBtn.style.background=cats[i].color;
+  spinBtn.style.boxShadow=`0 4px 0 ${cats[i].dark}`;
+  resultPop.classList.remove('show');document.getElementById('resultBackdrop').classList.remove('show');
+  draw(angle);
+}
+
+const resultBackdrop=document.getElementById('resultBackdrop');
+// Evitar cierres accidentales al interactuar con botones internos.
+// Se cierra solo con la X (rpClose) o por orden explícita del padre.
+function openResultPop(){
+  resultPop.classList.add('show');
+  resultBackdrop.classList.add('show');
+  try { window.parent.postMessage({type:'RULETA_OPEN',cat:fixedCat},'*'); } catch(e){}
+}
+function closeResultPop(notifyParent=true){
+  resultPop.classList.remove('show');resultBackdrop.classList.remove('show');
+  rpBody.innerHTML='';
+  rpName.textContent='';
+  rpSc.textContent='';
+  if(resultPop._totTimer){clearInterval(resultPop._totTimer);resultPop._totTimer=null;}
+  if(resultPop._spTimer){clearInterval(resultPop._spTimer);resultPop._spTimer=null;}
+  if(resultPop._diTimer){clearInterval(resultPop._diTimer);resultPop._diTimer=null;}
+  if(resultPop._ftTimer){clearInterval(resultPop._ftTimer);resultPop._ftTimer=null;}
+  if(resultPop._bdTimer){clearInterval(resultPop._bdTimer);resultPop._bdTimer=null;}
+  if(resultPop._bgTimer){clearInterval(resultPop._bgTimer);resultPop._bgTimer=null;}
+  if(resultPop._ttTimer){clearInterval(resultPop._ttTimer);resultPop._ttTimer=null;}
+  if(resultPop._wyrTimer){clearInterval(resultPop._wyrTimer);resultPop._wyrTimer=null;}
+  if(notifyParent){
+    try { window.parent.postMessage({type:'RULETA_CLOSE',cat:fixedCat,reason:'user_close'},'*'); } catch(e){}
+  }
+}
+document.getElementById('rpClose').onclick=closeResultPop;
+window.addEventListener('message',function(e){
+  if(!e.data) return;
+  if(e.data.type==='RULETA_EXPANDED'){
+    document.documentElement.style.height='100%';
+    document.body.style.height='100%';
+    document.body.style.overflow='hidden';
+  }
+  if(e.data.type==='RULETA_CLOSE'){
+    closeResultPop(false);
+    document.documentElement.style.height='';
+    document.body.style.height='';
+    document.body.style.overflow='';
+  }
+});
+
+const audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+function playTick(){
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.connect(g);g.connect(audioCtx.destination);
+  o.type='sine';o.frequency.value=600;
+  g.gain.value=0.03;
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.02);
+  o.start();o.stop(audioCtx.currentTime+0.02);
+}
+function playTada(){
+  const notes=[523,659,784,1047];
+  notes.forEach((f,i)=>{
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.connect(g);g.connect(audioCtx.destination);
+    o.type='triangle';o.frequency.value=f;
+    g.gain.value=0.15;
+    g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.1*i+0.4);
+    o.start(audioCtx.currentTime+0.1*i);
+    o.stop(audioCtx.currentTime+0.1*i+0.4);
+  });
+}
+
+spinBtn.onclick=()=>{
+  if(spinning)return;
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  spinning=true;spinBtn.disabled=true;
+  const n=cats[cur].acts.length;
+  const chosen=Math.floor(Math.random()*n);
+  const slice=2*Math.PI/n;
+  const target=-(chosen*slice+slice/2)+Math.PI/2;
+  const final=target+(5+Math.random()*4)*2*Math.PI;
+  const dur=3200,start=performance.now(),startA=angle;
+  let lastTickAngle=angle;
+  function frame(now){
+    const t=Math.min((now-start)/dur,1),e=1-Math.pow(1-t,4);
+    angle=startA+(final-startA)*e;draw(angle);
+    const sliceAngle=2*Math.PI/n;
+    if(Math.floor(angle/sliceAngle)!==Math.floor(lastTickAngle/sliceAngle)){playTick();}
+    lastTickAngle=angle;
+    if(t<1)requestAnimationFrame(frame);
+    else{angle=final%(2*Math.PI);spinning=false;spinBtn.disabled=false;playTada();showResult(chosen);}
+  }
+  requestAnimationFrame(frame);
+};
+
+const pillBar=document.getElementById('catPills');
+const params=new URLSearchParams(location.search);
+const fixedCat=params.has('cat')?parseInt(params.get('cat'),10):null;
+
+if(fixedCat!==null&&fixedCat>=0&&fixedCat<cats.length){
+  pillBar.style.display='none';
+  select(fixedCat);
+}else{
+  cats.forEach((c,i)=>{
+    const b=document.createElement('button');
+    b.className='cat-pill';
+    b.textContent=c.emoji+' '+c.name;
+    b.onclick=()=>select(i);
+    pillBar.appendChild(b);
+  });
+  select(0);
+}
+</script>
+</body>
+</html>

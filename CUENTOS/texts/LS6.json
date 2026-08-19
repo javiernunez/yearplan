@@ -1,0 +1,61 @@
+{
+  "title": "Melody Moo's Busy Weather Day",
+  "gemini_app": "https://gemini.google.com/share/caeab5e8a623",
+  "pages": [
+    {
+      "n": 1,
+      "role": "cover",
+      "text": ""
+    },
+    {
+      "n": 2,
+      "role": "story",
+      "text": "Hi! This is Melody Moo. Today is a very special day because the weather will change many times. Are you ready to see what happens outside? Let's go on an adventure with Melody Moo!"
+    },
+    {
+      "n": 3,
+      "role": "story",
+      "text": "Look at the sun! It is very hot and the sky is blue. Melody Moo loves the warm sun on her face. Is she wearing her heavy winter boots? No, she is not wearing boots because it is a sunny day."
+    },
+    {
+      "n": 4,
+      "role": "story",
+      "text": "Oh no! Look up. The sun is hiding behind the clouds. Now the sky is gray and it feels a bit cool. It is a cloudy day! Melody Moo wonders if something will fall from the sky."
+    },
+    {
+      "n": 5,
+      "role": "story",
+      "text": "\"Yes, I am!\" Melody cries. She is putting on her bright orange jacket. She looks at her fancy party dress hanging on the wall. Is she wearing her dress today? No, she is not wearing a dress because it is a rainy day."
+    },
+    {
+      "n": 6,
+      "role": "story",
+      "text": "Drip, drop, drip! It is raining! The water falls from the sky to help the plants grow. Melody Moo does not get wet because she has a big umbrella. It is so much fun to watch the rain fall!"
+    },
+    {
+      "n": 7,
+      "role": "story",
+      "text": "Whoosh, whoosh! Listen to that sound. It is the wind blowing very hard. The wind moves the leaves on the trees and messes up Melody Moo's hair. Feel the air moving everywhere!"
+    },
+    {
+      "n": 8,
+      "role": "story",
+      "text": "Watch out! The wind is so strong that it took Melody Moo's hat. Run, Melody Moo, catch it! The wind is playing a racing game with her today."
+    },
+    {
+      "n": 9,
+      "role": "story",
+      "text": "Brrr! Now it is very cold. The wind brought white clouds and something new is falling. It is snow! Everything is turning white and soft. Melody Moo is wearing her favorite long scarf to stay warm."
+    },
+    {
+      "n": 10,
+      "role": "story",
+      "text": "Melody Moo loves the snow! It is time to play and build something fun. The snow is cold, but playing keeps Melody Moo very warm and happy. Look at her go!"
+    },
+    {
+      "n": 11,
+      "role": "story",
+      "text": "Look! The sun has come out again while raindrops are still falling. A rainbow has appeared in the sky! It has many beautiful colors: red, orange, yellow, green, blue, and violet.\n\nWhat a busy day Melody Moo has had! She saw the sun, the rain, the wind, and the snow. Now it is time to rest and dream about a new day. Goodnight, Melody Moo!"
+    }
+  ]
+}

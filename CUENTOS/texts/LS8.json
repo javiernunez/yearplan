@@ -1,0 +1,56 @@
+{
+  "title": "Melody Moo's Easter Adventure",
+  "gemini_app": "https://gemini.google.com/gem/storybook/a29a35cb30624b74",
+  "pages": [
+    {
+      "n": 1,
+      "role": "cover",
+      "text": ""
+    },
+    {
+      "n": 2,
+      "role": "story",
+      "text": "This is Melody Moo. She is a cute green monster. It is Easter morning! Melody Moo is very happy. She wears her yellow hard hat and her brown backpack."
+    },
+    {
+      "n": 3,
+      "role": "story",
+      "text": "Melody Moo looks at the table. There is a beautiful Easter card! The card is pink and white. It says, \"Happy Easter, Melody Moo!\""
+    },
+    {
+      "n": 4,
+      "role": "story",
+      "text": "Melody Moo is ready for an adventure. There is a big basket near the door. She takes the basket and goes outside to the garden."
+    },
+    {
+      "n": 5,
+      "role": "story",
+      "text": "In the garden, Melody Moo sees a friend. It is Binky the Easter bunny! Binky has long ears and a little nose. He is very fast."
+    },
+    {
+      "n": 6,
+      "role": "story",
+      "text": "Binky likes to play a game. He likes to hide things. Binky runs behind the trees and the bushes. He puts treats in the secret places."
+    },
+    {
+      "n": 7,
+      "role": "story",
+      "text": "Melody Moo looks for the treats. The garden is very pretty today. There are many red and purple flowers in the grass."
+    },
+    {
+      "n": 8,
+      "role": "story",
+      "text": "Melody Moo looks under a big leaf. There is a small, yellow chick! The chick says, \"Cheep, cheep!\" Melody Moo smiles at her new friend."
+    },
+    {
+      "n": 9,
+      "role": "story",
+      "text": "Look! There are six colorful Easter eggs near the tree! Melody Moo is so excited. She can jump very high! She puts the eggs in her basket."
+    },
+    {
+      "n": 10,
+      "role": "story",
+      "text": "Melody Moo takes her microphone and sings a song. She loves Easter! It is a wonderful day with friends and treats. Happy Easter!"
+    }
+  ]
+}

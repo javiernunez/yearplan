@@ -1,0 +1,62 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-yearplan
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy static site to yearplan.sermestre.es
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST || vars.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER || vars.DEPLOY_USER }}
+      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || vars.DEPLOY_PORT || '22' }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || vars.DEPLOY_PATH || '/opt/yearplan.sermestre.es' }}
+      DEPLOY_BRANCH: ${{ github.ref_name }}
+    steps:
+      - name: Validate deploy configuration
+        run: |
+          set -euo pipefail
+          test -n "${DEPLOY_HOST}" || (echo "Missing DEPLOY_HOST (secret or variable)." && exit 1)
+          test -n "${DEPLOY_USER}" || (echo "Missing DEPLOY_USER (secret or variable)." && exit 1)
+          test -n "${{ secrets.DEPLOY_SSH_KEY }}" || (echo "Missing DEPLOY_SSH_KEY secret." && exit 1)
+          echo "Deploy configuration looks good."
+
+      - name: Pull on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ env.DEPLOY_PORT }}
+          timeout: 30s
+          command_timeout: 30m
+          script_stop: true
+          script: |
+            set -euxo pipefail
+            export DEPLOY_PATH="${{ env.DEPLOY_PATH }}"
+            export DEPLOY_BRANCH="${{ env.DEPLOY_BRANCH }}"
+            if [ -x "${DEPLOY_PATH}/scripts/remote-deploy.sh" ]; then
+              exec bash "${DEPLOY_PATH}/scripts/remote-deploy.sh"
+            fi
+            # Bootstrap path before scripts/ exists on the server
+            test -d "${DEPLOY_PATH}/.git" || (
+              echo "ERROR: clone the repo first to ${DEPLOY_PATH} (see README)." >&2
+              exit 1
+            )
+            cd "${DEPLOY_PATH}"
+            git fetch origin
+            git checkout -B "${DEPLOY_BRANCH}" "origin/${DEPLOY_BRANCH}"
+            git reset --hard "origin/${DEPLOY_BRANCH}"
+            git clean -fd
+            test -f index.html
+            test -f programacion_index.html
+            date -u "+[deploy] %Y-%m-%dT%H:%M:%SZ yearplan ready at ${DEPLOY_PATH}"
