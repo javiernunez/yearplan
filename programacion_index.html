@@ -23,8 +23,10 @@
   /* Base ~18–20px; --text-ui compensa el zoom 0.75 de in-ls-view (~18–20px en pantalla) */
   --text-base:clamp(18px,0.35vw + 16.5px,20px);
   --text-ui:clamp(1.34rem,1.2rem + 0.35vw,1.48rem);
-  --text-lesson-tab:clamp(0.92rem,0.84rem + 0.18vw,1.02rem);
+  --text-lesson-tab:var(--text-ui);
   --text-label:clamp(0.78rem,0.72rem + 0.2vw,0.88rem);
+  --sidebar-w:200px;
+  --content-max:1240px;
 }
 html{font-size:var(--text-base);}
 .theme-ls1{
@@ -101,7 +103,7 @@ body.in-ls-view footer{
 /* Columna LS + índice: mismo ancho que el carrusel; título a la izquierda, pestañas centradas */
 .ls-index-column{
   width:100%;
-  max-width:min(calc(100vw - 200px), 1000px);
+  max-width:min(calc(100vw - var(--sidebar-w) - 24px), var(--content-max));
   margin:0 auto;
   padding:0 6px;
   box-sizing:border-box;
@@ -142,7 +144,7 @@ body.in-ls-view footer{
 .stage{
   position:relative;
   width:100%;
-  max-width:min(calc(100vw - 200px), 1000px);
+  max-width:min(calc(100vw - var(--sidebar-w) - 24px), var(--content-max));
   aspect-ratio:16/10;
   background:linear-gradient(160deg,#1a3352,#0e1f36);
   border-radius:20px;
@@ -306,12 +308,12 @@ body.in-ls-view footer{
 .main-content{
   flex:1;
   min-width:0;
-  margin-left:200px;
+  margin-left:var(--sidebar-w);
 }
 .roulette-panel{
   position:fixed;
   inset:0 auto 0 0;
-  width:200px;
+  width:var(--sidebar-w);
   height:100vh;
   height:100dvh;
   height:100svh;
@@ -377,6 +379,7 @@ body.in-ls-view footer{
   background:#fff !important;
 }
 @media(max-width:1100px){
+  :root{--sidebar-w:175px;}
   .roulette-panel{width:175px;}
   .roulette-panel-inner{padding:5px;}
   .roulette-panel iframe{width:164px;height:208px;}
@@ -404,7 +407,7 @@ body.in-ls-view footer{
 
 /* LS info bar — chips between lesson tabs and carousel */
 .ls-info-bar{
-  width:min(96vw,1100px);
+  width:min(calc(100vw - var(--sidebar-w) - 24px), var(--content-max));
   margin:8px auto 0;
   padding:14px 12px 12px;
   display:flex;
@@ -736,11 +739,11 @@ button.lesson{
   display:flex;
   align-items:center;
   justify-content:center;
-  white-space:normal;
-  overflow:visible;
+  white-space:nowrap;
+  overflow:hidden;
   border-radius:14px;
-  padding:10px 8px;
-  min-height:3.25em;
+  padding:10px 12px;
+  min-height:2.45em;
   height:auto;
   font-size:1em;
   line-height:1.12;
@@ -758,33 +761,24 @@ button.lesson .lesson-name{
   word-spacing:calc(var(--carla-word-spacing) * 0.22);
   -webkit-text-stroke:0.35px currentColor;
   paint-order:stroke fill;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:3px;
+  display:block;
   width:100%;
   max-width:100%;
-  white-space:normal;
-  overflow:visible;
+  overflow:hidden;
+  text-overflow:ellipsis;
   text-align:center;
   line-height:1.12;
 }
-button.lesson .lesson-code{
-  font-size:0.76em;
-  font-weight:700;
-  line-height:1;
-  letter-spacing:0.05em;
-  opacity:0.88;
-}
 button.lesson .lesson-label{
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
   font-size:1em;
   line-height:1.12;
-  display:block;
 }
 button.lesson .lesson-label--solo{
-  font-size:1.06em;
-  line-height:1.15;
+  font-size:1.02em;
 }
 /* Reposo: fondo blanco; borde + texto del color del grupo */
 button.lesson.intro:not(.active){
@@ -893,7 +887,7 @@ button.ls-chip:disabled,button.lesson:disabled{opacity:.45;cursor:not-allowed;}
   justify-content:center;
 }
 .mgmt-strip{
-  width:min(96vw,1100px);
+  width:min(calc(100vw - var(--sidebar-w) - 24px), var(--content-max));
   padding:20px 24px 22px;
   text-align:center;
   background:rgba(255,255,255,.82);
@@ -3729,21 +3723,10 @@ function buildLessonRow() {
     b.setAttribute("aria-label", LESSON_LABELS[t]);
     const name = document.createElement("span");
     name.className = "lesson-name";
-    if (tab.code) {
-      const codeEl = document.createElement("span");
-      codeEl.className = "lesson-code";
-      codeEl.textContent = tab.code;
-      const labelEl = document.createElement("span");
-      labelEl.className = "lesson-label";
-      labelEl.textContent = tab.name;
-      name.appendChild(codeEl);
-      name.appendChild(labelEl);
-    } else {
-      const labelEl = document.createElement("span");
-      labelEl.className = "lesson-label lesson-label--solo";
-      labelEl.textContent = tab.name;
-      name.appendChild(labelEl);
-    }
+    const labelEl = document.createElement("span");
+    labelEl.className = "lesson-label" + (tab.code ? "" : " lesson-label--solo");
+    labelEl.textContent = tab.code ? tab.code + " · " + tab.name : tab.name;
+    name.appendChild(labelEl);
     b.appendChild(name);
     b.addEventListener("click", () => {
       const c = tabCounts();
