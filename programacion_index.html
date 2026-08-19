@@ -5195,12 +5195,10 @@ renderSlide();
 
 </script>
 
-<!-- Overlay para ruletas expandida/fullscreen -->
-<div id="ruletaOverlayBg" style="display:none;position:fixed;inset:0;background:transparent;z-index:99990;"></div>
+<!-- Botón fullscreen ruleta expandida -->
 <button id="ruletaFsBtn" aria-label="Expandir pantalla completa" style="display:none;position:fixed;top:12px;right:12px;z-index:100001;width:34px;height:34px;border:none;border-radius:10px;background:rgba(20,31,53,.86);color:#fff;font-size:16px;line-height:1;cursor:pointer;align-items:center;justify-content:center;">⛶</button>
 <script>
 (function(){
-  var bg = document.getElementById('ruletaOverlayBg');
   var fsBtn = document.getElementById('ruletaFsBtn');
   var activeIframe = null;
   var isRuletaFull = false;
@@ -5262,7 +5260,6 @@ renderSlide();
     fsBtn.style.display = 'flex';
     if(roulettePanel) roulettePanel.style.setProperty('overflow','visible','important');
     if(rouletteInner) rouletteInner.style.setProperty('overflow','visible','important');
-    bg.style.display = 'block';
     // avisar al iframe de que está expandido
     setTimeout(function(){
       try { iframe.contentWindow.postMessage({type:'RULETA_EXPANDED'},'*'); } catch(ex){}
@@ -5284,7 +5281,6 @@ renderSlide();
     fsBtn.style.display = 'none';
     if(roulettePanel) roulettePanel.style.removeProperty('overflow');
     if(rouletteInner) rouletteInner.style.removeProperty('overflow');
-    bg.style.display = 'none';
     try { activeIframe.contentWindow.postMessage({type:'RULETA_CLOSE'},'*'); } catch(e){}
     activeIframe = null;
   }

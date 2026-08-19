@@ -112,6 +112,7 @@ canvas { display: block; border-radius: 50%; width: 100%; height: 100%; }
   inset: 0;
   background: transparent;
   z-index: 9998;
+  pointer-events: none;
 }
 .result-pop-backdrop.show { display: block; }
 .result-pop {
@@ -131,6 +132,7 @@ canvas { display: block; border-radius: 50%; width: 100%; height: 100%; }
   z-index: 9999;
   padding: .75rem;
   box-sizing: border-box;
+  pointer-events: auto;
 }
 .result-pop.show { display: flex; }
 @keyframes popIn {
@@ -208,8 +210,8 @@ canvas { display: block; border-radius: 50%; width: 100%; height: 100%; }
   <button class="spin-btn" id="spinBtn">🎲 Spin!</button>
 </div><!-- end widget -->
 
-<div class="result-pop-backdrop" id="resultBackdrop">
-  <div class="result-pop" id="resultPop">
+<div class="result-pop-backdrop" id="resultBackdrop" aria-hidden="true"></div>
+<div class="result-pop" id="resultPop" role="dialog" aria-modal="true">
     <button class="rp-close" id="rpClose" aria-label="Cerrar">✕</button>
     <div class="rp-head">
       <div class="rp-dot" id="rpDot"></div>
@@ -217,7 +219,6 @@ canvas { display: block; border-radius: 50%; width: 100%; height: 100%; }
       <div class="rp-sc" id="rpSc"></div>
     </div>
     <div class="rp-body" id="rpBody"></div>
-  </div>
 </div>
 
 <div class="confetti-wrap" id="confWrap"></div>
