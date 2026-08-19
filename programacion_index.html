@@ -211,59 +211,63 @@ h2 {
 }
 .stage-arrow--prev{left:12px;}
 .stage-arrow--next{right:12px;}
-.pin-stack{
+.resource-stack{
   position:absolute;
-  top:10px;
-  right:10px;
-  bottom:auto;
+  top:max(10px,1vw);
+  right:max(10px,1vw);
   z-index:6;
   display:flex;
   flex-direction:column;
   align-items:flex-end;
-  gap:10px;
+  gap:8px;
   pointer-events:none;
 }
-.pin-stack--empty{
+.resource-stack--empty{
   display:none;
 }
-.pin-stack .pin{
-  position:relative;
-  top:auto;
-  right:auto;
+.resource-btn{
   pointer-events:auto;
-}
-.pin{
-  width:52px;
-  height:52px;
-  padding:0;
-  border:none;
-  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  max-width:min(240px,44vw);
+  margin:0;
+  font:inherit;
+  font-weight:800;
+  font-size:clamp(0.78rem,0.72rem + 0.2vw,0.9rem);
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:#fff;
+  background:rgba(5,150,105,.94);
+  padding:8px 14px 7px;
+  border:1px solid rgba(255,255,255,.42);
+  border-radius:12px;
+  box-shadow:0 4px 16px rgba(0,0,0,.34);
   cursor:pointer;
-  background:transparent;
-  box-shadow:none;
-  display:block;
-  flex-shrink:0;
-  transition:transform .15s,filter .15s,opacity .15s;
+  transition:transform .15s,filter .15s,background .15s;
 }
-.pin:hover{
-  transform:scale(1.06);
+.resource-btn:hover{
   filter:brightness(1.08);
+  transform:scale(1.03);
 }
-.pin:focus-visible{
-  outline:3px solid rgba(255,255,255,.65);
+.resource-btn:focus-visible{
+  outline:3px solid rgba(255,255,255,.8);
   outline-offset:2px;
 }
-.pin-img{
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  border-radius:50%;
-  pointer-events:none;
+.resource-btn svg{
+  flex-shrink:0;
+  width:16px;
+  height:16px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
 }
-/* Solo icono de pin: sin etiquetas (evita solapes con 2+ pins) */
-.pin-tip{
-  display:none !important;
+.resource-btn-label{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
 /* LS1–LS7 · L3 Melody Moo (diapos 3 de la pestaña): enlace PLICKERS abajo a la izquierda */
@@ -1993,7 +1997,7 @@ a.mgmt-link--eval:active{
       <div class="zone right" id="zR" aria-label="Diapositiva siguiente (mitad derecha)"></div>
       <button type="button" class="stage-arrow stage-arrow--prev" id="arrowPrev" aria-label="Anterior">‹</button>
       <button type="button" class="stage-arrow stage-arrow--next" id="arrowNext" aria-label="Siguiente">›</button>
-      <div class="pin-stack pin-stack--empty" id="pinStack" aria-live="polite"></div>
+      <div class="resource-stack resource-stack--empty" id="pinStack" aria-live="polite"></div>
       <a class="plickers-corner" id="plickersCorner" hidden href="https://www.plickers.com/packs/6a05834fe4336f20231b8823#now-playing" target="_blank" rel="noopener noreferrer">PLICKERS</a>
       <button type="button" class="fs-toggle" id="fsToggle" aria-label="Pantalla completa">
         <svg id="fsIconExpand" viewBox="0 0 24 24"><path d="M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6"/></svg>
@@ -3322,7 +3326,15 @@ let lessonTab = 0;
 /** Pestaña resaltada en la fila de lecciones (puede diferir de lessonTab al saltar a PNG de entrada). */
 let lessonHighlightTab = 0;
 let localSlide = 0;
-let _lastPinFlashKey = "";
+const RESOURCE_BTN_ICON =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>';
+
+function resourceButtonLabel(label) {
+  const raw = (label || "").trim();
+  if (!raw) return "Recurso";
+  const cleaned = raw.replace(/^L\d+\.?\s*/i, "").trim();
+  return cleaned || "Recurso";
+}
 
 function pinCellPairs(cell) {
   if (!cell) return null;
@@ -3581,43 +3593,25 @@ function renderSlide() {
   const pairs = pinCellPairs(cell);
   if (stack) {
     stack.textContent = "";
-    stack.classList.toggle("pin-stack--empty", !pairs || !pairs.length);
+    stack.classList.toggle("resource-stack--empty", !pairs || !pairs.length);
     if (pairs && pairs.length) {
       pairs.forEach((p) => {
         const b = document.createElement("button");
         b.type = "button";
-        b.className = "pin";
-        const img = document.createElement("img");
-        img.className = "pin-img";
-        img.src = "pin-recurso.png";
-        img.alt = "";
-        const tip = document.createElement("span");
-        tip.className = "pin-tip";
-        tip.setAttribute("role", "tooltip");
-        tip.textContent = (p.label || "Enlace").trim();
-        b.appendChild(img);
-        b.appendChild(tip);
-        const lab = (p.label || "Enlace").trim();
-        b.setAttribute("aria-label", "Abrir recurso: " + lab);
+        b.className = "resource-btn";
+        b.innerHTML = RESOURCE_BTN_ICON;
+        const lab = resourceButtonLabel(p.label);
+        const span = document.createElement("span");
+        span.className = "resource-btn-label";
+        span.textContent = lab;
+        b.appendChild(span);
+        const fullLab = (p.label || lab).trim();
+        b.setAttribute("aria-label", "Abrir recurso descargable: " + fullLab);
         b.addEventListener("click", () => {
           openResourceHref(p.href);
         });
         stack.appendChild(b);
       });
-      const key =
-        lsIndex +
-        "-" +
-        lessonTab +
-        "-" +
-        localSlide +
-        "-" +
-        pairs.map((x) => x.href).join("|");
-      if (key !== _lastPinFlashKey) {
-        _lastPinFlashKey = key;
-        flashPinTipsInStack();
-      }
-    } else {
-      _lastPinFlashKey = "";
     }
   }
 
@@ -3648,10 +3642,6 @@ function renderSlide() {
   }
 
   updateArrowButtons();
-}
-
-function flashPinTipsInStack() {
-  /* Etiquetas de pin desactivadas: solo se muestra el icono. */
 }
 
 function buildLsRow() {
