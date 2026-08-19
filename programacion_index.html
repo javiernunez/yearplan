@@ -227,28 +227,24 @@ h2 {
 }
 .resource-btn{
   pointer-events:auto;
-  display:inline-flex;
+  display:flex;
   align-items:center;
-  gap:7px;
-  max-width:min(240px,44vw);
+  justify-content:center;
+  width:44px;
+  height:44px;
+  padding:0;
   margin:0;
-  font:inherit;
-  font-weight:800;
-  font-size:clamp(0.78rem,0.72rem + 0.2vw,0.9rem);
-  letter-spacing:.05em;
-  text-transform:uppercase;
   color:#fff;
   background:rgba(5,150,105,.94);
-  padding:8px 14px 7px;
   border:1px solid rgba(255,255,255,.42);
-  border-radius:12px;
+  border-radius:50%;
   box-shadow:0 4px 16px rgba(0,0,0,.34);
   cursor:pointer;
   transition:transform .15s,filter .15s,background .15s;
 }
 .resource-btn:hover{
   filter:brightness(1.08);
-  transform:scale(1.03);
+  transform:scale(1.06);
 }
 .resource-btn:focus-visible{
   outline:3px solid rgba(255,255,255,.8);
@@ -256,18 +252,10 @@ h2 {
 }
 .resource-btn svg{
   flex-shrink:0;
-  width:16px;
-  height:16px;
-  fill:none;
-  stroke:currentColor;
-  stroke-width:2.2;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-}
-.resource-btn-label{
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
+  width:22px;
+  height:22px;
+  fill:currentColor;
+  stroke:none;
 }
 
 /* LS1–LS7 · L3 Melody Moo (diapos 3 de la pestaña): enlace PLICKERS abajo a la izquierda */
@@ -3327,14 +3315,7 @@ let lessonTab = 0;
 let lessonHighlightTab = 0;
 let localSlide = 0;
 const RESOURCE_BTN_ICON =
-  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>';
-
-function resourceButtonLabel(label) {
-  const raw = (label || "").trim();
-  if (!raw) return "Recurso";
-  const cleaned = raw.replace(/^L\d+\.?\s*/i, "").trim();
-  return cleaned || "Recurso";
-}
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.95 7.1L22 10.2l-5.8 4.8 1.8 7.5L12 18.4 5.9 22.5l1.8-7.5L2 10.2l7.05-1.1L12 2z"/></svg>';
 
 function pinCellPairs(cell) {
   if (!cell) return null;
@@ -3600,13 +3581,8 @@ function renderSlide() {
         b.type = "button";
         b.className = "resource-btn";
         b.innerHTML = RESOURCE_BTN_ICON;
-        const lab = resourceButtonLabel(p.label);
-        const span = document.createElement("span");
-        span.className = "resource-btn-label";
-        span.textContent = lab;
-        b.appendChild(span);
-        const fullLab = (p.label || lab).trim();
-        b.setAttribute("aria-label", "Abrir recurso descargable: " + fullLab);
+        const fullLab = (p.label || "Recurso").trim();
+        b.setAttribute("aria-label", "Abrir recurso descargable" + (fullLab ? ": " + fullLab : ""));
         b.addEventListener("click", () => {
           openResourceHref(p.href);
         });
