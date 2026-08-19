@@ -137,7 +137,7 @@ body.in-ls-view footer{
 .ls-situation-title.g9{color:#1d6fd6;}
 
 h2 {
-  font-size: 40px;
+  font-size: 40px !important;
   text-align: center
 }
 .stage-wrap{
@@ -318,27 +318,14 @@ h2 {
   margin-left:var(--sidebar-w);
 }
 .roulette-panel{
-  position:fixed;
-  inset:0 auto 0 0;
-  width:var(--sidebar-w);
-  height:100vh;
-  height:100dvh;
-  height:100svh;
-  min-height:100vh;
-  min-height:100dvh;
-  min-height:100svh;
-  overflow-y:auto;
-  overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-gutter:stable;
-  box-sizing:border-box;
-  border-right:1px solid rgba(26,53,88,.08);
-  z-index:100;
-  background:rgba(255,255,255,.6);
-  backdrop-filter:blur(6px);
-  -webkit-backdrop-filter:blur(6px);
-  display:flex;
-  flex-direction:column;
+  position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--sidebar-w);
+    overflow-x: hidden;
+    z-index: 100;
+    background: rgba(255, 255, 255, .6);
+    display: flex;
+    flex-direction: column;
 }
 .roulette-panel::-webkit-scrollbar{
   width:8px;
@@ -351,16 +338,10 @@ h2 {
   border-radius:4px;
 }
 .roulette-panel-inner{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-start;
-  gap:14px;
-  width:100%;
-  flex:1 1 auto;
-  min-height:100%;
-  padding:12px 6px 20px;
-  box-sizing:border-box;
+  display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
 }
 .roulette-panel iframe{
   border:none;
@@ -672,42 +653,59 @@ body.fs-stage-open{
   overflow:hidden;
 }
 
-footer{flex:0 0 auto;}
+footer{flex:0 0 auto;
+  padding-left: 252px;
+}
 .foot-white{
-  background:var(--white);
+  background:rgba(255,255,255,.88);
   margin-top:10px;
-  padding:16px 14px 18px;
+  padding:14px 16px 16px;
   text-align:center;
-  border-radius:22px 22px 0 0;
-  box-shadow:0 -10px 40px rgba(26,53,88,.07);
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.95);
+  box-shadow:0 4px 20px rgba(26,53,88,.06);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.foot-nav-label{
+  margin:0 0 12px;
+  font-size:var(--text-label);
+  font-weight:900;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color:rgba(26,53,88,.45);
 }
 .ls-row{
   display:flex;
   flex-wrap:wrap;
-  gap:12px;
+  gap:10px 12px;
   justify-content:center;
-  align-items:flex-end;
+  align-items:center;
 }
 button.ls-chip{
   font-family:inherit;
   font-size:var(--text-ui);
-  font-weight:800;
+  font-weight:700;
   cursor:pointer;
-  padding:13px 24px 12px;
-  border-radius:14px 14px 0 0;
-  border:none;
-  border-bottom:3px solid transparent;
-  background:rgba(225,238,248,.95);
+  padding:9px 18px;
+  border-radius:999px;
+  border:2px solid rgba(26,53,88,.22);
+  background:#fff;
   color:var(--ink);
-  box-shadow:0 -3px 14px rgba(26,53,88,.04);
-  transition:background .15s,box-shadow .15s;
+  box-shadow:none;
+  transition:background .15s,border-color .15s,color .15s,transform .1s;
 }
-button.ls-chip:hover{background:#eef6fc;}
+button.ls-chip:hover{
+  background:#eef6fc;
+  border-color:rgba(26,53,88,.35);
+}
 button.ls-chip.active{
-  background:var(--white);
-  border-bottom-color:var(--accent);
-  box-shadow:0 -6px 24px rgba(26,53,88,.08);
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#fff;
+  box-shadow:0 4px 14px rgba(26,53,88,.12);
 }
+button.ls-chip:active{transform:scale(.97);}
 
 .foot-sky{
   padding:20px 12px 28px;
@@ -2038,7 +2036,8 @@ a.mgmt-link--eval:active{
 
   <footer>
     <div class="foot-white">
-      <div class="ls-row" id="lsRow"></div>
+      <p class="foot-nav-label">Jump to Learning Situation</p>
+      <nav class="ls-row" id="lsRow" aria-label="Ir a otra Learning Situation"></nav>
     </div>
     <div class="foot-sky">
       <div class="foot-carla">
@@ -3670,6 +3669,8 @@ function buildLsRow() {
     b.type = "button";
     b.className = "ls-chip" + (i === lsIndex ? " active" : "");
     b.textContent = "LS " + m.id;
+    if (i === lsIndex) b.setAttribute("aria-current", "true");
+    else b.removeAttribute("aria-current");
     b.addEventListener("click", () => {
       lsIndex = i;
       lessonTab = 0;
