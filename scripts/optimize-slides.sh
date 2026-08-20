@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Compress LS slides for faster classroom loading.
+# Compress LS slides to WebP for faster classroom loading.
 #
-#   bash scripts/optimize-slides.sh              # PNG → JPEG, then recompress JPEG
-#   bash scripts/optimize-slides.sh --recompress # only shrink existing File *.jpg
+#   bash scripts/optimize-slides.sh              # PNG/JPEG → WebP
+#   bash scripts/optimize-slides.sh --recompress # shrink existing File *.webp
 #   bash scripts/optimize-slides.sh --dry-run
 set -euo pipefail
 
@@ -25,7 +25,7 @@ DRY = "--dry-run" in sys.argv
 RECOMPRESS_ONLY = "--recompress" in sys.argv
 
 
-def iter_slide_files(root: Path, suffix: str) -> list[Path]:
+def iter_slide_files(root: Path, suffixes: tuple[str, ...]) -> list[Path]:
     out: list[Path] = []
     for folder in sorted(root.iterdir()):
         if not folder.is_dir():
@@ -35,7 +35,7 @@ def iter_slide_files(root: Path, suffix: str) -> list[Path]:
         if folder.name == "NUEVOS POWERPOINTS":
             continue
         for p in folder.iterdir():
-            if p.suffix.lower() != suffix:
+            if p.suffix.lower() not in suffixes:
                 continue
             if not p.name.startswith("File "):
                 continue
@@ -59,9 +59,9 @@ def resize(im: Image.Image) -> Image.Image:
     return im.resize((MAX_WIDTH, h), Image.Resampling.LANCZOS)
 
 
-def save_jpeg(im: Image.Image, dest: Path, min_size: int | None = None) -> int:
+def save_webp(im: Image.Image, dest: Path, min_size: int | None = None) -> int:
     tmp = dest.with_suffix(dest.suffix + ".tmp")
-    im.save(tmp, format="JPEG", quality=QUALITY, optimize=True, progressive=True)
+    im.save(tmp, format="WEBP", quality=QUALITY, method=4)
     after = tmp.stat().st_size
     if min_size is not None and after >= min_size:
         tmp.unlink()
@@ -70,21 +70,22 @@ def save_jpeg(im: Image.Image, dest: Path, min_size: int | None = None) -> int:
     return after
 
 
-def png_to_jpeg(src: str) -> tuple[str, int, int, str]:
+def to_webp(src: str) -> tuple[str, int, int, str]:
     path = Path(src)
-    dest = path.with_suffix(".jpg")
+    dest = path.with_suffix(".webp")
     before = path.stat().st_size
     im = resize(as_rgb(Image.open(path)))
-    after = save_jpeg(im, dest)
-    path.unlink()
+    after = save_webp(im, dest)
+    if dest.resolve() != path.resolve():
+        path.unlink()
     return (str(dest), before, after, f"{im.size[0]}x{im.size[1]}")
 
 
-def recompress_jpeg(src: str) -> tuple[str, int, int, str]:
+def recompress_webp(src: str) -> tuple[str, int, int, str]:
     path = Path(src)
     before = path.stat().st_size
     im = resize(as_rgb(Image.open(path)))
-    after = save_jpeg(im, path, min_size=before)
+    after = save_webp(im, path, min_size=before)
     return (str(path), before, after, f"{im.size[0]}x{im.size[1]}")
 
 
@@ -93,7 +94,7 @@ def run_batch(label: str, files: list[Path], fn) -> None:
         print(f"{label}: nothing to do")
         return
     total_before = sum(p.stat().st_size for p in files)
-    print(f"{label}: n={len(files)} in_mb={total_before/1e6:.1f} max_width={MAX_WIDTH} jpeg_q={QUALITY}")
+    print(f"{label}: n={len(files)} in_mb={total_before/1e6:.1f} max_width={MAX_WIDTH} webp_q={QUALITY}")
     if DRY:
         print("dry-run: no files written")
         return
@@ -114,9 +115,10 @@ def run_batch(label: str, files: list[Path], fn) -> None:
 
 def main() -> None:
     root = Path(sys.argv[1])
-    if not RECOMPRESS_ONLY:
-        run_batch("png→jpg", iter_slide_files(root, ".png"), png_to_jpeg)
-    run_batch("recompress jpg", iter_slide_files(root, ".jpg"), recompress_jpeg)
+    if RECOMPRESS_ONLY:
+        run_batch("recompress webp", iter_slide_files(root, (".webp",)), recompress_webp)
+        return
+    run_batch("png/jpg→webp", iter_slide_files(root, (".png", ".jpg", ".jpeg")), to_webp)
 
 
 if __name__ == "__main__":
