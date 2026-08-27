@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Monster Builders — Programación</title>
+<title>Monster Builders — Classroom Programming</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="fonts/carla.css">
@@ -2461,7 +2461,7 @@ a.mgmt-link--eval:active{
       <h2 class="ls-situation-title" id="lsSituationTitle">Learning situation</h2>
     </div>
 
-    <nav class="lesson-nav" aria-label="Lecciones">
+    <nav class="lesson-nav" aria-label="Lessons">
       <div class="lesson-scroll">
         <div class="lesson-row" id="lessonRow"></div>
       </div>
@@ -2472,13 +2472,13 @@ a.mgmt-link--eval:active{
   <div class="stage-wrap">
     <div class="stage" id="stage">
       <img id="slideImg" alt="" src="" decoding="async">
-      <div class="zone left" id="zL" aria-label="Diapositiva anterior (mitad izquierda)"></div>
-      <div class="zone right" id="zR" aria-label="Diapositiva siguiente (mitad derecha)"></div>
-      <button type="button" class="stage-arrow stage-arrow--prev" id="arrowPrev" aria-label="Anterior">‹</button>
-      <button type="button" class="stage-arrow stage-arrow--next" id="arrowNext" aria-label="Siguiente">›</button>
+      <div class="zone left" id="zL" aria-label="Previous slide (left half)"></div>
+      <div class="zone right" id="zR" aria-label="Next slide (right half)"></div>
+      <button type="button" class="stage-arrow stage-arrow--prev" id="arrowPrev" aria-label="Previous">‹</button>
+      <button type="button" class="stage-arrow stage-arrow--next" id="arrowNext" aria-label="Next">›</button>
       <div class="resource-stack resource-stack--empty" id="pinStack" aria-live="polite"></div>
       <a class="plickers-corner" id="plickersCorner" hidden href="https://www.plickers.com/packs/6a05834fe4336f20231b8823#now-playing" target="_blank" rel="noopener noreferrer">PLICKERS</a>
-      <button type="button" class="fs-toggle" id="fsToggle" aria-label="Pantalla completa">
+      <button type="button" class="fs-toggle" id="fsToggle" aria-label="Full screen">
         <svg id="fsIconExpand" viewBox="0 0 24 24"><path d="M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6"/></svg>
         <svg id="fsIconShrink" viewBox="0 0 24 24" style="display:none"><path d="M9 3v6H3M15 3v6h6M21 21h-6v-6M3 21h6v-6"/></svg>
       </button>
@@ -2489,7 +2489,7 @@ a.mgmt-link--eval:active{
           <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span></span>
           <span class="rail-body">
             <span class="rail-label letra-carla">Groups</span>
-            <span class="rail-meta" id="pupilsShortcutMeta">3º</span>
+            <span class="rail-meta" id="pupilsShortcutMeta">3rd</span>
           </span>
         </button>
         <button type="button" class="rail-brick rb-time" id="timeShortcut" aria-haspopup="dialog" aria-controls="timeModal">
@@ -2545,7 +2545,7 @@ a.mgmt-link--eval:active{
   <footer>
     <div class="foot-white">
       <p class="foot-nav-label">Jump to Learning Situation</p>
-      <nav class="ls-row" id="lsRow" aria-label="Ir a otra Learning Situation"></nav>
+      <nav class="ls-row" id="lsRow" aria-label="Go to another Learning Situation"></nav>
     </div>
     <div class="foot-sky">
       <div class="foot-carla">
@@ -2557,10 +2557,10 @@ a.mgmt-link--eval:active{
 
 <div class="roulette-modal-backdrop" id="rouletteModal">
   <div class="roulette-modal" id="rouletteModalBox">
-    <button class="rm-expand" id="rmExpand" aria-label="Ampliar"><svg viewBox="0 0 24 24"><path d="M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6"/></svg></button>
-    <button class="rm-shrink" id="rmShrink" aria-label="Minimizar"><svg viewBox="0 0 24 24"><path d="M9 3v6H3M15 3v6h6M21 21h-6v-6M3 21h6v-6"/></svg></button>
+    <button class="rm-expand" id="rmExpand" aria-label="Enlarge"><svg viewBox="0 0 24 24"><path d="M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6"/></svg></button>
+    <button class="rm-shrink" id="rmShrink" aria-label="Minimise"><svg viewBox="0 0 24 24"><path d="M9 3v6H3M15 3v6h6M21 21h-6v-6M3 21h6v-6"/></svg></button>
     
-    <button class="rm-close" id="rmClose" aria-label="Cerrar">✕</button>
+    <button class="rm-close" id="rmClose" aria-label="Close">✕</button>
     <div class="rm-cat" id="rmCat"></div>
     <h3 class="rm-name" id="rmName"></h3>
     <span class="rm-sc" id="rmSc"></span>
@@ -2575,20 +2575,20 @@ a.mgmt-link--eval:active{
 
 <div class="pupils-modal-backdrop" id="pupilsModal" role="dialog" aria-modal="true" aria-labelledby="pupilsTitle" hidden>
   <div class="pupils-modal">
-    <button type="button" class="pupils-close" id="pupilsClose" aria-label="Cerrar">✕</button>
+    <button type="button" class="pupils-close" id="pupilsClose" aria-label="Close">✕</button>
     <h3 id="pupilsTitle">Groups</h3>
-    <div class="pupils-years" id="pupilsYears" role="group" aria-label="Curso"></div>
+    <div class="pupils-years" id="pupilsYears" role="group" aria-label="Year group"></div>
     <p class="pupils-status" id="pupilsStatus"></p>
     <details class="pupils-editor" id="pupilsEditor">
-      <summary>Cargar / editar nombres</summary>
-      <p class="pupils-hint">Un nombre por línea. Se guarda en este navegador (no va al servidor).</p>
-      <textarea id="pupilsText" spellcheck="false" placeholder="Lucía&#10;Marc&#10;Sofía"></textarea>
+      <summary>Load / edit names</summary>
+      <p class="pupils-hint">One name per line. Saved in this browser (not on the server).</p>
+      <textarea id="pupilsText" spellcheck="false" placeholder="Lucy&#10;Mark&#10;Sofia"></textarea>
       <div class="pupils-editor-actions">
-        <button type="button" class="pupils-save" id="pupilsSave">Guardar lista</button>
+        <button type="button" class="pupils-save" id="pupilsSave">Save list</button>
         <span class="pupils-hint" id="pupilsSavedMsg"></span>
       </div>
     </details>
-    <div class="pupils-modes" role="group" aria-label="Agrupación">
+    <div class="pupils-modes" role="group" aria-label="Grouping">
       <button type="button" class="pupils-mode" data-mode="individual">Individual</button>
       <button type="button" class="pupils-mode" data-mode="pairs">Pairs</button>
       <button type="button" class="pupils-mode" data-mode="fours">Fours</button>
@@ -2599,7 +2599,7 @@ a.mgmt-link--eval:active{
 
 <div class="pupils-modal-backdrop" id="timeModal" role="dialog" aria-modal="true" aria-labelledby="timeTitle" hidden>
   <div class="pupils-modal">
-    <button type="button" class="pupils-close" id="timeClose" aria-label="Cerrar">✕</button>
+    <button type="button" class="pupils-close" id="timeClose" aria-label="Close">✕</button>
     <h3 id="timeTitle">Time</h3>
     <div class="timer-face" id="timeFace">1:00</div>
     <div class="timer-presets" id="timePresets">
@@ -2619,7 +2619,7 @@ a.mgmt-link--eval:active{
 
 <div class="pupils-modal-backdrop" id="callModal" role="dialog" aria-modal="true" aria-labelledby="callTitle" hidden>
   <div class="pupils-modal">
-    <button type="button" class="pupils-close" id="callClose" aria-label="Cerrar">✕</button>
+    <button type="button" class="pupils-close" id="callClose" aria-label="Close">✕</button>
     <h3 id="callTitle">Call &amp; Response</h3>
     <div class="call-card" id="callCard"></div>
     <div class="timer-actions">
@@ -2630,7 +2630,7 @@ a.mgmt-link--eval:active{
 
 <div class="pupils-modal-backdrop" id="pointsModal" role="dialog" aria-modal="true" aria-labelledby="pointsTitle" hidden>
   <div class="pupils-modal">
-    <button type="button" class="pupils-close" id="pointsClose" aria-label="Cerrar">✕</button>
+    <button type="button" class="pupils-close" id="pointsClose" aria-label="Close">✕</button>
     <h3 id="pointsTitle">Points</h3>
     <div class="points-grid" id="pointsGrid"></div>
     <div class="timer-actions" style="margin-top:16px">
@@ -4248,7 +4248,7 @@ function renderSlide() {
         b.className = "resource-btn";
         b.innerHTML = RESOURCE_BTN_ICON;
         const fullLab = (p.label || "Recurso").trim();
-        b.setAttribute("aria-label", "Abrir recurso descargable" + (fullLab ? ": " + fullLab : ""));
+        b.setAttribute("aria-label", "Open downloadable resource" + (fullLab ? ": " + fullLab : ""));
         b.addEventListener("click", () => {
           openResourceHref(p.href);
         });
@@ -4495,7 +4495,7 @@ renderSlide();
     document.body.classList.add("fs-stage-open");
     iconExpand.style.display = "none";
     iconShrink.style.display = "";
-    btn.setAttribute("aria-label","Salir de pantalla completa");
+    btn.setAttribute("aria-label","Exit full screen");
   }
 
   function exitFs(){
@@ -4511,7 +4511,7 @@ renderSlide();
     }
     iconExpand.style.display = "";
     iconShrink.style.display = "none";
-    btn.setAttribute("aria-label","Pantalla completa");
+    btn.setAttribute("aria-label","Full screen");
   }
 
   btn.addEventListener("click", function(e){
@@ -5869,7 +5869,7 @@ renderSlide();
 </script>
 
 <!-- Botón fullscreen ruleta expandida -->
-<button id="ruletaFsBtn" aria-label="Expandir pantalla completa" style="display:none;position:fixed;top:12px;right:12px;z-index:100001;width:34px;height:34px;border:none;border-radius:10px;background:rgba(20,31,53,.86);color:#fff;font-size:16px;line-height:1;cursor:pointer;align-items:center;justify-content:center;">⛶</button>
+<button id="ruletaFsBtn" aria-label="Enter full screen" style="display:none;position:fixed;top:12px;right:12px;z-index:100001;width:34px;height:34px;border:none;border-radius:10px;background:rgba(20,31,53,.86);color:#fff;font-size:16px;line-height:1;cursor:pointer;align-items:center;justify-content:center;">⛶</button>
 <script>
 (function(){
   var fsBtn = document.getElementById('ruletaFsBtn');
@@ -5994,7 +5994,7 @@ renderSlide();
         var activeCat = activeIframe.dataset ? activeIframe.dataset.rouletteCat : null;
         var closeCat = e.data.cat != null ? String(e.data.cat) : null;
         var closeReason = e.data.reason || '';
-        // Cerrar solo cuando el widget lo pide explícitamente por acción de usuario.
+        // Close only when the widget asks after an explicit user action.
         if((closeCat === null || closeCat === activeCat) && closeReason === 'user_close'){
           collapseIframe();
         }
@@ -6083,7 +6083,9 @@ renderSlide();
       return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
     });
   }
-  function yearLabel(y){ return y + 'º'; }
+  function yearLabel(y){
+    return ({'1':'1st','2':'2nd','3':'3rd','4':'4th','5':'5th','6':'6th'})[y] || (y + 'th');
+  }
   function updateShortcut(){
     var n = namesOf(year).length;
     shortcutMeta.textContent = n ? (yearLabel(year) + ' · ' + n) : yearLabel(year);
@@ -6100,8 +6102,8 @@ renderSlide();
   function updateStatus(){
     var n = namesOf(year).length;
     statusEl.textContent = n
-      ? (yearLabel(year) + ' · ' + n + ' alumn' + (n === 1 ? 'o/a' : 'os/as'))
-      : ('No hay nombres en ' + yearLabel(year) + '. Ábrelo abajo y pégalos.');
+      ? (yearLabel(year) + ' · ' + n + ' pupil' + (n === 1 ? '' : 's'))
+      : ('No names in ' + yearLabel(year) + '. Open the list below and paste them.');
     if(!n) editor.open = true;
     updateShortcut();
   }
@@ -6112,7 +6114,7 @@ renderSlide();
   }
   function renderIndividual(){
     if(!remaining.length){
-      resultEl.innerHTML = '<p class="pupils-empty">¡Ya han salido todos!</p><button type="button" class="pupils-again" id="pupilsAgain">Empezar de nuevo</button>';
+      resultEl.innerHTML = '<p class="pupils-empty">That\'s everyone!</p><button type="button" class="pupils-again" id="pupilsAgain">Start again</button>';
       return;
     }
     var name = remaining.shift();
@@ -6128,7 +6130,7 @@ renderSlide();
   function renderGroups(size){
     var names = namesOf(year);
     if(!names.length){
-      resultEl.innerHTML = '<p class="pupils-empty">Primero carga los nombres de ' + yearLabel(year) + '.</p>';
+      resultEl.innerHTML = '<p class="pupils-empty">First load the names for ' + yearLabel(year) + '.</p>';
       return;
     }
     var groups = makeGroups(names, size);
@@ -6147,7 +6149,7 @@ renderSlide();
     var names = namesOf(year);
     if(mode === 'individual'){
       if(!names.length){
-        resultEl.innerHTML = '<p class="pupils-empty">Primero carga los nombres de ' + yearLabel(year) + '.</p>';
+        resultEl.innerHTML = '<p class="pupils-empty">First load the names for ' + yearLabel(year) + '.</p>';
         return;
       }
       if(!remaining.length) remaining = shuffle(names);
@@ -6221,7 +6223,7 @@ renderSlide();
     var all = loadAll();
     all[year] = parseNames(textEl.value);
     localStorage.setItem(STORE, JSON.stringify(all));
-    savedMsg.textContent = 'Guardado · ' + all[year].length;
+    savedMsg.textContent = 'Saved · ' + all[year].length;
     remaining = [];
     mode = '';
     setModeButtons();
