@@ -26,9 +26,11 @@
   --text-lesson-tab:clamp(0.92rem,0.84rem + 0.18vw,1.02rem);
   --text-label:clamp(0.78rem,0.72rem + 0.2vw,0.88rem);
   --sidebar-w:190px;
+  --tools-w:190px;
   --roulette-iframe-w:172px;
   --roulette-iframe-h:168px;
   --content-max:1320px;
+  --sidebars-total:calc(var(--sidebar-w) + var(--tools-w));
 }
 html{font-size:var(--text-base);}
 .theme-ls1{
@@ -90,7 +92,7 @@ body.in-ls-view footer{
 
 .hdr{
   flex:0 0 auto;
-  padding:20px 0px 0px 160px;
+  padding:20px 160px 0;
   text-align:center;
   background:transparent;
   margin-bottom: -20px;
@@ -107,7 +109,7 @@ body.in-ls-view footer{
 /* Columna LS + índice: mismo ancho que el carrusel; título a la izquierda, pestañas centradas */
 .ls-index-column{
   width:100%;
-  max-width:min(calc(100vw - var(--sidebar-w) - 24px), var(--content-max));
+  max-width:min(calc(100vw - var(--sidebars-total) - 24px), var(--content-max));
   margin:0 auto;
   padding:0 6px;
   box-sizing:border-box;
@@ -147,7 +149,7 @@ h2 {
 .stage{
   position:relative;
   width:100%;
-  max-width:min(calc(100vw - var(--sidebar-w) - 24px), var(--content-max));
+  max-width:min(calc(100vw - var(--sidebars-total) - 24px), var(--content-max));
   aspect-ratio:16/10;
   background:linear-gradient(160deg,#1a3352,#0e1f36);
   border-radius:20px;
@@ -304,6 +306,7 @@ h2 {
   flex:1;
   min-width:0;
   margin-left:var(--sidebar-w);
+  margin-right:var(--tools-w);
 }
 .roulette-panel{
   position: fixed;
@@ -361,12 +364,13 @@ h2 {
 @media(max-width:1100px){
   :root{
     --sidebar-w:172px;
+    --tools-w:172px;
     --roulette-iframe-w:156px;
     --roulette-iframe-h:154px;
   }
   .roulette-panel{width:var(--sidebar-w);}
   .roulette-panel-inner{padding:6px 4px 10px;gap:2px;}
-  .main-content{margin-left:var(--sidebar-w);}
+  .main-content{margin-left:var(--sidebar-w);margin-right:var(--tools-w);}
 }
 @media(max-width:800px){
   .roulette-panel{
@@ -385,12 +389,294 @@ h2 {
     min-height:0;
     width:100%;
   }
-  .main-content{margin-left:0;}
+  .main-content{margin-left:0;margin-right:0;}
+}
+
+/* Right rail — classroom shortcuts (mirrors the roulette strip) */
+.tools-panel{
+  position:fixed;
+  inset:0 0 0 auto;
+  width:var(--tools-w);
+  overflow-x:hidden;
+  overflow-y:auto;
+  z-index:100;
+  background:rgba(255,255,255,.6);
+  display:flex;
+  flex-direction:column;
+}
+.tools-panel-inner{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  gap:10px;
+  padding:20px 8px 20px;
+  box-sizing:border-box;
+}
+.tools-shortcut{
+  width:var(--roulette-iframe-w);
+  min-height:88px;
+  border:1px solid rgba(26,53,88,.12);
+  border-radius:16px;
+  background:rgba(255,255,255,.88);
+  box-shadow:0 6px 18px rgba(26,53,88,.08);
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  padding:12px 8px;
+  color:var(--ink);
+  font-family:var(--font-carla);
+  font-size:1.15rem;
+  letter-spacing:var(--carla-letter-spacing);
+  word-spacing:var(--carla-word-spacing);
+  line-height:1.2;
+  transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.tools-shortcut:hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 22px rgba(26,53,88,.14);
+  background:#fff;
+}
+.tools-shortcut:focus-visible{
+  outline:3px solid var(--accent);
+  outline-offset:3px;
+}
+.tools-shortcut.is-open{
+  background:#fff;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-soft);
+}
+.tools-shortcut .tools-ico{
+  font-size:1.7rem;
+  line-height:1;
+}
+.tools-shortcut .tools-meta{
+  font-family:'Nunito',system-ui,sans-serif;
+  font-size:.72rem;
+  font-weight:800;
+  letter-spacing:.02em;
+  color:rgba(26,53,88,.62);
+}
+.pupils-modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(14,31,54,.55);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  z-index:90050;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+.pupils-modal-backdrop.show{display:flex;}
+.pupils-modal{
+  background:#fff;
+  border-radius:22px;
+  padding:28px 30px 24px;
+  max-width:920px;
+  width:min(94vw,920px);
+  max-height:90vh;
+  overflow-y:auto;
+  box-shadow:0 24px 64px rgba(0,0,0,.3);
+  position:relative;
+  animation:modalPop .3s cubic-bezier(.34,1.56,.64,1);
+}
+.pupils-close{
+  position:absolute;top:12px;right:14px;
+  background:none;border:none;font-size:1.5rem;
+  cursor:pointer;color:#888;line-height:1;padding:4px 8px;
+  border-radius:8px;
+}
+.pupils-close:hover{background:rgba(0,0,0,.06);color:#333;}
+.pupils-modal h3{
+  font-family:var(--font-carla);
+  font-size:2.2rem;
+  font-weight:400;
+  letter-spacing:var(--carla-letter-spacing);
+  word-spacing:var(--carla-word-spacing);
+  color:var(--ink);
+  margin:0 0 14px;
+  text-align:center;
+}
+.pupils-years,
+.pupils-modes{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:center;
+  margin:0 0 14px;
+}
+.pupils-year,
+.pupils-mode{
+  border:2px solid rgba(26,53,88,.16);
+  background:#fff;
+  color:var(--ink);
+  border-radius:999px;
+  padding:8px 16px;
+  font-weight:800;
+  font-size:.95rem;
+  cursor:pointer;
+  font-family:'Nunito',system-ui,sans-serif;
+}
+.pupils-year:hover,
+.pupils-mode:hover{
+  border-color:var(--accent);
+  color:var(--accent-deep);
+}
+.pupils-year.is-on,
+.pupils-mode.is-on{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#fff;
+}
+.pupils-status{
+  text-align:center;
+  font-size:.92rem;
+  font-weight:700;
+  color:rgba(26,53,88,.7);
+  margin:0 0 12px;
+}
+.pupils-editor{
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:14px;
+  padding:10px 12px 12px;
+  margin:0 0 14px;
+}
+.pupils-editor summary{
+  cursor:pointer;
+  font-weight:800;
+  font-size:.88rem;
+  color:var(--ink);
+  list-style:none;
+}
+.pupils-editor summary::-webkit-details-marker{display:none;}
+.pupils-editor textarea{
+  width:100%;
+  min-height:140px;
+  margin:10px 0 8px;
+  border:1px solid #cbd5e1;
+  border-radius:10px;
+  padding:10px 12px;
+  font-family:'Nunito',system-ui,sans-serif;
+  font-size:.95rem;
+  resize:vertical;
+}
+.pupils-editor-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.pupils-save{
+  border:none;
+  background:var(--ink);
+  color:#fff;
+  border-radius:999px;
+  padding:8px 16px;
+  font-weight:800;
+  cursor:pointer;
+}
+.pupils-hint{
+  font-size:.8rem;
+  color:#64748b;
+}
+.pupils-result{
+  min-height:88px;
+}
+.pupils-pick{
+  text-align:center;
+  padding:28px 12px 12px;
+}
+.pupils-pick-name{
+  font-family:var(--font-carla);
+  font-size:clamp(2.4rem,6vw,4.2rem);
+  letter-spacing:var(--carla-letter-spacing);
+  word-spacing:var(--carla-word-spacing);
+  color:var(--accent-deep);
+  line-height:1.15;
+  margin:0 0 8px;
+}
+.pupils-pick-left{
+  font-size:.9rem;
+  font-weight:700;
+  color:#64748b;
+}
+.pupils-groups{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+}
+.pupils-group{
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:14px;
+  padding:12px 14px;
+  min-width:140px;
+  flex:1 1 160px;
+  max-width:220px;
+}
+.pupils-group h4{
+  margin:0 0 8px;
+  font-size:.75rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--accent-deep);
+}
+.pupils-group p{
+  margin:0;
+  font-family:var(--font-carla);
+  font-size:1.35rem;
+  letter-spacing:var(--carla-letter-spacing);
+  word-spacing:var(--carla-word-spacing);
+  line-height:1.35;
+}
+.pupils-again{
+  display:block;
+  margin:16px auto 0;
+  border:2px solid var(--accent);
+  background:#fff;
+  color:var(--accent-deep);
+  border-radius:999px;
+  padding:10px 22px;
+  font-weight:800;
+  cursor:pointer;
+}
+.pupils-empty{
+  text-align:center;
+  color:#64748b;
+  font-weight:700;
+  padding:20px 8px;
+}
+@media(max-width:1100px){
+  .tools-panel{width:var(--tools-w);}
+  .tools-panel-inner{padding:6px 4px 10px;}
+}
+@media(max-width:800px){
+  .tools-panel{
+    position:static;
+    width:100%;
+    height:auto;
+    overflow:visible;
+    border-bottom:1px solid rgba(26,53,88,.08);
+  }
+  .tools-panel-inner{
+    flex-direction:row;
+    flex-wrap:wrap;
+    justify-content:center;
+    width:100%;
+  }
 }
 
 /* LS info bar — chips between lesson tabs and carousel */
 .ls-info-bar{
-  width:min(calc(100vw - var(--sidebar-w) - 24px), var(--content-max));
+  width:min(calc(100vw - var(--sidebars-total) - 24px), var(--content-max));
   margin:8px auto 0;
   padding:14px 12px 12px;
   display:flex;
@@ -883,7 +1169,7 @@ button.ls-chip:disabled,button.lesson:disabled{opacity:.45;cursor:not-allowed;}
   justify-content:center;
 }
 .mgmt-strip{
-  width:min(calc(100vw - var(--sidebar-w) - 24px), var(--content-max));
+  width:min(calc(100vw - var(--sidebars-total) - 24px), var(--content-max));
   padding:10px 16px 12px;
   text-align:center;
   background:rgba(255,255,255,.78);
@@ -1955,6 +2241,16 @@ a.mgmt-link--eval:active{
     </div>
   </div>
 
+  <div class="tools-panel" aria-label="Classroom shortcuts">
+    <div class="tools-panel-inner">
+      <button type="button" class="tools-shortcut" id="pupilsShortcut" aria-haspopup="dialog" aria-controls="pupilsModal">
+        <span class="tools-ico" aria-hidden="true">👥</span>
+        <span>Alumnado</span>
+        <span class="tools-meta" id="pupilsShortcutMeta">3º</span>
+      </button>
+    </div>
+  </div>
+
   <div class="main-content">
 
   <div class="ls-index-column">
@@ -2041,6 +2337,30 @@ a.mgmt-link--eval:active{
 
 <div class="story-overlay" id="storyOverlay" hidden aria-hidden="true">
   <iframe id="storyOverlayFrame" title="Melody Moo Storybook"></iframe>
+</div>
+
+<div class="pupils-modal-backdrop" id="pupilsModal" role="dialog" aria-modal="true" aria-labelledby="pupilsTitle" hidden>
+  <div class="pupils-modal">
+    <button type="button" class="pupils-close" id="pupilsClose" aria-label="Cerrar">✕</button>
+    <h3 id="pupilsTitle">Alumnado</h3>
+    <div class="pupils-years" id="pupilsYears" role="group" aria-label="Curso"></div>
+    <p class="pupils-status" id="pupilsStatus"></p>
+    <details class="pupils-editor" id="pupilsEditor">
+      <summary>Cargar / editar nombres</summary>
+      <p class="pupils-hint">Un nombre por línea. Se guarda en este navegador (no va al servidor).</p>
+      <textarea id="pupilsText" spellcheck="false" placeholder="Lucía&#10;Marc&#10;Sofía"></textarea>
+      <div class="pupils-editor-actions">
+        <button type="button" class="pupils-save" id="pupilsSave">Guardar lista</button>
+        <span class="pupils-hint" id="pupilsSavedMsg"></span>
+      </div>
+    </details>
+    <div class="pupils-modes" role="group" aria-label="Agrupación">
+      <button type="button" class="pupils-mode" data-mode="individual">Individual</button>
+      <button type="button" class="pupils-mode" data-mode="pairs">Pairs</button>
+      <button type="button" class="pupils-mode" data-mode="fours">Fours</button>
+    </div>
+    <div class="pupils-result" id="pupilsResult"></div>
+  </div>
 </div>
 
 <script>
@@ -5403,6 +5723,238 @@ renderSlide();
           collapseIframe();
         }
       }
+    }
+  });
+})();
+</script>
+<script>
+(function(){
+  var STORE = 'yearplan-classes-v1';
+  var YEAR_STORE = 'yearplan-class-year';
+  var YEARS = ['1','2','3','4','5','6'];
+  var modal = document.getElementById('pupilsModal');
+  var shortcut = document.getElementById('pupilsShortcut');
+  var shortcutMeta = document.getElementById('pupilsShortcutMeta');
+  var yearsEl = document.getElementById('pupilsYears');
+  var statusEl = document.getElementById('pupilsStatus');
+  var editor = document.getElementById('pupilsEditor');
+  var textEl = document.getElementById('pupilsText');
+  var saveBtn = document.getElementById('pupilsSave');
+  var savedMsg = document.getElementById('pupilsSavedMsg');
+  var resultEl = document.getElementById('pupilsResult');
+  var year = localStorage.getItem(YEAR_STORE) || '3';
+  var mode = '';
+  var remaining = [];
+
+  function loadAll(){
+    try{
+      var raw = JSON.parse(localStorage.getItem(STORE) || '{}');
+      return raw && typeof raw === 'object' ? raw : {};
+    }catch(e){ return {}; }
+  }
+  function namesOf(y){
+    var all = loadAll();
+    var list = all[y];
+    return Array.isArray(list) ? list.filter(Boolean) : [];
+  }
+  function parseNames(text){
+    return String(text || '')
+      .split(/[\n,;]+/)
+      .map(function(s){ return s.replace(/^\s*\d+[\.)]\s*/, '').trim(); })
+      .filter(function(s){ return s.length > 0; });
+  }
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function makeGroups(names, size){
+    var a = shuffle(names);
+    var n = a.length;
+    if(!n) return [];
+    var groups = [];
+    var i = 0;
+    if(size === 2){
+      var rem2 = n % 2;
+      var endPairs = rem2 === 0 ? n : n - 3;
+      if(endPairs < 0) return [a];
+      while(i < endPairs){ groups.push(a.slice(i, i + 2)); i += 2; }
+      if(i < n) groups.push(a.slice(i));
+      return groups;
+    }
+    var rem = n % 4;
+    var tail = 0;
+    if(rem === 1) tail = 5;
+    else if(rem === 2) tail = n >= 10 ? 10 : n;
+    else if(rem === 3) tail = 3;
+    var endRegular = n - tail;
+    if(endRegular < 0) return [a];
+    while(i < endRegular){ groups.push(a.slice(i, i + 4)); i += 4; }
+    var rest = a.slice(i);
+    if(rem === 2 && rest.length === 10){
+      groups.push(rest.slice(0, 5));
+      groups.push(rest.slice(5));
+    } else if(rest.length){
+      groups.push(rest);
+    }
+    return groups;
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+    });
+  }
+  function yearLabel(y){ return y + 'º'; }
+  function updateShortcut(){
+    var n = namesOf(year).length;
+    shortcutMeta.textContent = n ? (yearLabel(year) + ' · ' + n) : yearLabel(year);
+  }
+  function renderYears(){
+    yearsEl.innerHTML = YEARS.map(function(y){
+      return '<button type="button" class="pupils-year' + (y === year ? ' is-on' : '') + '" data-year="' + y + '">' + yearLabel(y) + '</button>';
+    }).join('');
+  }
+  function fillEditor(){
+    textEl.value = namesOf(year).join('\n');
+    savedMsg.textContent = '';
+  }
+  function updateStatus(){
+    var n = namesOf(year).length;
+    statusEl.textContent = n
+      ? (yearLabel(year) + ' · ' + n + ' alumn' + (n === 1 ? 'o/a' : 'os/as'))
+      : ('No hay nombres en ' + yearLabel(year) + '. Ábrelo abajo y pégalos.');
+    if(!n) editor.open = true;
+    updateShortcut();
+  }
+  function setModeButtons(){
+    Array.prototype.forEach.call(document.querySelectorAll('.pupils-mode'), function(btn){
+      btn.classList.toggle('is-on', btn.getAttribute('data-mode') === mode);
+    });
+  }
+  function renderIndividual(){
+    if(!remaining.length){
+      resultEl.innerHTML = '<p class="pupils-empty">¡Ya han salido todos!</p><button type="button" class="pupils-again" id="pupilsAgain">Empezar de nuevo</button>';
+      return;
+    }
+    var name = remaining.shift();
+    resultEl.innerHTML =
+      '<div class="pupils-pick">' +
+        '<p class="pupils-pick-name">' + escapeHtml(name) + '</p>' +
+        '<p class="pupils-pick-left">' + remaining.length + ' remaining</p>' +
+      '</div>' +
+      '<button type="button" class="pupils-again" id="pupilsAgain">' +
+        (remaining.length ? 'Next' : 'That\'s everyone — reset') +
+      '</button>';
+  }
+  function renderGroups(size){
+    var names = namesOf(year);
+    if(!names.length){
+      resultEl.innerHTML = '<p class="pupils-empty">Primero carga los nombres de ' + yearLabel(year) + '.</p>';
+      return;
+    }
+    var groups = makeGroups(names, size);
+    var html = '<div class="pupils-groups">';
+    groups.forEach(function(g, idx){
+      var title = g.length === 3
+        ? 'Trio'
+        : (size === 2 ? ('Pair ' + (idx + 1)) : ('Group ' + (idx + 1)));
+      html += '<div class="pupils-group"><h4>' + title + '</h4><p>' +
+        g.map(escapeHtml).join('<br>') + '</p></div>';
+    });
+    html += '</div><button type="button" class="pupils-again" id="pupilsAgain">Shuffle again</button>';
+    resultEl.innerHTML = html;
+  }
+  function runMode(){
+    var names = namesOf(year);
+    if(mode === 'individual'){
+      if(!names.length){
+        resultEl.innerHTML = '<p class="pupils-empty">Primero carga los nombres de ' + yearLabel(year) + '.</p>';
+        return;
+      }
+      if(!remaining.length) remaining = shuffle(names);
+      renderIndividual();
+      return;
+    }
+    if(mode === 'pairs') renderGroups(2);
+    if(mode === 'fours') renderGroups(4);
+  }
+  function openModal(){
+    modal.hidden = false;
+    modal.classList.add('show');
+    shortcut.classList.add('is-open');
+    renderYears();
+    fillEditor();
+    updateStatus();
+    resultEl.innerHTML = '';
+    mode = '';
+    remaining = [];
+    setModeButtons();
+  }
+  function closeModal(){
+    modal.classList.remove('show');
+    modal.hidden = true;
+    shortcut.classList.remove('is-open');
+  }
+
+  renderYears();
+  updateShortcut();
+
+  shortcut.addEventListener('click', function(){
+    if(modal.classList.contains('show')) closeModal();
+    else openModal();
+  });
+  document.getElementById('pupilsClose').addEventListener('click', closeModal);
+  modal.addEventListener('click', function(e){
+    if(e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && modal.classList.contains('show')){
+      e.stopImmediatePropagation();
+      closeModal();
+    }
+  }, true);
+  yearsEl.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-year]');
+    if(!btn) return;
+    year = btn.getAttribute('data-year');
+    localStorage.setItem(YEAR_STORE, year);
+    remaining = [];
+    mode = '';
+    setModeButtons();
+    resultEl.innerHTML = '';
+    renderYears();
+    fillEditor();
+    updateStatus();
+  });
+  saveBtn.addEventListener('click', function(){
+    var all = loadAll();
+    all[year] = parseNames(textEl.value);
+    localStorage.setItem(STORE, JSON.stringify(all));
+    savedMsg.textContent = 'Guardado · ' + all[year].length;
+    remaining = [];
+    mode = '';
+    setModeButtons();
+    resultEl.innerHTML = '';
+    updateStatus();
+  });
+  document.querySelector('.pupils-modes').addEventListener('click', function(e){
+    var btn = e.target.closest('[data-mode]');
+    if(!btn) return;
+    mode = btn.getAttribute('data-mode');
+    remaining = mode === 'individual' ? shuffle(namesOf(year)) : [];
+    setModeButtons();
+    runMode();
+  });
+  resultEl.addEventListener('click', function(e){
+    if(!e.target.closest('#pupilsAgain')) return;
+    if(mode === 'individual'){
+      if(!remaining.length) remaining = shuffle(namesOf(year));
+      renderIndividual();
+    } else {
+      runMode();
     }
   });
 })();
