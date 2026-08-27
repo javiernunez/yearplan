@@ -2047,7 +2047,7 @@ a.mgmt-link--eval:active{
   align-items:center;
   justify-content:center;
   gap:4px;
-  padding:12px 8px 36px;
+  padding:12px 8px 28px;
   min-height:78px;
   aspect-ratio:1 / 1;
   background:rgba(255,255,255,.7);
@@ -2082,33 +2082,43 @@ a.mgmt-link--eval:active{
   content:'';
   position:absolute;
   left:0;right:0;bottom:0;
-  height:16px;
+  height:14px;
   pointer-events:none;
   background:linear-gradient(180deg, var(--ls-brick) 0%, var(--ls-brick-deep) 100%);
   box-shadow:
     inset 0 2px 0 rgba(255,255,255,.28),
     inset 0 -3px 0 rgba(0,0,0,.2);
 }
-.ls-sel-btn::before{
+.ls-sel-studs{
+  position:absolute;
+  left:10px;
+  right:10px;
+  bottom:11px;
+  display:flex;
+  gap:4px;
+  height:10px;
+  z-index:2;
+  pointer-events:none;
+}
+.ls-sel-stud{
+  flex:1;
+  height:10px;
+  border-radius:3px 3px 0 0;
+  background:var(--ls-brick);
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.12);
+  position:relative;
+}
+.ls-sel-stud::after{
   content:'';
   position:absolute;
-  left:0;right:0;
-  bottom:9px;
-  height:14px;
-  z-index:1;
-  pointer-events:none;
-  background-image:radial-gradient(
-    circle 7px at 50% 50%,
-    var(--ls-brick-hi) 0 28%,
-    var(--ls-brick) 48%,
-    var(--ls-brick-deep) 78%,
-    transparent 80%
-  );
-  background-size:20% 14px;
-  background-repeat:repeat-x;
-  background-position:0 0;
+  top:2px;
+  left:2px;
+  right:2px;
+  height:3px;
+  border-radius:1px;
+  background:rgba(255,255,255,.32);
 }
-.ls-sel-btn span{
+.ls-sel-btn > span{
   font-size:.58rem;
   font-weight:600;
   color:rgba(26,53,88,.55);
@@ -2124,7 +2134,7 @@ a.mgmt-link--eval:active{
   transform:translateY(-2px);
   box-shadow:0 6px 18px rgba(26,53,88,.16);
 }
-.ls-sel-btn:hover span{ color:var(--ls-brick-deep); }
+.ls-sel-btn:hover > span{ color:var(--ls-brick-deep); }
 .ls-sel-btn:active{ transform:scale(.97); }
 .ls-sel-btn:focus-visible{
   outline:3px solid #1a3558;
@@ -2454,16 +2464,16 @@ a.mgmt-link--eval:active{
       <div class="ls-selector" id="lsSelector">
         <div class="ls-selector-label">Select your Learning Situation:</div>
         <div class="ls-selector-grid">
-          <button type="button" class="ls-sel-btn" data-ls="0">LS 1<span>What do monsters look like?</span></button>
-          <button type="button" class="ls-sel-btn" data-ls="1">LS 2<span>Where do monsters live?</span></button>
-          <button type="button" class="ls-sel-btn" data-ls="2">LS 3<span>Monsters go to school</span></button>
-          <button type="button" class="ls-sel-btn" data-ls="3">LS 4<span>Monsters celebrate Christmas</span></button>
-          <button type="button" class="ls-sel-btn" data-ls="4">LS 5<span>What do monsters eat?</span></button>
-          <button type="button" class="ls-sel-btn" data-ls="5">LS 6<span>What do monsters wear?</span></button>
-          <button type="button" class="ls-sel-btn" data-ls="6">LS 7<span>What is my monster doing?</span></button>
-          <button type="button" class="ls-sel-btn" data-ls="7">LS 8<span>Monsters celebrate Easter</span></button>
-          <button type="button" class="ls-sel-btn" data-ls="8">LS 9<span>Monster abilities and routines</span></button>
-          <button type="button" class="ls-sel-btn" data-ls="9">LS 10<span>Create your own monster</span></button>
+          <button type="button" class="ls-sel-btn" data-ls="0">LS 1<span>What do monsters look like?</span><span class="ls-sel-studs" aria-hidden="true"><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span></span></button>
+          <button type="button" class="ls-sel-btn" data-ls="1">LS 2<span>Where do monsters live?</span><span class="ls-sel-studs" aria-hidden="true"><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span></span></button>
+          <button type="button" class="ls-sel-btn" data-ls="2">LS 3<span>Monsters go to school</span><span class="ls-sel-studs" aria-hidden="true"><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span></span></button>
+          <button type="button" class="ls-sel-btn" data-ls="3">LS 4<span>Monsters celebrate Christmas</span><span class="ls-sel-studs" aria-hidden="true"><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span></span></button>
+          <button type="button" class="ls-sel-btn" data-ls="4">LS 5<span>What do monsters eat?</span><span class="ls-sel-studs" aria-hidden="true"><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span></span></button>
+          <button type="button" class="ls-sel-btn" data-ls="5">LS 6<span>What do monsters wear?</span><span class="ls-sel-studs" aria-hidden="true"><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span></span></button>
+          <button type="button" class="ls-sel-btn" data-ls="6">LS 7<span>What is my monster doing?</span><span class="ls-sel-studs" aria-hidden="true"><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span></span></button>
+          <button type="button" class="ls-sel-btn" data-ls="7">LS 8<span>Monsters celebrate Easter</span><span class="ls-sel-studs" aria-hidden="true"><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span></span></button>
+          <button type="button" class="ls-sel-btn" data-ls="8">LS 9<span>Monster abilities and routines</span><span class="ls-sel-studs" aria-hidden="true"><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span></span></button>
+          <button type="button" class="ls-sel-btn" data-ls="9">LS 10<span>Create your own monster</span><span class="ls-sel-studs" aria-hidden="true"><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span><span class="ls-sel-stud"></span></span></button>
         </div>
       </div>
     </div>
