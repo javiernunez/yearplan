@@ -6494,12 +6494,12 @@ renderSlide();
   var activeSound = null;
   var SOUNDS = [
     { id: 'applause', name: 'Applause', ico: '👏', loop: false, hold: 0 },
-    { id: 'silence', name: 'Silence', ico: '🤫', loop: false },
+    { id: 'silence', name: 'Silence', ico: '🤫', loop: false, hold: 0 },
     { id: 'fantastic', name: 'Fantastic!', ico: '⭐', loop: false },
     { id: 'welldone', name: 'Well done!', ico: '🌟', loop: false },
-    { id: 'cheer', name: 'Cheer', ico: '🎉', loop: false },
-    { id: 'bell', name: 'Bell', ico: '🔔', loop: false, hold: 8000 },
-    { id: 'drumroll', name: 'Drum roll', ico: '🥁', loop: false },
+    { id: 'cheer', name: 'Cheer', ico: '🎉', loop: false, hold: 0 },
+    { id: 'bell', name: 'Bell', ico: '🔔', loop: false, hold: 0 },
+    { id: 'drumroll', name: 'Drum roll', ico: '🥁', loop: false, hold: 0 },
     { id: 'incorrect', name: 'Incorrect', ico: '❌', loop: false },
     { id: 'correct', name: 'Correct', ico: '✅', loop: false },
     { id: 'go', name: 'Ready, steady, go!', ico: '🏁', loop: false, hold: 4500 },
@@ -6608,66 +6608,17 @@ renderSlide();
   function playApplause(){
     playClip('assets/sounds/applause.mp3', 'applause');
   }
-  function playSilence(ctx){
-    var t0 = ctx.currentTime;
-    var src = track(ctx.createBufferSource());
-    src.buffer = noiseBuffer(ctx, 2.6);
-    var f = ctx.createBiquadFilter();
-    f.type = 'lowpass';
-    f.frequency.setValueAtTime(2400, t0);
-    f.frequency.exponentialRampToValueAtTime(700, t0 + 2.4);
-    var g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(0.11, t0 + 0.12);
-    g.gain.setValueAtTime(0.09, t0 + 1.4);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 2.55);
-    src.connect(f); f.connect(g); g.connect(ctx.destination);
-    src.start(t0);
-    src.stop(t0 + 2.6);
+  function playBell(){
+    playClip('assets/sounds/bell.mp3', 'bell');
   }
-  function playCheer(ctx){
-    var t0 = ctx.currentTime;
-    var o = track(ctx.createOscillator());
-    var g = ctx.createGain();
-    o.type = 'sawtooth';
-    o.frequency.setValueAtTime(220, t0);
-    o.frequency.exponentialRampToValueAtTime(880, t0 + 0.55);
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(0.08, t0 + 0.08);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.7);
-    o.connect(g); g.connect(ctx.destination);
-    o.start(t0); o.stop(t0 + 0.72);
-    for(var i = 0; i < 18; i++){
-      playNoise(ctx, t0 + 0.15 + Math.random() * 0.9, 0.06, 0.07, 'bandpass', 1400 + Math.random() * 1600, 0.8);
-    }
+  function playSilence(){
+    playClip('assets/sounds/silence.mp3', 'silence');
   }
-  function playBell(ctx){
-    var t0 = ctx.currentTime;
-    function strike(when, peak){
-      [784, 1175, 1568, 2093].forEach(function(f, i){
-        var o = track(ctx.createOscillator());
-        var g = ctx.createGain();
-        o.type = 'sine';
-        o.frequency.setValueAtTime(f, when);
-        g.gain.setValueAtTime(0.0001, when);
-        g.gain.exponentialRampToValueAtTime(peak * (i === 0 ? 1 : (0.42 / i)), when + 0.018);
-        g.gain.exponentialRampToValueAtTime(0.0001, when + 2.2);
-        o.connect(g); g.connect(ctx.destination);
-        o.start(when);
-        o.stop(when + 2.25);
-      });
-    }
-    for(var r = 0; r < 8; r++) strike(t0 + r * 0.78, 0.16);
+  function playCheer(){
+    playClip('assets/sounds/cheer.mp3', 'cheer');
   }
-  function playDrumroll(ctx){
-    var t0 = ctx.currentTime;
-    var hits = 18;
-    for(var i = 0; i < hits; i++){
-      var when = t0 + (i * i * 0.0045);
-      playNoise(ctx, when, 0.045, 0.08 + i * 0.004, 'bandpass', 1800, 1.2);
-    }
-    playNoise(ctx, t0 + 1.15, 0.45, 0.16, 'highpass', 600, 0.4);
-    playTone(ctx, 180, 'triangle', t0 + 1.15, 0.5, 0.1);
+  function playDrumroll(){
+    playClip('assets/sounds/drumroll.mp3', 'drumroll');
   }
   function playIncorrect(ctx){
     var t0 = ctx.currentTime;
@@ -6750,7 +6701,7 @@ renderSlide();
       btn.classList.toggle('is-on', btn.getAttribute('data-sound') === activeSound);
     });
     if(soundsBrick){
-      var looping = activeSound === 'gamejam' || activeSound === 'calm' || activeSound === 'applause';
+      var looping = activeSound === 'gamejam' || activeSound === 'calm' || activeSound === 'applause' || activeSound === 'bell' || activeSound === 'silence' || activeSound === 'cheer' || activeSound === 'drumroll';
       soundsBrick.classList.toggle('is-running', looping);
     }
   }
@@ -6767,12 +6718,12 @@ renderSlide();
     paintSoundTiles();
     try{
       if(id === 'applause') playApplause();
-      else if(id === 'silence') playSilence(ctx);
+      else if(id === 'silence') playSilence();
       else if(id === 'fantastic'){ if(!speakLine('Fantastic!', 1.25, 1.08)) playCorrect(ctx); }
       else if(id === 'welldone'){ if(!speakLine('Well done!', 1.15, 1.02)) playCorrect(ctx); }
-      else if(id === 'cheer') playCheer(ctx);
-      else if(id === 'bell') playBell(ctx);
-      else if(id === 'drumroll') playDrumroll(ctx);
+      else if(id === 'cheer') playCheer();
+      else if(id === 'bell') playBell();
+      else if(id === 'drumroll') playDrumroll();
       else if(id === 'incorrect') playIncorrect(ctx);
       else if(id === 'correct') playCorrect(ctx);
       else if(id === 'go') playGo(ctx);
