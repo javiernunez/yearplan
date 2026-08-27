@@ -400,7 +400,7 @@ h2 {
   overflow-x:hidden;
   overflow-y:auto;
   z-index:100;
-  background:rgba(255,255,255,.6);
+  background:transparent;
   display:flex;
   flex-direction:column;
 }
@@ -409,56 +409,122 @@ h2 {
   flex-direction:column;
   align-items:center;
   justify-content:flex-start;
-  gap:10px;
+  gap:14px;
   padding:20px 8px 20px;
   box-sizing:border-box;
 }
-.tools-shortcut{
+.rail-brick{
+  appearance:none;
+  border:none;
+  background:transparent;
+  padding:0;
+  margin:0;
   width:var(--roulette-iframe-w);
-  min-height:88px;
-  border:1px solid rgba(26,53,88,.12);
-  border-radius:16px;
-  background:rgba(255,255,255,.88);
-  box-shadow:0 6px 18px rgba(26,53,88,.08);
   cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  transition:transform .15s ease, filter .15s ease;
+}
+.rail-brick:hover{ transform:translateY(-2px); filter:brightness(1.06); }
+.rail-brick:active{ transform:scale(.98); }
+.rail-brick:focus-visible{
+  outline:3px solid var(--ink);
+  outline-offset:4px;
+  border-radius:10px;
+}
+.rail-studs{
+  display:flex;
+  gap:5px;
+  padding:0 14px;
+  height:10px;
+  overflow:hidden;
+  position:relative;
+  z-index:2;
+}
+.rail-stud{
+  flex:1;
+  height:10px;
+  border-radius:3px 3px 0 0;
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.12);
+  position:relative;
+}
+.rail-stud::after{
+  content:'';
+  position:absolute;
+  top:2px;left:3px;right:3px;
+  height:3px;
+  border-radius:1px;
+  background:rgba(255,255,255,.32);
+}
+.rail-body{
+  border-radius:4px 4px 10px 10px;
+  margin-top:-1px;
+  min-height:72px;
+  padding:8px 8px 10px;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:4px;
-  padding:12px 8px;
-  color:var(--ink);
+  gap:2px;
+  box-shadow:
+    inset -4px 0 0 rgba(0,0,0,.12),
+    inset 0 -4px 0 rgba(0,0,0,.18),
+    0 6px 16px rgba(26,53,88,.18);
+}
+.rail-label{
   font-family:var(--font-carla);
-  font-size:1.15rem;
   letter-spacing:var(--carla-letter-spacing);
   word-spacing:var(--carla-word-spacing);
-  line-height:1.2;
-  transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  font-size:1.02rem;
+  font-weight:700;
+  text-transform:uppercase;
+  color:#fff;
+  line-height:1.05;
+  text-align:center;
+  -webkit-text-stroke:0.6px #fff;
+  paint-order:stroke fill;
+  text-shadow:0 1px 3px rgba(0,0,0,.22);
 }
-.tools-shortcut:hover{
-  transform:translateY(-1px);
-  box-shadow:0 8px 22px rgba(26,53,88,.14);
-  background:#fff;
-}
-.tools-shortcut:focus-visible{
-  outline:3px solid var(--accent);
-  outline-offset:3px;
-}
-.tools-shortcut.is-open{
-  background:#fff;
-  border-color:var(--accent);
-  box-shadow:0 0 0 3px var(--accent-soft);
-}
-.tools-shortcut .tools-ico{
-  font-size:1.7rem;
-  line-height:1;
-}
-.tools-shortcut .tools-meta{
+.rail-meta{
   font-family:'Nunito',system-ui,sans-serif;
-  font-size:.72rem;
+  font-size:.68rem;
   font-weight:800;
-  letter-spacing:.02em;
-  color:rgba(26,53,88,.62);
+  letter-spacing:.03em;
+  color:rgba(255,255,255,.86);
+}
+.rail-brick.rb-groups .rail-stud{ background:#34b8a8; }
+.rail-brick.rb-groups .rail-body{ background:#24a090; }
+.rail-brick.rb-time .rail-stud{ background:#f47a35; }
+.rail-brick.rb-time .rail-body{ background:#e5620d; }
+.rail-brick.rb-call .rail-stud{ background:#8660cc; }
+.rail-brick.rb-call .rail-body{ background:#6d4bb5; }
+.rail-brick.rb-call .rail-label{
+  font-size:.86rem;
+  white-space:normal;
+  max-width:10em;
+}
+.rail-brick.is-open .rail-body{
+  box-shadow:
+    inset -4px 0 0 rgba(0,0,0,.12),
+    inset 0 -4px 0 rgba(0,0,0,.18),
+    0 0 0 3px rgba(255,255,255,.75),
+    0 8px 20px rgba(26,53,88,.28);
+}
+.rail-brick.is-running .rail-body{
+  animation:railPulse 1.1s ease-in-out infinite;
+}
+.rail-brick.is-ended .rail-body{
+  background:#d93040;
+  animation:railEnd .35s ease-in-out 5;
+}
+@keyframes railPulse{
+  0%,100%{ filter:brightness(1); }
+  50%{ filter:brightness(1.18); }
+}
+@keyframes railEnd{
+  0%,100%{ filter:brightness(1); }
+  50%{ filter:brightness(1.35); }
 }
 .pupils-modal-backdrop{
   position:fixed;
@@ -654,6 +720,114 @@ h2 {
   font-weight:700;
   padding:20px 8px;
 }
+.timer-face{
+  font-family:var(--font-carla);
+  font-size:clamp(3.2rem,8vw,5.4rem);
+  letter-spacing:var(--carla-letter-spacing);
+  text-align:center;
+  color:var(--ink);
+  line-height:1;
+  margin:8px 0 18px;
+}
+.timer-face.is-up{ color:#dc2626; }
+.timer-presets,
+.timer-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:center;
+  margin:0 0 12px;
+}
+.timer-preset,
+.timer-btn,
+.call-next{
+  border:2px solid rgba(26,53,88,.16);
+  background:#fff;
+  color:var(--ink);
+  border-radius:999px;
+  padding:8px 16px;
+  font-weight:800;
+  font-size:.95rem;
+  cursor:pointer;
+  font-family:'Nunito',system-ui,sans-serif;
+}
+.timer-preset.is-on{
+  background:#e5620d;
+  border-color:#e5620d;
+  color:#fff;
+}
+.timer-btn.primary{
+  background:var(--ink);
+  border-color:var(--ink);
+  color:#fff;
+}
+.call-card{
+  text-align:center;
+  padding:12px 8px 8px;
+}
+.call-kicker{
+  font-size:.75rem;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#6d4bb5;
+  margin:0 0 6px;
+}
+.call-line{
+  font-family:var(--font-carla);
+  font-size:clamp(1.8rem,4.5vw,2.8rem);
+  letter-spacing:var(--carla-letter-spacing);
+  word-spacing:var(--carla-word-spacing);
+  color:var(--ink);
+  margin:0 0 18px;
+  line-height:1.2;
+}
+.call-response{
+  background:#f4eefc;
+  border-radius:16px;
+  padding:16px 18px;
+  margin:0 auto 16px;
+  max-width:36rem;
+}
+.points-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.points-team{
+  border-radius:16px;
+  padding:14px 12px 12px;
+  text-align:center;
+  color:#fff;
+  box-shadow:inset 0 -4px 0 rgba(0,0,0,.16);
+}
+.points-team h4{
+  margin:0 0 6px;
+  font-family:var(--font-carla);
+  font-size:1.35rem;
+  letter-spacing:var(--carla-letter-spacing);
+  font-weight:400;
+}
+.points-score{
+  font-size:2.6rem;
+  font-weight:900;
+  line-height:1;
+  margin:0 0 8px;
+}
+.points-ops{ display:flex; gap:8px; justify-content:center; }
+.points-ops button{
+  width:42px;height:42px;
+  border:none;border-radius:12px;
+  background:rgba(255,255,255,.92);
+  color:#1a3558;
+  font-size:1.4rem;
+  font-weight:900;
+  cursor:pointer;
+}
+.points-team.t0{ background:#d81b7a; }
+.points-team.t1{ background:#e5620d; }
+.points-team.t2{ background:#24a090; }
+.points-team.t3{ background:#6d4bb5; }
 @media(max-width:1100px){
   .tools-panel{width:var(--tools-w);}
   .tools-panel-inner{padding:6px 4px 10px;}
@@ -2241,12 +2415,34 @@ a.mgmt-link--eval:active{
     </div>
   </div>
 
-  <div class="tools-panel" aria-label="Classroom shortcuts">
+  <div class="tools-panel" aria-label="Classroom tools">
     <div class="tools-panel-inner">
-      <button type="button" class="tools-shortcut" id="pupilsShortcut" aria-haspopup="dialog" aria-controls="pupilsModal">
-        <span class="tools-ico" aria-hidden="true">👥</span>
-        <span>Alumnado</span>
-        <span class="tools-meta" id="pupilsShortcutMeta">3º</span>
+      <button type="button" class="rail-brick rb-groups" id="pupilsShortcut" aria-haspopup="dialog" aria-controls="pupilsModal">
+        <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span></span>
+        <span class="rail-body">
+          <span class="rail-label letra-carla">Groups</span>
+          <span class="rail-meta" id="pupilsShortcutMeta">3º</span>
+        </span>
+      </button>
+      <button type="button" class="rail-brick rb-time" id="timeShortcut" aria-haspopup="dialog" aria-controls="timeModal">
+        <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span></span>
+        <span class="rail-body">
+          <span class="rail-label letra-carla">Time</span>
+          <span class="rail-meta" id="timeShortcutMeta">Timer</span>
+        </span>
+      </button>
+      <button type="button" class="rail-brick rb-call" id="callShortcut" aria-haspopup="dialog" aria-controls="callModal">
+        <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span></span>
+        <span class="rail-body">
+          <span class="rail-label letra-carla">Call &amp; Response</span>
+        </span>
+      </button>
+      <button type="button" class="rail-brick rb-points" id="pointsShortcut" aria-haspopup="dialog" aria-controls="pointsModal">
+        <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span></span>
+        <span class="rail-body">
+          <span class="rail-label letra-carla">Points</span>
+          <span class="rail-meta" id="pointsShortcutMeta">0</span>
+        </span>
       </button>
     </div>
   </div>
@@ -2342,7 +2538,7 @@ a.mgmt-link--eval:active{
 <div class="pupils-modal-backdrop" id="pupilsModal" role="dialog" aria-modal="true" aria-labelledby="pupilsTitle" hidden>
   <div class="pupils-modal">
     <button type="button" class="pupils-close" id="pupilsClose" aria-label="Cerrar">✕</button>
-    <h3 id="pupilsTitle">Alumnado</h3>
+    <h3 id="pupilsTitle">Groups</h3>
     <div class="pupils-years" id="pupilsYears" role="group" aria-label="Curso"></div>
     <p class="pupils-status" id="pupilsStatus"></p>
     <details class="pupils-editor" id="pupilsEditor">
@@ -2360,6 +2556,48 @@ a.mgmt-link--eval:active{
       <button type="button" class="pupils-mode" data-mode="fours">Fours</button>
     </div>
     <div class="pupils-result" id="pupilsResult"></div>
+  </div>
+</div>
+
+<div class="pupils-modal-backdrop" id="timeModal" role="dialog" aria-modal="true" aria-labelledby="timeTitle" hidden>
+  <div class="pupils-modal">
+    <button type="button" class="pupils-close" id="timeClose" aria-label="Cerrar">✕</button>
+    <h3 id="timeTitle">Time</h3>
+    <div class="timer-face" id="timeFace">1:00</div>
+    <div class="timer-presets" id="timePresets">
+      <button type="button" class="timer-preset" data-secs="30">30s</button>
+      <button type="button" class="timer-preset is-on" data-secs="60">1 min</button>
+      <button type="button" class="timer-preset" data-secs="120">2 min</button>
+      <button type="button" class="timer-preset" data-secs="180">3 min</button>
+      <button type="button" class="timer-preset" data-secs="300">5 min</button>
+      <button type="button" class="timer-preset" data-secs="600">10 min</button>
+    </div>
+    <div class="timer-actions">
+      <button type="button" class="timer-btn primary" id="timeStart">Start</button>
+      <button type="button" class="timer-btn" id="timeRestart">Restart</button>
+    </div>
+  </div>
+</div>
+
+<div class="pupils-modal-backdrop" id="callModal" role="dialog" aria-modal="true" aria-labelledby="callTitle" hidden>
+  <div class="pupils-modal">
+    <button type="button" class="pupils-close" id="callClose" aria-label="Cerrar">✕</button>
+    <h3 id="callTitle">Call &amp; Response</h3>
+    <div class="call-card" id="callCard"></div>
+    <div class="timer-actions">
+      <button type="button" class="call-next" id="callNext">Next call</button>
+    </div>
+  </div>
+</div>
+
+<div class="pupils-modal-backdrop" id="pointsModal" role="dialog" aria-modal="true" aria-labelledby="pointsTitle" hidden>
+  <div class="pupils-modal">
+    <button type="button" class="pupils-close" id="pointsClose" aria-label="Cerrar">✕</button>
+    <h3 id="pointsTitle">Points</h3>
+    <div class="points-grid" id="pointsGrid"></div>
+    <div class="timer-actions" style="margin-top:16px">
+      <button type="button" class="timer-btn" id="pointsReset">Reset</button>
+    </div>
   </div>
 </div>
 
@@ -5881,7 +6119,19 @@ renderSlide();
     if(mode === 'pairs') renderGroups(2);
     if(mode === 'fours') renderGroups(4);
   }
+  function closeOtherTools(){
+    ['timeModal','callModal','pointsModal'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(!el) return;
+      el.classList.remove('show');
+      el.hidden = true;
+    });
+    document.querySelectorAll('.rail-brick:not(#pupilsShortcut)').forEach(function(b){
+      b.classList.remove('is-open');
+    });
+  }
   function openModal(){
+    closeOtherTools();
     modal.hidden = false;
     modal.classList.add('show');
     shortcut.classList.add('is-open');
@@ -5957,6 +6207,228 @@ renderSlide();
       runMode();
     }
   });
+})();
+</script>
+<script>
+(function(){
+  var CALLS = [
+    { call: '1, 2, 3, eyes on me', response: '1, 2, eyes on you!' },
+    { call: 'Hocus pocus', response: 'Everybody focus!' },
+    { call: 'Macaroni cheese', response: 'Everybody freeze!' },
+    { call: 'Hands on top', response: 'That means stop!' },
+    { call: 'Class, class', response: 'Yes, yes!' },
+    { call: 'Tootsie roll, lollipop', response: 'We were talking, now we stop!' },
+    { call: 'Ready to rock?', response: 'Ready to roll!' },
+    { call: 'If you can hear me, clap once', response: '(clap)' },
+    { call: 'Give me five', response: '(high five!)' },
+    { call: 'Monsters, are you ready?', response: 'Yes we are!' },
+    { call: 'Brickly says freeze', response: '(statues)' },
+    { call: 'Waterfall', response: 'Shhhhh…' }
+  ];
+  var TEAM_NAMES = ['Brickly', 'Grammor', 'Linko', 'Boo'];
+  var POINTS_KEY = 'yearplan-points-v1';
+
+  function $(id){ return document.getElementById(id); }
+  function showModal(el, brick){
+    closeAll(brick);
+    el.hidden = false;
+    el.classList.add('show');
+    if(brick) brick.classList.add('is-open');
+  }
+  function hideModal(el, brick){
+    el.classList.remove('show');
+    el.hidden = true;
+    if(brick) brick.classList.remove('is-open');
+  }
+  function closeAll(keepBrick){
+    [
+      ['pupilsModal','pupilsShortcut'],
+      ['timeModal','timeShortcut'],
+      ['callModal','callShortcut'],
+      ['pointsModal','pointsShortcut']
+    ].forEach(function(pair){
+      var el = $(pair[0]);
+      var br = $(pair[1]);
+      if(keepBrick && br === keepBrick) return;
+      if(el){ el.classList.remove('show'); el.hidden = true; }
+      if(br) br.classList.remove('is-open');
+    });
+  }
+  function ding(){
+    try{
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      var ctx = new Ctx();
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = 880;
+      o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.14, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
+      o.start(); o.stop(ctx.currentTime + 0.7);
+    }catch(e){}
+  }
+
+  /* ---- TIME ---- */
+  var timeModal = $('timeModal');
+  var timeBrick = $('timeShortcut');
+  var timeFace = $('timeFace');
+  var timeMeta = $('timeShortcutMeta');
+  var timeStart = $('timeStart');
+  var totalSecs = 60;
+  var left = 60;
+  var running = false;
+  var iv = null;
+
+  function fmt(s){
+    s = Math.max(0, s);
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    return m + ':' + String(r).padStart(2,'0');
+  }
+  function paintTime(){
+    timeFace.textContent = fmt(left);
+    timeFace.classList.toggle('is-up', left === 0);
+    timeMeta.textContent = running || left !== totalSecs ? fmt(left) : 'Timer';
+    timeStart.textContent = running ? 'Pause' : (left === 0 ? 'Start' : (left < totalSecs ? 'Resume' : 'Start'));
+    timeBrick.classList.toggle('is-running', running);
+    if(left !== 0) timeBrick.classList.remove('is-ended');
+  }
+  function stopTick(){
+    running = false;
+    if(iv){ clearInterval(iv); iv = null; }
+    paintTime();
+  }
+  function startTick(){
+    if(left <= 0) left = totalSecs;
+    running = true;
+    timeBrick.classList.remove('is-ended');
+    paintTime();
+    if(iv) clearInterval(iv);
+    iv = setInterval(function(){
+      left -= 1;
+      if(left <= 0){
+        left = 0;
+        stopTick();
+        timeBrick.classList.add('is-ended');
+        ding();
+        paintTime();
+        return;
+      }
+      paintTime();
+    }, 1000);
+  }
+  function setPreset(secs){
+    totalSecs = secs;
+    left = secs;
+    stopTick();
+    timeBrick.classList.remove('is-ended');
+    Array.prototype.forEach.call(document.querySelectorAll('.timer-preset'), function(b){
+      b.classList.toggle('is-on', Number(b.getAttribute('data-secs')) === secs);
+    });
+    paintTime();
+  }
+  paintTime();
+  timeBrick.addEventListener('click', function(){
+    if(timeModal.classList.contains('show')) hideModal(timeModal, timeBrick);
+    else showModal(timeModal, timeBrick);
+  });
+  $('timeClose').addEventListener('click', function(){ hideModal(timeModal, timeBrick); });
+  timeModal.addEventListener('click', function(e){ if(e.target === timeModal) hideModal(timeModal, timeBrick); });
+  $('timePresets').addEventListener('click', function(e){
+    var b = e.target.closest('[data-secs]');
+    if(!b) return;
+    setPreset(Number(b.getAttribute('data-secs')));
+  });
+  timeStart.addEventListener('click', function(){
+    if(running) stopTick();
+    else startTick();
+  });
+  $('timeRestart').addEventListener('click', function(){
+    left = totalSecs;
+    timeBrick.classList.remove('is-ended');
+    if(running){ stopTick(); startTick(); }
+    else paintTime();
+  });
+
+  /* ---- CALL & RESPONSE ---- */
+  var callModal = $('callModal');
+  var callBrick = $('callShortcut');
+  var callCard = $('callCard');
+  var callIdx = 0;
+  function renderCall(){
+    var c = CALLS[callIdx % CALLS.length];
+    callCard.innerHTML =
+      '<p class="call-kicker">Teacher</p>' +
+      '<p class="call-line">' + c.call + '</p>' +
+      '<div class="call-response"><p class="call-kicker">Class</p><p class="call-line" style="margin:0;font-size:clamp(1.4rem,3.5vw,2.2rem)">' + c.response + '</p></div>';
+  }
+  renderCall();
+  callBrick.addEventListener('click', function(){
+    if(callModal.classList.contains('show')) hideModal(callModal, callBrick);
+    else { showModal(callModal, callBrick); renderCall(); }
+  });
+  $('callClose').addEventListener('click', function(){ hideModal(callModal, callBrick); });
+  callModal.addEventListener('click', function(e){ if(e.target === callModal) hideModal(callModal, callBrick); });
+  $('callNext').addEventListener('click', function(){
+    callIdx = (callIdx + 1) % CALLS.length;
+    renderCall();
+  });
+
+  /* ---- POINTS ---- */
+  var pointsModal = $('pointsModal');
+  var pointsBrick = $('pointsShortcut');
+  var pointsGrid = $('pointsGrid');
+  var pointsMeta = $('pointsShortcutMeta');
+  function loadPoints(){
+    try{
+      var raw = JSON.parse(localStorage.getItem(POINTS_KEY) || 'null');
+      if(Array.isArray(raw) && raw.length === 4) return raw.map(function(n){ return Number(n) || 0; });
+    }catch(e){}
+    return [0,0,0,0];
+  }
+  var scores = loadPoints();
+  function savePoints(){ localStorage.setItem(POINTS_KEY, JSON.stringify(scores)); }
+  function renderPoints(){
+    pointsGrid.innerHTML = TEAM_NAMES.map(function(name, i){
+      return '<div class="points-team t' + i + '">' +
+        '<h4>' + name + '</h4>' +
+        '<p class="points-score">' + scores[i] + '</p>' +
+        '<div class="points-ops">' +
+          '<button type="button" data-team="' + i + '" data-d="-1" aria-label="Minus">−</button>' +
+          '<button type="button" data-team="' + i + '" data-d="1" aria-label="Plus">+</button>' +
+        '</div></div>';
+    }).join('');
+    var tot = scores.reduce(function(a,b){ return a + b; }, 0);
+    pointsMeta.textContent = String(tot);
+  }
+  renderPoints();
+  pointsBrick.addEventListener('click', function(){
+    if(pointsModal.classList.contains('show')) hideModal(pointsModal, pointsBrick);
+    else { showModal(pointsModal, pointsBrick); renderPoints(); }
+  });
+  $('pointsClose').addEventListener('click', function(){ hideModal(pointsModal, pointsBrick); });
+  pointsModal.addEventListener('click', function(e){ if(e.target === pointsModal) hideModal(pointsModal, pointsBrick); });
+  pointsGrid.addEventListener('click', function(e){
+    var b = e.target.closest('[data-team]');
+    if(!b) return;
+    var i = Number(b.getAttribute('data-team'));
+    scores[i] = Math.max(0, scores[i] + Number(b.getAttribute('data-d')));
+    savePoints();
+    renderPoints();
+  });
+  $('pointsReset').addEventListener('click', function(){
+    scores = [0,0,0,0];
+    savePoints();
+    renderPoints();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Escape') return;
+    if(timeModal.classList.contains('show')){ hideModal(timeModal, timeBrick); e.stopImmediatePropagation(); }
+    else if(callModal.classList.contains('show')){ hideModal(callModal, callBrick); e.stopImmediatePropagation(); }
+    else if(pointsModal.classList.contains('show')){ hideModal(pointsModal, pointsBrick); e.stopImmediatePropagation(); }
+  }, true);
 })();
 </script>
 </body>
