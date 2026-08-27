@@ -2084,10 +2084,11 @@ a.mgmt-link--eval:active{
   left:0;right:0;bottom:0;
   height:14px;
   pointer-events:none;
+  opacity:.38;
   background:linear-gradient(180deg, var(--ls-brick) 0%, var(--ls-brick-deep) 100%);
   box-shadow:
-    inset 0 2px 0 rgba(255,255,255,.28),
-    inset 0 -3px 0 rgba(0,0,0,.2);
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -2px 0 rgba(0,0,0,.12);
 }
 .ls-sel-studs{
   position:absolute;
@@ -2099,6 +2100,7 @@ a.mgmt-link--eval:active{
   height:10px;
   z-index:2;
   pointer-events:none;
+  opacity:.38;
 }
 .ls-sel-stud{
   flex:1;
@@ -2530,33 +2532,33 @@ a.mgmt-link--eval:active{
     <div class="tools-panel" aria-label="Classroom tools">
       <div class="tools-panel-inner">
         <button type="button" class="rail-brick rb-groups" id="pupilsShortcut" aria-haspopup="dialog" aria-controls="pupilsModal">
-          <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span></span>
+          <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span><span class="rail-stud"></span></span>
           <span class="rail-body">
             <span class="rail-label letra-carla">Groups</span>
             <span class="rail-meta" id="pupilsShortcutMeta">3rd</span>
           </span>
         </button>
         <button type="button" class="rail-brick rb-time" id="timeShortcut" aria-haspopup="dialog" aria-controls="timeModal">
-          <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span></span>
+          <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span><span class="rail-stud"></span></span>
           <span class="rail-body">
             <span class="rail-label letra-carla">Time</span>
             <span class="rail-meta" id="timeShortcutMeta">Timer</span>
           </span>
         </button>
         <button type="button" class="rail-brick rb-call" id="callShortcut" aria-haspopup="dialog" aria-controls="callModal">
-          <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span></span>
+          <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span><span class="rail-stud"></span></span>
           <span class="rail-body">
             <span class="rail-label letra-carla">Call</span>
           </span>
         </button>
         <button type="button" class="rail-brick rb-sounds" id="soundsShortcut" aria-haspopup="dialog" aria-controls="soundsModal">
-          <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span></span>
+          <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span><span class="rail-stud"></span></span>
           <span class="rail-body">
             <span class="rail-label letra-carla">Sounds</span>
           </span>
         </button>
         <button type="button" class="rail-brick rb-points" id="pointsShortcut" aria-haspopup="dialog" aria-controls="pointsModal">
-          <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span></span>
+          <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span><span class="rail-stud"></span></span>
           <span class="rail-body">
             <span class="rail-label letra-carla">Points</span>
             <span class="rail-meta" id="pointsShortcutMeta">0</span>
