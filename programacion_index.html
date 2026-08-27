@@ -148,7 +148,7 @@ h2 {
 .stage{
   position:relative;
   width:100%;
-  max-width:min(calc(100vw - var(--sidebar-w) - 96px), var(--content-max));
+  max-width:min(calc(100vw - var(--sidebar-w) - 168px), var(--content-max));
   aspect-ratio:16/10;
   background:linear-gradient(160deg,#1a3352,#0e1f36);
   border-radius:20px;
@@ -404,8 +404,7 @@ h2 {
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:8px;
-  padding:0;
+  gap:12px;
   box-sizing:border-box;
 }
 .rail-brick{
@@ -414,7 +413,7 @@ h2 {
   background:transparent;
   padding:0;
   margin:0;
-  width:64px;
+  width:128px;
   cursor:pointer;
   display:flex;
   flex-direction:column;
@@ -430,61 +429,61 @@ h2 {
 }
 .rail-studs{
   display:flex;
-  gap:3px;
-  padding:0 7px;
-  height:6px;
+  gap:4px;
+  padding:0 12px;
+  height:9px;
   overflow:hidden;
   position:relative;
   z-index:2;
 }
 .rail-stud{
   flex:1;
-  height:6px;
-  border-radius:2px 2px 0 0;
-  box-shadow:inset 0 -1px 0 rgba(0,0,0,.12);
+  height:9px;
+  border-radius:3px 3px 0 0;
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.12);
   position:relative;
 }
 .rail-stud::after{
   content:'';
   position:absolute;
-  top:1px;left:2px;right:2px;
+  top:2px;left:3px;right:3px;
   height:2px;
   border-radius:1px;
   background:rgba(255,255,255,.32);
 }
 .rail-body{
-  border-radius:3px 3px 7px 7px;
+  border-radius:4px 4px 9px 9px;
   margin-top:-1px;
-  min-height:38px;
-  padding:4px 3px 5px;
+  min-height:58px;
+  padding:7px 6px 8px;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:0;
+  gap:1px;
   box-shadow:
-    inset -2px 0 0 rgba(0,0,0,.12),
+    inset -3px 0 0 rgba(0,0,0,.12),
     inset 0 -3px 0 rgba(0,0,0,.18),
-    0 3px 8px rgba(26,53,88,.16);
+    0 4px 12px rgba(26,53,88,.16);
 }
 .rail-label{
   font-family:var(--font-carla);
   letter-spacing:var(--carla-letter-spacing);
   word-spacing:var(--carla-word-spacing);
-  font-size:.58rem;
+  font-size:.92rem;
   font-weight:700;
   text-transform:uppercase;
   color:#fff;
-  line-height:1;
+  line-height:1.05;
   text-align:center;
-  -webkit-text-stroke:0.4px #fff;
+  -webkit-text-stroke:0.5px #fff;
   paint-order:stroke fill;
   text-shadow:0 1px 2px rgba(0,0,0,.22);
   white-space:nowrap;
 }
 .rail-meta{
   font-family:'Nunito',system-ui,sans-serif;
-  font-size:.52rem;
+  font-size:.68rem;
   font-weight:800;
   letter-spacing:.02em;
   color:rgba(255,255,255,.9);
