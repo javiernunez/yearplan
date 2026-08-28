@@ -716,6 +716,16 @@ body.fs-stage-open .tools-panel{ display:none; }
   font-weight:700;
   padding:20px 8px;
 }
+.timer-icon{
+  display:flex;
+  justify-content:center;
+  margin:0 0 6px;
+}
+.timer-icon svg{
+  width:72px;
+  height:72px;
+  display:block;
+}
 .timer-face{
   font-family:var(--font-carla);
   font-size:clamp(3.2rem,8vw,5.4rem);
@@ -2659,6 +2669,26 @@ a.mgmt-link--eval:active{
   <div class="pupils-modal">
     <button type="button" class="pupils-close" id="timeClose" aria-label="Close">✕</button>
     <h3 id="timeTitle">Time</h3>
+    <div class="timer-icon" aria-hidden="true">
+      <svg viewBox="0 0 72 72" fill="none">
+        <rect x="32" y="4" width="8" height="8" rx="2" fill="#e5620d"/>
+        <rect x="26" y="10" width="20" height="6" rx="2" fill="#1a3558"/>
+        <circle cx="62" cy="18" r="5" fill="#e5620d"/>
+        <circle cx="36" cy="40" r="24" stroke="#1a3558" stroke-width="4"/>
+        <circle cx="36" cy="40" r="20" fill="#fff8f2" stroke="#e5620d" stroke-width="2.5"/>
+        <circle cx="36" cy="40" r="3.2" fill="#e5620d"/>
+        <path d="M36 40 V24" stroke="#1a3558" stroke-width="3" stroke-linecap="round"/>
+        <path d="M36 40 L48 40" stroke="#e5620d" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="36" cy="20.5" r="1.6" fill="#1a3558"/>
+        <circle cx="49.5" cy="27.5" r="1.4" fill="#1a3558"/>
+        <circle cx="51.5" cy="40" r="1.6" fill="#1a3558"/>
+        <circle cx="49.5" cy="52.5" r="1.4" fill="#1a3558"/>
+        <circle cx="36" cy="59.5" r="1.6" fill="#1a3558"/>
+        <circle cx="22.5" cy="52.5" r="1.4" fill="#1a3558"/>
+        <circle cx="20.5" cy="40" r="1.6" fill="#1a3558"/>
+        <circle cx="22.5" cy="27.5" r="1.4" fill="#1a3558"/>
+      </svg>
+    </div>
     <div class="timer-face" id="timeFace">1:00</div>
     <div class="timer-presets" id="timePresets">
       <button type="button" class="timer-preset" data-secs="30">30s</button>
