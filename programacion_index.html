@@ -1186,6 +1186,9 @@ footer{flex:0 0 auto;
   justify-content:center;
   align-items:center;
 }
+.ls-row-chips{
+  display:contents;
+}
 button.ls-chip{
   font-family:inherit;
   font-size:var(--text-ui);
@@ -1392,13 +1395,6 @@ button.lesson.g9.active{
   box-shadow:0 6px 18px rgba(29,111,214,.38);
 }
 button.ls-chip:disabled,button.lesson:disabled{opacity:.45;cursor:not-allowed;}
-
-.back-row{
-  flex:0 0 auto;
-  padding:8px 12px 14px;
-  display:flex;
-  justify-content:center;
-}
 
 .foot-carla{
   margin-top:10px;
@@ -2509,13 +2505,6 @@ button.ls-chip:disabled,button.lesson:disabled{opacity:.45;cursor:not-allowed;}
 
   <div class="ls-info-bar" id="lsInfoBar"></div>
 
-  <div class="back-row">
-    <button class="back-to-intro-btn" id="backToIntroBtn">
-      <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-      Back
-    </button>
-  </div>
-
   </div><!-- /main-content -->
 
   </div><!-- /main-layout -->
@@ -2523,7 +2512,13 @@ button.ls-chip:disabled,button.lesson:disabled{opacity:.45;cursor:not-allowed;}
   <footer>
     <div class="foot-white">
       <p class="foot-nav-label">Jump to Learning Situation</p>
-      <nav class="ls-row" id="lsRow" aria-label="Go to another Learning Situation"></nav>
+      <div class="ls-row">
+        <nav class="ls-row-chips" id="lsRow" aria-label="Go to another Learning Situation"></nav>
+        <button class="back-to-intro-btn" id="backToIntroBtn">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          Back
+        </button>
+      </div>
     </div>
     <div class="foot-sky">
       <div class="foot-carla">
