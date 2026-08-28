@@ -1406,21 +1406,21 @@ button.ls-chip:disabled,button.lesson:disabled{opacity:.45;cursor:not-allowed;}
 .back-to-intro-btn{
   display:inline-flex;
   align-items:center;
-  gap:7px;
-  padding:11px 20px;
+  gap:4px;
+  padding:6px 12px;
   border-radius:999px;
-  font-weight:400;
-  font-size:var(--text-ui);
+  font-weight:800;
+  font-size:clamp(0.78rem,0.72rem + 0.2vw,0.88rem);
   text-decoration:none;
   border:2px solid #f26522;
   background:#fff;
   color:#f26522;
   cursor:pointer;
-  font-family:var(--font-carla);
-  letter-spacing:var(--carla-letter-spacing);
-  word-spacing:var(--carla-word-spacing);
-  -webkit-text-stroke:0.55px currentColor;
-  paint-order:stroke fill;
+  font-family:inherit;
+  letter-spacing:0;
+  word-spacing:normal;
+  -webkit-text-stroke:0;
+  line-height:1.2;
   transition:background .15s,color .15s,transform .1s,box-shadow .15s;
 }
 .back-to-intro-btn:hover{
@@ -1430,7 +1430,7 @@ button.ls-chip:disabled,button.lesson:disabled{opacity:.45;cursor:not-allowed;}
 }
 .back-to-intro-btn:active{ transform:scale(.97); }
 .back-to-intro-btn svg{
-  width:15px;height:15px;stroke:#f26522;fill:none;
+  width:11px;height:11px;stroke:currentColor;fill:none;
   stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;
 }
 .foot-carla__img{
