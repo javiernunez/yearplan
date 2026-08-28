@@ -499,6 +499,20 @@ h2 {
 .rail-brick.rb-sounds .rail-body{ background:#d81b7a; }
 .rail-brick.rb-points .rail-stud{ background:#fbbf24; }
 .rail-brick.rb-points .rail-body{ background:#f59e0b; }
+.rail-brick.rb-agenda .rail-stud{ background:#34c98a; }
+.rail-brick.rb-agenda .rail-body{ background:#1c9a6a; }
+.rail-brick.rb-eval .rail-stud{ background:#2bb8ae; }
+.rail-brick.rb-eval .rail-body{ background:#0f766e; }
+a.rail-brick{
+  text-decoration:none;
+  color:inherit;
+}
+.rail-brick.rb-agenda .rail-label,
+.rail-brick.rb-eval .rail-label{
+  white-space:normal;
+  font-size:.78rem;
+  line-height:1.08;
+}
 .rail-brick.is-open .rail-body{
   box-shadow:
     inset -2px 0 0 rgba(0,0,0,.12),
@@ -1379,114 +1393,11 @@ button.lesson.g9.active{
 }
 button.ls-chip:disabled,button.lesson:disabled{opacity:.45;cursor:not-allowed;}
 
-/* Class Management & UDL (bajo el carrusel) */
-.mgmt-outer{
+.back-row{
   flex:0 0 auto;
   padding:8px 12px 14px;
   display:flex;
   justify-content:center;
-}
-.mgmt-strip{
-  width:min(calc(100vw - var(--sidebar-w) - 24px), var(--content-max));
-  padding:10px 16px 12px;
-  text-align:center;
-  background:rgba(255,255,255,.78);
-  border:1px solid rgba(255,255,255,.92);
-  border-radius:12px;
-  box-shadow:0 4px 16px rgba(26,53,88,.06);
-  backdrop-filter:blur(6px);
-  -webkit-backdrop-filter:blur(6px);
-}
-.mgmt-title{
-  font-
-  margin:0 0 8px;
-  font-size:clamp(0.98rem,0.94rem + 0.15vw,0.96rem);
-  font-weight:800;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:rgba(26,53,88,.45);
-}
-.mgmt-links{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px 10px;
-  justify-content:center;
-  align-items:center;
-}
-a.mgmt-link{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:6px 12px;
-  border-radius:999px;
-  font-family:var(--font-carla);
-  font-weight:400;
-  font-size:clamp(0.88rem,0.82rem + 0.2vw,0.96rem);
-  letter-spacing:var(--carla-letter-spacing);
-  word-spacing:var(--carla-word-spacing);
-  -webkit-text-stroke:0.4px currentColor;
-  paint-order:stroke fill;
-  text-decoration:none;
-  border:1.5px solid;
-  background:#fff;
-  transition:background .15s,color .15s,border-color .15s,transform .1s,box-shadow .15s;
-}
-a.mgmt-link--g123{
-  border-color:#1c9a6a;
-  color:#136b49;
-}
-a.mgmt-link--g123:hover{
-  background:rgba(28,154,106,.14);
-  color:#0f5137;
-  box-shadow:0 4px 14px rgba(28,154,106,.2);
-}
-a.mgmt-link--g123:active{
-  background:rgba(28,154,106,.28);
-  transform:scale(.97);
-}
-a.mgmt-link--g45{
-  border-color:#6d4bb5;
-  color:#4d3588;
-}
-a.mgmt-link--g45:hover{
-  background:rgba(109,75,181,.12);
-  color:#3d2a6e;
-  box-shadow:0 4px 14px rgba(109,75,181,.22);
-}
-a.mgmt-link--g45:active{
-  background:rgba(109,75,181,.24);
-  transform:scale(.97);
-}
-a.mgmt-link--g6{
-  border-color:#e88f6e;
-  color:#7a3a22;
-}
-a.mgmt-link--g6:hover{
-  background:rgba(232,143,110,.18);
-  color:#5c2a18;
-  box-shadow:0 4px 14px rgba(232,143,110,.3);
-}
-a.mgmt-link--g6:active{
-  background:rgba(232,143,110,.32);
-  transform:scale(.97);
-}
-a.mgmt-link--eval{
-  border-color:#0f766e;
-  color:#0f4f4a;
-}
-a.mgmt-link--eval:hover{
-  background:rgba(15,118,110,.1);
-  color:#0a3d38;
-  box-shadow:0 4px 14px rgba(15,118,110,.22);
-}
-a.mgmt-link--eval:active{
-  background:rgba(15,118,110,.2);
-  transform:scale(.97);
-}
-.mgmt-sep{
-  color:rgba(26,53,88,.35);
-  font-weight:800;
-  user-select:none;
 }
 
 .foot-carla{
@@ -2547,6 +2458,12 @@ a.mgmt-link--eval:active{
     </div>
     <div class="tools-panel" aria-label="Classroom tools">
       <div class="tools-panel-inner">
+        <a class="rail-brick rb-agenda" href="VISUAL AGENDA/VISUAL AGENDA.jpg" target="_blank" rel="noopener noreferrer">
+          <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span><span class="rail-stud"></span></span>
+          <span class="rail-body">
+            <span class="rail-label letra-carla">Visual Agenda</span>
+          </span>
+        </a>
         <button type="button" class="rail-brick rb-groups" id="pupilsShortcut" aria-haspopup="dialog" aria-controls="pupilsModal">
           <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span><span class="rail-stud"></span></span>
           <span class="rail-body">
@@ -2580,30 +2497,23 @@ a.mgmt-link--eval:active{
             <span class="rail-meta" id="pointsShortcutMeta">0</span>
           </span>
         </button>
+        <a class="rail-brick rb-eval" href="https://docs.google.com/spreadsheets/d/1dWZ4475g6V-0W1dSOJPlk3thQDF4SsDEZ5OdYAR1I6Q/edit?gid=498520202#gid=498520202" target="_blank" rel="noopener noreferrer">
+          <span class="rail-studs" aria-hidden="true"><span class="rail-stud"></span><span class="rail-stud"></span><span class="rail-stud"></span></span>
+          <span class="rail-body">
+            <span class="rail-label letra-carla">Evaluation</span>
+          </span>
+        </a>
       </div>
     </div>
   </div>
 
   <div class="ls-info-bar" id="lsInfoBar"></div>
 
-  <div class="mgmt-outer">
-    <section class="mgmt-strip" aria-label="Class Management and UDL">
-      <h3 class="mgmt-title">Class Management &amp; UDL</h3>
-      <div class="mgmt-links">
-        <a class="mgmt-link mgmt-link--g123" href="VISUAL AGENDA/VISUAL AGENDA.jpg" target="_blank" rel="noopener noreferrer">Visual Agenda</a>
-        <span class="mgmt-sep" aria-hidden="true">·</span>
-        <a class="mgmt-link mgmt-link--g45" href="TOOL CARDS/Tool Cards 14x14.pdf" target="_blank" rel="noopener noreferrer">Tool cards</a>
-        <span class="mgmt-sep" aria-hidden="true">·</span>
-        <a class="mgmt-link mgmt-link--g6" href="ENGLISH PORTFOLIO/English portfolio.pdf" target="_blank" rel="noopener noreferrer">English Portfolio</a>
-        <span class="mgmt-sep" aria-hidden="true">·</span>
-        <a class="mgmt-link mgmt-link--eval" href="https://docs.google.com/spreadsheets/d/1dWZ4475g6V-0W1dSOJPlk3thQDF4SsDEZ5OdYAR1I6Q/edit?gid=498520202#gid=498520202" target="_blank" rel="noopener noreferrer">Evaluation</a>
-        <span class="mgmt-sep" aria-hidden="true">·</span>
-        <button class="back-to-intro-btn" id="backToIntroBtn">
-          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-          Back
-        </button>
-      </div>
-    </section>
+  <div class="back-row">
+    <button class="back-to-intro-btn" id="backToIntroBtn">
+      <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
   </div>
 
   </div><!-- /main-content -->
