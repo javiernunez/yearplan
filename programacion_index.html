@@ -26,6 +26,9 @@
   --text-lesson-tab:clamp(0.92rem,0.84rem + 0.18vw,1.02rem);
   --text-label:clamp(0.78rem,0.72rem + 0.2vw,0.88rem);
   --sidebar-w:118px;
+  --tools-panel-w:128px;
+  --stage-gap:10px;
+  --stage-max-w:min(calc(100vw - var(--sidebar-w) - var(--tools-panel-w) - var(--stage-gap) - 40px), var(--content-max));
   --roulette-iframe-w:102px;
   --roulette-iframe-h:98px;
   --content-max:1320px;
@@ -71,14 +74,12 @@ body:has(#intro-screen.is-open) .app{
   visibility:hidden;
 }
 body.in-ls-view .hdr,
-body.in-ls-view .main-content,
-body.in-ls-view footer{
+body.in-ls-view .main-content{
   zoom:0.75;
 }
 @supports not (zoom:0.75){
   body.in-ls-view .hdr,
-  body.in-ls-view .main-content,
-  body.in-ls-view footer{
+  body.in-ls-view .main-content{
     transform:scale(0.75);
     transform-origin:top center;
   }
@@ -136,19 +137,51 @@ h2 {
   font-size: 40px !important;
   text-align: center
 }
-.stage-wrap{
-  flex:1 1 auto;
+.stage-area{
+  width:100%;
   display:flex;
-  align-items:center;
   justify-content:center;
-  gap:10px;
   padding:14px 16px 22px;
-  overflow:hidden;
+  box-sizing:border-box;
+}
+.presentation-grid{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) var(--tools-panel-w);
+  grid-template-rows:auto auto auto;
+  column-gap:var(--stage-gap);
+  row-gap:0;
+  width:min(100%, calc(var(--stage-max-w) + var(--tools-panel-w) + var(--stage-gap)));
+  max-width:calc(100% - 8px);
+  margin:0 auto;
+  justify-items:stretch;
+}
+.presentation-grid .stage{
+  grid-column:1;
+  grid-row:1;
+  width:100%;
+  justify-self:stretch;
+}
+.presentation-grid .ls-info-bar{
+  grid-column:1;
+  grid-row:2;
+  width:100%;
+  justify-self:stretch;
+}
+.presentation-grid .presentation-footer{
+  grid-column:1;
+  grid-row:3;
+  width:100%;
+  justify-self:stretch;
+}
+.presentation-grid .tools-panel{
+  grid-column:2;
+  grid-row:1;
+  align-self:center;
 }
 .stage{
   position:relative;
   width:100%;
-  max-width:min(calc(100vw - var(--sidebar-w) - 168px), var(--content-max));
+  max-width:100%;
   aspect-ratio:16/10;
   background:linear-gradient(160deg,#1a3352,#0e1f36);
   border-radius:20px;
@@ -911,27 +944,43 @@ body.fs-stage-open .tools-panel{ display:none; }
   .sounds-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); }
 }
 @media(max-width:800px){
-  .stage-wrap{ flex-wrap:wrap; }
-  .tools-panel{ width:100%; }
+  .stage-area{ padding:14px 12px 22px; }
+  .presentation-grid{
+    grid-template-columns:1fr;
+    grid-template-rows:auto auto auto auto;
+    width:100%;
+    max-width:min(calc(100vw - 24px), var(--content-max));
+  }
+  .presentation-grid .stage{ grid-column:1; grid-row:1; }
+  .presentation-grid .ls-info-bar{ grid-column:1; grid-row:2; }
+  .presentation-grid .presentation-footer{ grid-column:1; grid-row:4; }
+  .presentation-grid .tools-panel{
+    grid-column:1;
+    grid-row:3;
+    width:100%;
+    align-self:stretch;
+  }
   .tools-panel-inner{
     flex-direction:row;
     flex-wrap:wrap;
     justify-content:center;
     gap:8px;
   }
-  .stage{ max-width:min(calc(100vw - 24px), var(--content-max)); }
 }
 
-/* LS info bar — chips between lesson tabs and carousel */
+/* LS info bar — same column as the slide, chips centered to it */
 .ls-info-bar{
-  width:min(calc(100vw - var(--sidebar-w) - 24px), var(--content-max));
-  margin:8px auto 0;
-  padding:14px 12px 12px;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  margin:8px 0 0;
+  padding:14px 0 12px;
   display:flex;
   flex-wrap:wrap;
   gap:12px 14px;
   justify-content:center;
   align-items:center;
+  text-align:center;
 }
 .ls-info-chip{
   display:inline-flex;
@@ -1179,13 +1228,22 @@ body.fs-stage-open{
   overflow:hidden;
 }
 
-footer{flex:0 0 auto;
-  padding-left: 252px;
+footer,
+.presentation-footer{
+  flex:0 0 auto;
+  margin:0;
+  padding:0;
+  width:100%;
 }
 .foot-white{
-  margin-top: 10px;
-    padding: 14px 16px 16px;
-    text-align: center;
+  margin-top:10px;
+  padding:14px 0 16px;
+  text-align:center;
+  width:100%;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
 .foot-nav-label{
   margin:0 0 12px;
@@ -1201,6 +1259,7 @@ footer{flex:0 0 auto;
   gap:10px 12px;
   justify-content:center;
   align-items:center;
+  width:100%;
 }
 .ls-row-chips{
   display:contents;
@@ -1231,7 +1290,7 @@ button.ls-chip.active{
 button.ls-chip:active{transform:scale(.97);}
 
 .foot-sky{
-  padding:20px 12px 28px;
+  padding:20px 0 28px;
   background:transparent;
 }
 
@@ -2454,7 +2513,8 @@ button.ls-chip:disabled,button.lesson:disabled{opacity:.45;cursor:not-allowed;}
 
   </div>
 
-  <div class="stage-wrap">
+  <div class="stage-area">
+  <div class="presentation-grid">
     <div class="stage" id="stage">
       <img id="slideImg" alt="" src="" decoding="async">
       <div class="zone left" id="zL" aria-label="Previous slide (left half)"></div>
@@ -2468,6 +2528,24 @@ button.ls-chip:disabled,button.lesson:disabled{opacity:.45;cursor:not-allowed;}
         <svg id="fsIconShrink" viewBox="0 0 24 24" style="display:none"><path d="M9 3v6H3M15 3v6h6M21 21h-6v-6M3 21h6v-6"/></svg>
       </button>
     </div>
+    <div class="ls-info-bar" id="lsInfoBar"></div>
+    <footer class="presentation-footer">
+      <div class="foot-white">
+        <p class="foot-nav-label">Jump to Learning Situation</p>
+        <div class="ls-row">
+          <nav class="ls-row-chips" id="lsRow" aria-label="Go to another Learning Situation"></nav>
+          <button class="back-to-intro-btn" id="backToIntroBtn">
+            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Back
+          </button>
+        </div>
+      </div>
+      <div class="foot-sky">
+        <div class="foot-carla">
+          <img class="foot-carla__img" src="Carla Mortes Pons/banner.png" alt="Carla Mortes Pons" loading="lazy">
+        </div>
+      </div>
+    </footer>
     <div class="tools-panel" aria-label="Classroom tools">
       <div class="tools-panel-inner">
         <a class="rail-brick rb-agenda" href="VISUAL AGENDA/VISUAL AGENDA.jpg" target="_blank" rel="noopener noreferrer">
@@ -2518,30 +2596,11 @@ button.ls-chip:disabled,button.lesson:disabled{opacity:.45;cursor:not-allowed;}
       </div>
     </div>
   </div>
-
-  <div class="ls-info-bar" id="lsInfoBar"></div>
+  </div>
 
   </div><!-- /main-content -->
 
   </div><!-- /main-layout -->
-
-  <footer>
-    <div class="foot-white">
-      <p class="foot-nav-label">Jump to Learning Situation</p>
-      <div class="ls-row">
-        <nav class="ls-row-chips" id="lsRow" aria-label="Go to another Learning Situation"></nav>
-        <button class="back-to-intro-btn" id="backToIntroBtn">
-          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-          Back
-        </button>
-      </div>
-    </div>
-    <div class="foot-sky">
-      <div class="foot-carla">
-        <img class="foot-carla__img" src="Carla Mortes Pons/banner.png" alt="Carla Mortes Pons" loading="lazy">
-      </div>
-    </div>
-  </footer>
 </div>
 
 <div class="roulette-modal-backdrop" id="rouletteModal">
