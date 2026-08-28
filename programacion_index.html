@@ -761,6 +761,12 @@ body.fs-stage-open .tools-panel{ display:none; }
   text-align:center;
   padding:12px 8px 8px;
 }
+.call-ico{
+  font-size:2.1rem;
+  line-height:1;
+  margin:0 0 8px;
+  letter-spacing:.08em;
+}
 .call-kicker{
   font-size:.75rem;
   font-weight:800;
@@ -2069,7 +2075,7 @@ a.mgmt-link--eval:active{
   --ls-brick-hi:#ffb089;
 }
 .ls-sel-btn[data-ls="0"]{ --ls-brick:#f26522; --ls-brick-deep:#d44a0c; --ls-brick-hi:#ffb089; }
-.ls-sel-btn[data-ls="1"]{ --ls-brick:#e36414; --ls-brick-deep:#b84a0d; --ls-brick-hi:#ffc078; }
+.ls-sel-btn[data-ls="1"]{ --ls-brick:#f4c430; --ls-brick-deep:#d4a017; --ls-brick-hi:#ffe9a0; }
 .ls-sel-btn[data-ls="2"]{ --ls-brick:#2a9d8f; --ls-brick-deep:#1f7a6f; --ls-brick-hi:#8fd9cf; }
 .ls-sel-btn[data-ls="3"]{ --ls-brick:#e63946; --ls-brick-deep:#b82d37; --ls-brick-hi:#f4a4aa; }
 .ls-sel-btn[data-ls="4"]{ --ls-brick:#9b59b6; --ls-brick-deep:#71368a; --ls-brick-hi:#d7bde9; }
@@ -6315,18 +6321,21 @@ renderSlide();
 <script>
 (function(){
   var CALLS = [
-    { call: '1, 2, 3, eyes on me', response: '1, 2, eyes on you!' },
-    { call: 'Hocus pocus', response: 'Everybody focus!' },
-    { call: 'Macaroni cheese', response: 'Everybody freeze!' },
-    { call: 'Hands on top', response: 'That means stop!' },
-    { call: 'Class, class', response: 'Yes, yes!' },
-    { call: 'Tootsie roll, lollipop', response: 'We were talking, now we stop!' },
-    { call: 'Ready to rock?', response: 'Ready to roll!' },
-    { call: 'If you can hear me, clap once', response: '(clap)' },
-    { call: 'Give me five', response: '(high five!)' },
-    { call: 'Monsters, are you ready?', response: 'Yes we are!' },
-    { call: 'Brickly says freeze', response: '(statues)' },
-    { call: 'Waterfall', response: 'Shhhhh…' }
+    { call: 'Hocus pocus', response: 'Everybody focus!', callIco: '🎩✨', resIco: '📖' },
+    { call: 'Macaroni and cheese', response: 'Everybody freeze!', callIco: '🧀', resIco: '🧊' },
+    { call: 'One, two, three, eyes on me', response: 'One, two, eyes on you!', callIco: '👀', resIco: '👉👉' },
+    { call: 'Class, class', response: 'Yes, yes!', callIco: '👩‍🏫', resIco: '💬' },
+    { call: 'I\'m ready to talk', response: 'I\'m ready to listen', callIco: '🎤', resIco: '👂' },
+    { call: 'Flat tire!', response: 'Shhhhhhhhh', callIco: '🛞', resIco: '🤫' },
+    { call: 'Wake me up!', response: 'Before you go, go', callIco: '⏰', resIco: '👟👟' },
+    { call: 'Hands on top', response: 'That means stop!', callIco: '🙌', resIco: '🛑' },
+    { call: 'Tootsie roll, lollipop', response: 'We were talking, now we stop!', callIco: '🍭', resIco: '🤐' },
+    { call: 'Ready to rock?', response: 'Ready to roll!', callIco: '🎸', resIco: '🥁' },
+    { call: 'If you can hear me, clap once', response: '(clap)', callIco: '👂', resIco: '👏' },
+    { call: 'Give me five', response: '(high five!)', callIco: '✋', resIco: '🙌' },
+    { call: 'Monsters, are you ready?', response: 'Yes we are!', callIco: '👾', resIco: '💪' },
+    { call: 'Brickly says freeze', response: '(statues)', callIco: '🧱', resIco: '🗿' },
+    { call: 'Waterfall', response: 'Shhhhh…', callIco: '💧', resIco: '🤫' }
   ];
   var TEAM_NAMES = ['Brickly', 'Grammor', 'Linko', 'Boo'];
   var POINTS_KEY = 'yearplan-points-v1';
@@ -6464,8 +6473,11 @@ renderSlide();
     var c = CALLS[callIdx % CALLS.length];
     callCard.innerHTML =
       '<p class="call-kicker">Teacher</p>' +
+      (c.callIco ? '<p class="call-ico" aria-hidden="true">' + c.callIco + '</p>' : '') +
       '<p class="call-line">' + c.call + '</p>' +
-      '<div class="call-response"><p class="call-kicker">Class</p><p class="call-line" style="margin:0;font-size:clamp(1.4rem,3.5vw,2.2rem)">' + c.response + '</p></div>';
+      '<div class="call-response"><p class="call-kicker">Class</p>' +
+      (c.resIco ? '<p class="call-ico" aria-hidden="true">' + c.resIco + '</p>' : '') +
+      '<p class="call-line" style="margin:0;font-size:clamp(1.4rem,3.5vw,2.2rem)">' + c.response + '</p></div>';
   }
   renderCall();
   callBrick.addEventListener('click', function(){
