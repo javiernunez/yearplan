@@ -9,23 +9,32 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   font-family: 'Nunito', sans-serif;
   background: transparent;
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: center;
-  padding: .15rem;
+  padding: 0;
 }
 
 .widget {
   position: relative;
   width: 100%;
-  max-width: 230px;
-  display: flex;
-  flex-direction: column;
+  height: 100%;
+  max-width: none;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   align-items: center;
+  justify-items: center;
   gap: 2px;
+  padding: 8px 2px 6px;
+  box-sizing: border-box;
 }
 
 /* Category selector — small pills */
@@ -52,23 +61,34 @@ body {
 .cat-pill:hover { transform: translateY(-1px); background: #fff; }
 .cat-pill.active { color: #fff; }
 
-/* Wheel */
+/* Wheel fills leftover space; button row stays fully visible */
+.wheel-cell {
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .wheel-wrap {
   position: relative;
-  width: min(210px, 60%);
+  height: 86%;
+  width: auto;
+  max-width: 92%;
   aspect-ratio: 1;
-  flex-shrink: 0;
+  flex: 0 0 auto;
 }
 
 .pin {
   position: absolute;
-  top: -10px;
+  top: -7px;
   left: 50%;
   transform: translateX(-50%);
   width: 0; height: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-top: 20px solid #1a1a2e;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 12px solid #1a1a2e;
   filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
   z-index: 10;
 }
@@ -90,16 +110,34 @@ canvas { display: block; border-radius: 50%; width: 100%; height: 100%; }
 /* Spin button */
 .spin-btn {
     font-family: var(--font-carla);
-    font-size: clamp(1.15rem, 3.8vw, 1.38rem);
-    padding: 5px 8px 5px;
+    font-size: 0.66rem;
+    padding: 0.32em 0.55em 0.5em;
     border-radius: 30px;
     border: none;
     cursor: pointer;
     color: #fff;
     transition: transform .1s, box-shadow .1s, opacity .15s;
-    letter-spacing: -0.12em;
+    letter-spacing: var(--carla-letter-spacing, -0.1em);
     word-spacing: 0.15em;
-    line-height: 1.15;
+    line-height: 1.5;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: visible;
+}
+html.is-expanded .spin-btn {
+  font-size: clamp(1.15rem, 3.8vw, 1.38rem);
+  padding: 5px 8px 6px;
+}
+html.is-expanded .wheel-wrap {
+  height: auto;
+  width: min(210px, 60%);
+  max-width: 210px;
+}
+html.is-expanded .pin {
+  top: -10px;
+  border-left-width: 10px;
+  border-right-width: 10px;
+  border-top-width: 20px;
 }
 .spin-btn:hover:not(:disabled) { transform: translateY(-2px); }
 .spin-btn:active:not(:disabled) { transform: translateY(1px); }
@@ -203,9 +241,11 @@ canvas { display: block; border-radius: 50%; width: 100%; height: 100%; }
 <div class="widget">
   <div class="cat-pills" id="catPills"></div>
   <div class="cat-label" id="catLabel"></div>
-  <div class="wheel-wrap">
-    <div class="pin"></div>
-    <canvas id="wheel" width="210" height="210"></canvas>
+  <div class="wheel-cell">
+    <div class="wheel-wrap">
+      <div class="pin"></div>
+      <canvas id="wheel" width="210" height="210"></canvas>
+    </div>
   </div>
   <button class="spin-btn" id="spinBtn">🎲 Spin!</button>
 </div><!-- end widget -->
@@ -1264,7 +1304,7 @@ function select(i){
   catLabel.style.display='none';
   spinBtn.textContent='🎲 '+cats[i].name.charAt(0)+cats[i].name.slice(1).toLowerCase();
   spinBtn.style.background=cats[i].color;
-  spinBtn.style.boxShadow=`0 4px 0 ${cats[i].dark}`;
+  spinBtn.style.boxShadow=`0 2px 0 ${cats[i].dark}`;
   resultPop.classList.remove('show');document.getElementById('resultBackdrop').classList.remove('show');
   draw(angle);
 }
@@ -1298,12 +1338,14 @@ document.getElementById('rpClose').onclick=closeResultPop;
 window.addEventListener('message',function(e){
   if(!e.data) return;
   if(e.data.type==='RULETA_EXPANDED'){
+    document.documentElement.classList.add('is-expanded');
     document.documentElement.style.height='100%';
     document.body.style.height='100%';
     document.body.style.overflow='hidden';
   }
   if(e.data.type==='RULETA_CLOSE'){
     closeResultPop(false);
+    document.documentElement.classList.remove('is-expanded');
     document.documentElement.style.height='';
     document.body.style.height='';
     document.body.style.overflow='';
